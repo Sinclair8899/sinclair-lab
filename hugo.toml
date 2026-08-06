@@ -1,3 +1,32 @@
-baseURL = 'https://example.org/'
+baseURL = 'https://lab.sinclairhuang.org/'
 languageCode = 'en-us'
-title = 'My New Hugo Site'
+title = 'Sinclair AI Lab'
+theme = 'PaperMod'
+
+enableRobotsTXT = true
+buildDrafts = false
+
+[params]
+  description = "Research at the intersection of AI, semiconductors, and life sciences"
+  ShowReadingTime = true
+  ShowShareButtons = false
+  ShowPostNavLinks = true
+  ShowBreadCrumbs = true
+  ShowCodeCopyButtons = true
+  ShowToc = true
+
+[params.homeInfoParams]
+  Title = "Sinclair AI Lab"
+  Content = "Applied research notes and working papers."
+
+[[menu.main]]
+  identifier = "posts"
+  name = "Posts"
+  url = "/posts/"
+  weight = 10
+
+[[menu.main]]
+  identifier = "main-site"
+  name = "sinclairhuang.org"
+  url = "https://sinclairhuang.org/"
+  weight = 20
