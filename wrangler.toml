@@ -4,3 +4,7 @@ compatibility_date = "2026-08-06"
 [assets]
 directory = "./public"
 not_found_handling = "404-page"
+
+[[routes]]
+pattern = "lab.sinclairhuang.org"
+custom_domain = true
