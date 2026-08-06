@@ -24,5 +24,6 @@ So this site is a notebook, not a publication. Experiments, half-formed ideas, t
 EDBA candidate at HEC Liège. Working papers on SSRN, longer essays on Medium, main academic site at [sinclairhuang.org](https://sinclairhuang.org).
 
 - ORCID: [0009-0007-8173-5672](https://orcid.org/0009-0007-8173-5672)
+- Email: research@sinclairhuang.org
 
-Based in Taiwan. Always happy to talk about any of this — the comments are open, so to speak.
+Based in Taiwan. If any of this overlaps with what you're working on, I'd be glad to hear from you.
