@@ -1,0 +1,3 @@
+User-agent: *
+Disallow:
+Sitemap: https://lab.sinclairhuang.org/sitemap.xml
