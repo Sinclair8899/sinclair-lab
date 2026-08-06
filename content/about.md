@@ -6,23 +6,23 @@ summary: about
 ShowToc: false
 ---
 
-I spent about thirty years in manufacturing — most of it in carbon black, most recently as General Manager of a plant in Dahej, Gujarat. Process control, feedstock chemistry, and the kind of problems where the data is messy, the physics is real, and being wrong costs money.
+This is a personal site for thinking out loud about AI.
 
-I now spend my time on a different question: what happens when you point modern AI tooling at problems like those?
+I'm interested in what these systems can actually do — not the demos, but the part where you try to use them for real work and find out where they hold up and where they quietly don't. Retrieval that surfaces noise instead of signal. Models that score well on benchmarks and then fail on the one question you cared about. The gap between what a tool promises and what it delivers is usually more interesting than either.
 
-This site is where I run those experiments in public. Some work. Most don't. I'm more interested in writing up the ones that failed in interesting ways than in publishing polished conclusions — that's what the papers are for.
+So this site is a notebook, not a publication. Experiments, half-formed ideas, things I tried that didn't work. I'd rather write up an interesting failure than wait until I have a clean conclusion — by then it belongs in a paper, not here.
 
-## What I'm working on
+## Recurring themes
 
-- **Automated research pipelines** — building systems that continuously collect papers, patents, and financial signals, then surface what's worth reading. Mostly an exercise in figuring out where retrieval helps and where it just adds noise.
-- **Local models for domain work** — testing whether models running on my own hardware are good enough for technical reading in narrow domains, without sending anything to an API.
-- **Valuation and market structure** — quantitative work on semiconductor firms, and what markets appear to price that conventional capability measures miss.
-- **Reading AI results critically** — particularly in structural biology and drug design, where the gap between benchmark performance and practical usefulness is wide and not always acknowledged.
+- **Building research automation** — pipelines that collect papers, patents, and market data continuously, then try to surface what's worth attention. Mostly an ongoing argument with myself about where retrieval helps and where it just adds volume.
+- **Local models** — testing whether models running on my own hardware are good enough for serious reading in narrow domains, with nothing leaving the machine.
+- **Quantitative methods** — panel data, ensemble models, and what markets appear to price that standard measures miss.
+- **Reading AI claims critically** — especially in computational biology, where benchmark performance and practical usefulness diverge more than the headlines suggest.
 
 ## Elsewhere
 
-I'm an EDBA candidate at HEC Liège. Working papers go to SSRN; longer essays go to Medium; my main academic site is [sinclairhuang.org](https://sinclairhuang.org).
+EDBA candidate at HEC Liège. Working papers on SSRN, longer essays on Medium, main academic site at [sinclairhuang.org](https://sinclairhuang.org).
 
 - ORCID: [0009-0007-8173-5672](https://orcid.org/0009-0007-8173-5672)
 
-Based in Taiwan.
+Based in Taiwan. Always happy to talk about any of this — the comments are open, so to speak.
