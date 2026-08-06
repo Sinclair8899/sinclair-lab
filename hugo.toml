@@ -7,7 +7,7 @@ enableRobotsTXT = true
 buildDrafts = false
 
 [params]
-  description = "Research at the intersection of AI, semiconductors, and life sciences"
+  description = "Experiments with AI tooling, from someone who spent thirty years in manufacturing"
   ShowReadingTime = true
   ShowShareButtons = false
   ShowPostNavLinks = true
@@ -17,7 +17,13 @@ buildDrafts = false
 
 [params.homeInfoParams]
   Title = "Sinclair AI Lab"
-  Content = "Applied research notes and working papers."
+  Content = "Experiments with AI tooling, and ideas that are still half-formed. Thirty years in manufacturing, now testing what these systems can actually do."
+
+[[menu.main]]
+  identifier = "about"
+  name = "About"
+  url = "/about/"
+  weight = 5
 
 [[menu.main]]
   identifier = "posts"
