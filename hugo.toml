@@ -26,6 +26,12 @@ buildDrafts = false
   weight = 5
 
 [[menu.main]]
+  identifier = "experiments"
+  name = "Experiments"
+  url = "/experiments/"
+  weight = 8
+
+[[menu.main]]
   identifier = "posts"
   name = "Posts"
   url = "/posts/"
