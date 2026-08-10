@@ -44,9 +44,25 @@ body.dark .fcnviz{--surface:#1d1e20;--ink:#ffffff;--ink2:#c3c2b7;--muted:#898781
 .fcnviz details.tbl th:first-child,.fcnviz details.tbl td:first-child{text-align:left}
 .fcnviz .meth{font-size:.82rem;color:var(--ink2);line-height:1.65;border-top:1px solid var(--grid);
   padding-top:1rem;margin-top:.5rem}
+.fcnviz .howto{border:1px solid var(--ring);border-left:3px solid var(--blue);border-radius:8px;
+  padding:.9rem 1.1rem;margin:0 0 1.4rem;font-size:.9rem;line-height:1.7;color:var(--ink2)}
+.fcnviz .howto strong{color:var(--ink)}
+.fcnviz .howto ol{margin:.4rem 0 .4rem 1.2rem;padding:0}
 </style>
 
 <div class="fcnviz" id="fcnviz">
+  <div class="howto">
+    <strong>How to read this page.</strong> This is not a product pricer — it is an interactive
+    stress exhibit. Change the knock-in barrier and the horizon, then watch three things:
+    <ol>
+      <li>how often at least one delivery occurs within the reinvestment window;</li>
+      <li>how deep the bad-tail return becomes;</li>
+      <li>whether a clean past streak actually reduces next-year delivery risk.</li>
+    </ol>
+    The lesson is not that every FCN is bad. It is that a clean historical streak is a weak safety
+    signal unless the product terms, the underlyings, and the market regime are understood.
+  </div>
+
   <div class="filters" id="filters">
     <div class="fgroup"><span class="flabel">Horizon</span>
       <span class="seg" id="seg-h" role="group" aria-label="Holding horizon">
@@ -101,7 +117,9 @@ body.dark .fcnviz{--surface:#1d1e20;--ink:#ffffff;--ink2:#c3c2b7;--muted:#898781
   <div class="tip" id="tip"></div>
 
   <div class="meth">
-    <strong>Method & limits.</strong> Engine and daily price data come unmodified from the
+    <strong>Method & limits.</strong> This page is an interactive companion to the working paper,
+    not a substitute for the full methodology or a product valuation tool. Engine and daily price
+    data come unmodified from the
     reproducibility package of my working paper <em>When Winning Streaks Mislead</em>
     (<a href="https://sinclairhuang.org/publications/">publications</a>). Notes are worst-of-3
     baskets over nine US-listed semiconductor names, 63-trading-day tenor, autocall from day 21,
