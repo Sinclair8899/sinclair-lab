@@ -67,7 +67,7 @@ body.dark .fcnviz{--surface:#1d1e20;--ink:#ffffff;--ink2:#c3c2b7;--muted:#898781
 
   <div class="tiles">
     <div class="tile"><div class="tl">Windows hit by delivery</div>
-      <div class="tv" id="t-del">–</div><div class="ts">≥1 Scenario-D settlement in window</div></div>
+      <div class="tv" id="t-del">–</div><div class="ts">≥1 delivery (Scenario-D assignment) in the reinvestment window — not a per-note probability</div></div>
     <div class="tile"><div class="tl">Median window return</div>
       <div class="tv" id="t-med">–</div><div class="ts">compounded, coupon included</div></div>
     <div class="tile"><div class="tl">5th percentile return</div>
@@ -90,7 +90,7 @@ body.dark .fcnviz{--surface:#1d1e20;--ink:#ffffff;--ink2:#c3c2b7;--muted:#898781
 
   <figure class="card">
     <h3>The streak illusion <span style="font-weight:400;color:var(--muted)">(paper configuration, 60% barrier)</span></h3>
-    <p class="chnote">Probability of a delivery within the <em>next year</em>, given how many clean quarters you have already seen. The flat tail is the point: past quarter four, a longer streak buys almost nothing.</p>
+    <p class="chnote">Probability of a delivery within the <em>next year</em>, conditional on how many clean quarters have already been observed. The flat tail is the point: after about four clean quarters, additional clean quarters add little incremental information about next-year delivery risk. A long streak may identify the regime you have just lived through, but it does not prove that the regime will persist.</p>
     <svg id="ch-streak" viewBox="0 0 720 240" role="img" aria-label="Delivery probability within one year conditional on clean streak length"></svg>
   </figure>
 
@@ -102,15 +102,22 @@ body.dark .fcnviz{--surface:#1d1e20;--ink:#ffffff;--ink2:#c3c2b7;--muted:#898781
 
   <div class="meth">
     <strong>Method & limits.</strong> Engine and daily price data come unmodified from the
-    reproducibility package of my paper <em>When Winning Streaks Mislead</em>
+    reproducibility package of my working paper <em>When Winning Streaks Mislead</em>
     (<a href="https://sinclairhuang.org/publications/">publications</a>). Notes are worst-of-3
     baskets over nine US-listed semiconductor names, 63-trading-day tenor, autocall from day 21,
     strike 80%, fixed 12% annual coupon as a comparability convention; windows start monthly with
-    immediate same-basket reinvestment, 2000–2026. The 60% barrier is the published configuration —
-    its numbers here reproduce the paper's to the digit; other barriers re-run the same engine and
-    are an extension beyond the paper. Overlapping windows are not independent observations, and the
-    nine names are survivors, which flatters the results. This page is an educational statistical
-    exhibit: it prices no product, models no issuer terms, and is not investment advice.
+    immediate same-basket reinvestment, 2000–2026. "Delivery" on this page is the paper's
+    Scenario-D assignment: no autocall, barrier touched, and the worst name below strike at final
+    observation. Window metrics aggregate sequential 3-month notes over the selected horizon; they
+    should not be read as single-note assignment probabilities. The 60% barrier is the working
+    paper's reported configuration — its numbers here reproduce that configuration to the digit;
+    other barriers re-run the same engine and are an interactive extension beyond the paper.
+    Overlapping windows are not independent observations, and the nine names are survivors, which
+    flatters the results: because the universe is survivor-only, read these figures as a lower-bound
+    stress exhibit rather than a full market-history estimate, and expect a delisting-inclusive
+    database to deepen the left tail. The page is designed to show the sensitivity of streak
+    narratives to product terms, not to estimate a fair coupon — it prices no product, models no
+    issuer terms, and is not investment advice.
   </div>
 </div>
 
