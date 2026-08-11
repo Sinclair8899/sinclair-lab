@@ -2,15 +2,18 @@
 title: "About"
 layout: "single"
 url: "/about/"
+date: 2026-08-06
+lastmod: 2026-08-11
+schema_type: "AboutPage"
 summary: about
 ShowToc: false
 ---
 
-This is a personal site for thinking out loud about AI.
+Sinclair AI Lab is the personal lab notebook of Sinclair Huang: working hypotheses, documented experiments, and failures worth examining, mostly in applied AI.
 
 I'm interested in what these systems can actually do — not the demos, but the part where you try to use them for real work and find out where they hold up and where they quietly don't. Retrieval that surfaces noise instead of signal. Models that score well on benchmarks and then fail on the one question you cared about. The gap between what a tool promises and what it delivers is usually more interesting than either.
 
-So this site is a notebook, not a publication. Experiments, half-formed ideas, things I tried that didn't work. I'd rather write up an interesting failure than wait until I have a clean conclusion — by then it belongs in a paper, not here.
+So this site is a lab notebook, not a publication venue: each experiment states its data, method, safeguards, and limits, and negative results are written up with enough detail to be examined. I'd rather document an instructive failure than wait until I have a clean conclusion — by then it belongs in a paper, not here.
 
 ## Recurring themes
 
@@ -21,7 +24,7 @@ So this site is a notebook, not a publication. Experiments, half-formed ideas, t
 
 ## Elsewhere
 
-EDBA candidate at HEC Liège. Working papers on SSRN, longer essays on Medium, main academic site at [sinclairhuang.org](https://sinclairhuang.org).
+Executive DBA (EDBA), HEC Liège. Working papers on SSRN, longer essays on Medium, main academic site at [sinclairhuang.org](https://sinclairhuang.org).
 
 - ORCID: [0009-0007-8173-5672](https://orcid.org/0009-0007-8173-5672)
 - Email: research [at] sinclairhuang.org

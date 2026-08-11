@@ -1,0 +1,163 @@
+{{- /* Site override of PaperMod's schema partial.
+     The theme's version marks the homepage as an Organization (or a Person
+     named after the site). This site is neither: it is a personal lab
+     WebSite created by a Person. Changes vs the theme:
+       - homepage: WebSite (official name) + creator Person
+       - pages with `schema_type: "AboutPage"` in front matter: AboutPage
+         instead of BlogPosting (no articleBody, mainEntity = the person)
+       - BlogPosting publisher: Person with name + url, not Organization
+     Breadcrumb and the rest of the BlogPosting block are kept from the
+     theme. */ -}}
+{{ if .IsHome }}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Sinclair AI Lab — by Sinclair Huang",
+  "alternateName": {{ site.Title }},
+  "url": {{ site.Home.Permalink }},
+  "description": {{ site.Params.description | plainify | truncate 180 | safeHTML }},
+  "inLanguage": {{ site.Language.Lang }},
+  "creator": {
+    "@type": "Person",
+    "name": {{ site.Params.author | default site.Title }},
+    "url": "https://sinclairhuang.org/",
+    "sameAs": [
+      "https://sinclairhuang.org/",
+      "https://orcid.org/0009-0007-8173-5672"
+    ]
+  }
+}
+</script>
+{{- else if (or .IsPage .IsSection) }}
+{{/* BreadcrumbList */}}
+{{- $url := replace .Parent.Permalink ( printf "%s" site.Home.Permalink) "" }}
+{{- $lang_url := strings.TrimPrefix ( printf "%s/" .Lang) $url }}
+{{- $bc_list := (split $lang_url "/")}}
+
+{{- $scratch := newScratch }}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+  {{- range $index, $element := $bc_list }}
+
+    {{- $scratch.Add "path" (printf "%s/" $element ) | safeJS }}
+    {{- $bc_pg := site.GetPage ($scratch.Get "path") -}}
+
+    {{- if (and ($bc_pg) (gt (len . ) 0))}}
+    {{- if (and $index)}}, {{end }}
+    {
+      "@type": "ListItem",
+      "position": {{ add 1 $index  }},
+      "name": {{ $bc_pg.Name }},
+      "item": {{ $bc_pg.Permalink | safeHTML }}
+    }
+    {{- end }}
+
+  {{- end }}
+  {{- /*  self-page addition  */ -}}
+  {{- if (ge (len $bc_list) 2) }}, {{end }}
+    {
+      "@type": "ListItem",
+      "position": {{len $bc_list}},
+      "name": {{ .Name }},
+      "item": {{ .Permalink | safeHTML }}
+    }
+  ]
+}
+</script>
+{{- if .IsPage }}
+{{- if eq (.Params.schema_type | default "") "AboutPage" }}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "AboutPage",
+  "name": {{ .Title | plainify }},
+  "url": {{ .Permalink | safeHTML }},
+  "description": {{ site.Params.description | plainify | truncate 180 | safeHTML }},
+  "inLanguage": {{ .Language.Lang | default "en-us" }},
+  "datePublished": {{ .PublishDate }},
+  "dateModified": {{ .Lastmod }},
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "Sinclair AI Lab — by Sinclair Huang",
+    "url": {{ site.Home.Permalink }}
+  },
+  "mainEntity": {
+    "@type": "Person",
+    "name": {{ site.Params.author | default site.Title }},
+    "url": "https://sinclairhuang.org/",
+    "sameAs": [
+      "https://sinclairhuang.org/",
+      "https://orcid.org/0009-0007-8173-5672"
+    ]
+  }
+}
+</script>
+{{- else }}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": {{ .Title | plainify}},
+  "name": "{{ .Title | plainify }}",
+  "description": {{ with .Description | plainify }}{{ . }}{{ else }}{{ .Summary | plainify  }}{{ end -}},
+  "keywords": [
+    {{- if .Params.keywords }}
+    {{ range $i, $e := .Params.keywords }}{{ if $i }}, {{ end }}{{ $e }}{{ end }}
+    {{- else }}
+    {{ range $i, $e := .Params.tags }}{{ if $i }}, {{ end }}{{ $e }}{{ end }}
+    {{- end }}
+  ],
+  "articleBody": {{ .Content | safeJS | htmlUnescape | plainify }},
+  "wordCount" : "{{ .WordCount }}",
+  "inLanguage": {{ .Language.Lang | default "en-us" }},
+  {{ if .Params.cover.image -}}
+  "image":
+    {{- if (ne .Params.cover.relative true) -}}
+    {{ .Params.cover.image | absURL }},
+    {{- else -}}
+    {{ (path.Join .RelPermalink .Params.cover.image ) | absURL }},
+    {{- end}}
+  {{- else }}
+    {{- $images := partial "templates/_funcs/get-page-images" . -}}
+    {{- with index $images 0 -}}
+  "image": {{ .Permalink }},
+    {{- end }}
+  {{- end -}}
+  "datePublished": {{ .PublishDate }},
+  "dateModified": {{ .Lastmod }},
+  {{- with (.Params.author | default site.Params.author) }}
+  "author":
+    {{- if (or (eq (printf "%T" .) "[]string") (eq (printf "%T" .) "[]interface {}")) -}}
+  [{{- range $i, $v := . -}}
+  {{- if $i }}, {{end -}}
+  {
+    "@type": "Person",
+    "name": {{ $v }}
+  }
+  {{- end }}],
+    {{- else -}}
+  {
+    "@type": "Person",
+    "name": {{ . }}
+  },
+    {{- end -}}
+  {{- end }}
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": {{ .Permalink | safeHTML }}
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": {{ site.Params.author | default site.Title }},
+    "url": "https://sinclairhuang.org/"
+  }
+}
+</script>
+{{- end }}{{/* schema_type branch end */}}
+{{- end }}{{/* .IsPage end */}}
+
+{{- end -}}

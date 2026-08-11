@@ -7,7 +7,8 @@ enableRobotsTXT = true
 buildDrafts = false
 
 [params]
-  description = "Notes and experiments on what AI tooling can actually do"
+  author = "Sinclair Huang"
+  description = "Sinclair AI Lab — by Sinclair Huang. Working hypotheses, documented experiments, and failures worth examining in applied AI."
   ShowReadingTime = true
   ShowShareButtons = false
   ShowPostNavLinks = true
@@ -16,8 +17,8 @@ buildDrafts = false
   ShowToc = true
 
 [params.homeInfoParams]
-  Title = "Sinclair AI Lab"
-  Content = "Experiments with AI tooling, and ideas that are still half-formed. Mostly about the gap between what these systems promise and what they deliver."
+  Title = "Sinclair AI Lab — by Sinclair Huang"
+  Content = "A working lab for small, inspectable AI systems and research tools: working hypotheses, documented experiments, and failures worth examining. Mostly about the gap between what these systems promise and what they deliver."
 
 [[menu.main]]
   identifier = "about"
