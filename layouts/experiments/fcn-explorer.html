@@ -44,6 +44,11 @@ body.dark .fcnviz{--surface:#1d1e20;--ink:#ffffff;--ink2:#c3c2b7;--muted:#898781
 .fcnviz details.tbl th:first-child,.fcnviz details.tbl td:first-child{text-align:left}
 .fcnviz .meth{font-size:.82rem;color:var(--ink2);line-height:1.65;border-top:1px solid var(--grid);
   padding-top:1rem;margin-top:.5rem}
+.fcnviz .xlinks{display:flex;flex-wrap:wrap;gap:.6rem 1.6rem;border-top:1px solid var(--grid);
+  padding-top:1rem;margin-top:1rem;font-size:.9rem}
+.fcnviz .xlinks a{color:var(--blue);text-decoration:none}
+.fcnviz .xlinks a:hover{text-decoration:underline}
+.fcnviz .xlinks a:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:2px}
 .fcnviz .howto{border:1px solid var(--ring);border-left:3px solid var(--blue);border-radius:8px;
   padding:.9rem 1.1rem;margin:0 0 1.4rem;font-size:.9rem;line-height:1.7;color:var(--ink2)}
 .fcnviz .howto strong{color:var(--ink)}
@@ -137,6 +142,12 @@ body.dark .fcnviz{--surface:#1d1e20;--ink:#ffffff;--ink2:#c3c2b7;--muted:#898781
     narratives to product terms, not to estimate a fair coupon — it prices no product, models no
     issuer terms, and is not investment advice.
   </div>
+
+  <nav class="xlinks" aria-label="Related research links">
+    <a href="https://sinclairhuang.org/insights/research-brief-illusion-of-winning-streaks/">閱讀研究摘要</a>
+    <a href="https://ssrn.com/abstract=7106058" target="_blank" rel="noopener noreferrer">查看完整論文(SSRN)</a>
+    <a href="https://sinclairhuang.org/research/">返回 Sinclair Huang Research</a>
+  </nav>
 </div>
 
 <script>
