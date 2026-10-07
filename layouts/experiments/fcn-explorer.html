@@ -1,4 +1,5 @@
 {{ define "main" }}
+{{- $dataV := os.ReadFile "static/experiments/fcn/index.json" | md5 -}}
 <article class="post-single">
   <header class="post-header">
     <h1 class="post-title">{{ .Title }}</h1>
@@ -14,15 +15,18 @@
 body.dark .fcnviz{--surface:#1d1e20;--ink:#ffffff;--ink2:#c3c2b7;--muted:#898781;
   --grid:#2c2c2a;--axis:#383835;--blue:#3987e5;--blue-wash:rgba(57,135,229,.10);
   --orange:#d95926;--ring:rgba(255,255,255,.10)}
-.fcnviz .filters{display:flex;flex-wrap:wrap;gap:1.2rem;align-items:center;margin:1.2rem 0}
-.fcnviz .fgroup{display:flex;align-items:center;gap:.5rem}
+.fcnviz .filters{display:flex;flex-wrap:wrap;gap:.8rem 1.2rem;align-items:center;margin:1.2rem 0 .4rem}
+.fcnviz .fgroup{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
 .fcnviz .fgroup .flabel{font-size:.8rem;color:var(--ink2)}
 .fcnviz .seg{display:inline-flex;border:1px solid var(--ring);border-radius:8px;overflow:hidden}
 .fcnviz .seg button{border:0;background:transparent;color:var(--ink2);padding:.35rem .7rem;
   font:inherit;font-size:.85rem;cursor:pointer}
 .fcnviz .seg button[aria-pressed="true"]{background:var(--blue);color:#fff;font-weight:600}
+.fcnviz .seg button:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
 .fcnviz .seg button .pm{font-size:.65rem;opacity:.8;margin-left:.2rem}
-.fcnviz .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 1.2rem}
+.fcnviz .termnote{font-size:.78rem;color:var(--muted);margin:0 0 1rem}
+.fcnviz .termnote strong{color:var(--ink2);font-weight:600}
+.fcnviz .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:0 0 1.2rem}
 .fcnviz .tile{border:1px solid var(--ring);border-radius:8px;padding:.7rem .9rem;background:var(--surface)}
 .fcnviz .tile .tl{font-size:.75rem;color:var(--ink2)}
 .fcnviz .tile .tv{font-size:1.7rem;font-weight:600;line-height:1.25}
@@ -30,20 +34,48 @@ body.dark .fcnviz{--surface:#1d1e20;--ink:#ffffff;--ink2:#c3c2b7;--muted:#898781
 .fcnviz figure.card{margin:0 0 1.4rem;border:1px solid var(--ring);border-radius:8px;
   padding:.9rem 1rem;background:var(--surface)}
 .fcnviz figure.card h3{margin:0 0 .1rem;font-size:.95rem;color:var(--ink)}
+.fcnviz figure.card h3 .sub{font-weight:400;color:var(--muted)}
 .fcnviz figure.card .chnote{font-size:.75rem;color:var(--muted);margin:0 0 .5rem}
-.fcnviz svg{width:100%;height:auto;display:block}
+.fcnviz .pair{display:flex;flex-wrap:wrap;gap:.6rem 1.4rem}
+.fcnviz .pair > div{flex:1 1 280px;min-width:0}
+.fcnviz .pair .ptitle{font-size:.78rem;color:var(--ink2);margin:.2rem 0 .1rem}
+.fcnviz .legend{display:flex;flex-wrap:wrap;gap:.3rem 1rem;font-size:.75rem;color:var(--ink2);margin:.3rem 0 0}
+.fcnviz .legend i{display:inline-block;width:14px;height:0;border-top:2px solid;vertical-align:middle;margin-right:.35rem}
+.fcnviz .legend i.l-blue{border-color:var(--blue)}
+.fcnviz .legend i.l-orange{border-color:var(--orange)}
+.fcnviz .legend i.l-muted{border-color:var(--muted);border-top-style:dashed}
+.fcnviz svg{width:100%;height:auto;display:block;overflow:visible}
+.fcnviz svg:focus{outline:none}
+.fcnviz svg:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:4px}
 .fcnviz svg text{font-family:inherit;font-size:11px;fill:var(--muted)}
+.fcnviz svg text.lbl-ink{fill:var(--ink2)}
+.fcnviz .c-grid{stroke:var(--grid)} .fcnviz .c-axis{stroke:var(--axis)}
+.fcnviz .c-muted{stroke:var(--muted)} .fcnviz .c-ink2{stroke:var(--ink2)}
+.fcnviz .f-blue{fill:var(--blue)} .fcnviz .f-orange{fill:var(--orange)}
+.fcnviz .f-wash{fill:var(--blue-wash)} .fcnviz .f-muted{fill:var(--muted)}
+.fcnviz .s-blue{stroke:var(--blue);fill:none} .fcnviz .s-orange{stroke:var(--orange);fill:none}
+.fcnviz .s-note{stroke:var(--muted);fill:none;stroke-dasharray:4 3}
+.fcnviz .dot-blue{fill:var(--blue);stroke:var(--surface)} .fcnviz .dot-orange{fill:var(--orange);stroke:var(--surface)}
+.fcnviz .dot-muted{fill:var(--muted);stroke:var(--surface)}
+.fcnviz .band{fill:var(--muted);opacity:.14}
+.fcnviz .cursor{stroke:var(--axis)} .fcnviz .ring{fill:none;stroke:var(--ink2);stroke-width:1.5}
 .fcnviz .tip{position:fixed;pointer-events:none;z-index:50;background:var(--surface);
   border:1px solid var(--ring);border-radius:6px;padding:.4rem .6rem;font-size:.78rem;
-  color:var(--ink2);box-shadow:0 2px 8px rgba(0,0,0,.12);display:none;max-width:240px}
+  color:var(--ink2);box-shadow:0 2px 8px rgba(0,0,0,.12);display:none;max-width:260px}
 .fcnviz .tip .v{color:var(--ink);font-weight:600;font-size:.9rem}
+.fcnviz .status{font-size:.78rem;color:var(--muted);min-height:1em}
+.fcnviz .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .fcnviz details.tbl{margin:0 0 1.5rem;font-size:.85rem}
 .fcnviz details.tbl summary{cursor:pointer;color:var(--ink2)}
-.fcnviz details.tbl table{border-collapse:collapse;margin:.6rem 0;width:100%;font-variant-numeric:tabular-nums}
+.fcnviz details.tbl h4{font-size:.85rem;margin:1rem 0 .2rem;color:var(--ink)}
+.fcnviz details.tbl .scroll{max-height:18rem;overflow:auto}
+.fcnviz details.tbl table{border-collapse:collapse;margin:.4rem 0;width:100%;font-variant-numeric:tabular-nums}
 .fcnviz details.tbl th,.fcnviz details.tbl td{border:1px solid var(--grid);padding:.3rem .5rem;text-align:right}
 .fcnviz details.tbl th:first-child,.fcnviz details.tbl td:first-child{text-align:left}
+.fcnviz details.tbl thead th{color:var(--ink2);font-weight:600}
 .fcnviz .meth{font-size:.82rem;color:var(--ink2);line-height:1.65;border-top:1px solid var(--grid);
   padding-top:1rem;margin-top:.5rem}
+.fcnviz .meth p{margin:0 0 .6rem}
 .fcnviz .xlinks{display:flex;flex-wrap:wrap;gap:.6rem 1.6rem;border-top:1px solid var(--grid);
   padding-top:1rem;margin-top:1rem;font-size:.9rem}
 .fcnviz .xlinks a{color:var(--blue);text-decoration:none}
@@ -69,26 +101,24 @@ body.dark .fcnviz{--surface:#1d1e20;--ink:#ffffff;--ink2:#c3c2b7;--muted:#898781
   </div>
 
   <div class="filters" id="filters">
-    <div class="fgroup"><span class="flabel">Horizon</span>
-      <span class="seg" id="seg-h" role="group" aria-label="Holding horizon">
-        <button data-h="2y" aria-pressed="true">2 years</button>
-        <button data-h="5y" aria-pressed="false">5 years</button>
-      </span>
-    </div>
-    <div class="fgroup"><span class="flabel">Knock-in barrier</span>
-      <span class="seg" id="seg-b" role="group" aria-label="Knock-in barrier">
-        <button data-b="0.50" aria-pressed="false">50%</button>
-        <button data-b="0.55" aria-pressed="false">55%</button>
-        <button data-b="0.60" aria-pressed="true">60%<span class="pm">paper</span></button>
-        <button data-b="0.65" aria-pressed="false">65%</button>
-        <button data-b="0.70" aria-pressed="false">70%</button>
-      </span>
-    </div>
+    <div class="fgroup"><span class="flabel" id="lbl-h">Horizon</span>
+      <span class="seg" data-key="h" role="group" aria-labelledby="lbl-h"></span></div>
+    <div class="fgroup"><span class="flabel" id="lbl-ki">Knock-in barrier</span>
+      <span class="seg" data-key="ki" role="group" aria-labelledby="lbl-ki"></span></div>
+    <div class="fgroup"><span class="flabel" id="lbl-k">Strike</span>
+      <span class="seg" data-key="k" role="group" aria-labelledby="lbl-k"></span></div>
+    <div class="fgroup"><span class="flabel" id="lbl-t">Tenor</span>
+      <span class="seg" data-key="t" role="group" aria-labelledby="lbl-t"></span></div>
+    <div class="fgroup"><span class="flabel" id="lbl-a">Autocall from</span>
+      <span class="seg" data-key="a" role="group" aria-labelledby="lbl-a"></span></div>
   </div>
+  <p class="termnote" id="termnote" aria-live="polite"></p>
 
   <div class="tiles">
     <div class="tile"><div class="tl">Windows hit by delivery</div>
       <div class="tv" id="t-del">–</div><div class="ts">≥1 delivery (Scenario-D assignment) in the reinvestment window — not a per-note probability</div></div>
+    <div class="tile"><div class="tl">Single-note delivery rate</div>
+      <div class="tv" id="t-note">–</div><div class="ts" id="t-note-s">share of individual notes that ended in Scenario-D assignment</div></div>
     <div class="tile"><div class="tl">Median window return</div>
       <div class="tv" id="t-med">–</div><div class="ts">compounded, coupon included</div></div>
     <div class="tile"><div class="tl">5th percentile return</div>
@@ -98,49 +128,86 @@ body.dark .fcnviz{--surface:#1d1e20;--ink:#ffffff;--ink2:#c3c2b7;--muted:#898781
   </div>
 
   <figure class="card">
+    <h3>How the barrier moves the risk <span class="sub" id="sens-sub"></span></h3>
+    <p class="chnote">All five barriers at once, with the other terms as selected. The selected barrier is marked. Use the pointer, or focus a chart and use the arrow keys.</p>
+    <div class="pair">
+      <div><div class="ptitle">Windows hit by delivery</div>
+        <svg id="ch-sens-d" role="img" aria-label="Share of windows hit by delivery, by knock-in barrier"></svg></div>
+      <div><div class="ptitle">5th percentile window return</div>
+        <svg id="ch-sens-p5" role="img" aria-label="5th percentile window return, by knock-in barrier"></svg></div>
+    </div>
+    <div class="legend"><span><i class="l-blue"></i>2-year windows</span><span><i class="l-orange"></i>5-year windows</span><span><i class="l-muted"></i>single note (left chart only)</span></div>
+  </figure>
+
+  <figure class="card">
     <h3>Distribution of window returns</h3>
-    <p class="chnote">Every start month × every basket. Hover a bar for the share of windows in that return range.</p>
-    <svg id="ch-hist" viewBox="0 0 720 240" role="img" aria-label="Histogram of window returns"></svg>
+    <p class="chnote">Every start month × every basket. Hover a bar — or focus the chart and use the arrow keys — for the share of windows in that return range.</p>
+    <svg id="ch-hist" role="img" aria-label="Histogram of window returns"></svg>
   </figure>
 
   <figure class="card">
     <h3>When deliveries cluster</h3>
-    <p class="chnote">Share of the 84 baskets whose window starting that month contained at least one delivery. Move the pointer to read a date.</p>
-    <svg id="ch-time" viewBox="0 0 720 240" role="img" aria-label="Timeline of delivery frequency by start month"></svg>
+    <p class="chnote">Share of the 84 baskets whose window starting that month contained at least one delivery. Move the pointer, or use the arrow keys, to read a date.</p>
+    <svg id="ch-time" role="img" aria-label="Timeline of delivery frequency by start month"></svg>
   </figure>
 
   <figure class="card">
-    <h3>The streak illusion <span style="font-weight:400;color:var(--muted)">(paper configuration, 60% barrier)</span></h3>
-    <p class="chnote">Probability of a delivery within the <em>next year</em>, conditional on how many clean quarters have already been observed. The flat tail is the point: after about four clean quarters, additional clean quarters add little incremental information about next-year delivery risk. A long streak may identify the regime you have just lived through, but it does not prove that the regime will persist.</p>
-    <svg id="ch-streak" viewBox="0 0 720 240" role="img" aria-label="Delivery probability within one year conditional on clean streak length"></svg>
+    <h3>Which name was the worst at delivery</h3>
+    <p class="chnote">Among single notes that ended in Scenario-D assignment under the selected terms, the share in which each name was the worst performer at final observation. Each name sits in 28 of the 84 baskets, so the shares are comparable. Horizon does not apply.</p>
+    <svg id="ch-attr" role="img" aria-label="Share of delivered notes in which each name was the worst performer"></svg>
   </figure>
 
-  <details class="tbl"><summary>Data table (current selection)</summary>
+  <figure class="card">
+    <h3>The streak illusion <span class="sub" id="streak-sub"></span></h3>
+    <p class="chnote">Probability of a delivery within the <em>next year</em>, conditional on how many clean quarters have already been observed. <span id="streak-tail"></span> <span id="streak-early"></span> A long streak may identify the regime you have just lived through, but it does not prove that the regime will persist.</p>
+    <p class="chnote">Whiskers resample whole calendar years of note starts (the working paper's block-bootstrap scheme)<span id="streak-years"></span>. Windows still overlap across years, so read them as a sensitivity band, not an exact confidence interval. The last bar pools every streak of 12 quarters or more.</p>
+    <svg id="ch-streak" role="img" aria-label="Delivery probability within one year conditional on clean streak length, with resampling bands"></svg>
+    <p class="termnote" id="streak-base"></p>
+    <p class="termnote" id="streak-note"></p>
+  </figure>
+
+  <details class="tbl"><summary>Data tables (current selection)</summary>
     <div id="tbl-out"></div>
   </details>
 
-  <div class="tip" id="tip"></div>
+  <div class="status" id="status" role="status"></div>
+  <div class="sr" id="live" aria-live="polite"></div>
+  <div class="tip" id="tip" aria-hidden="true"></div>
 
   <div class="meth">
-    <strong>Method & limits.</strong> This page is an interactive companion to the working paper,
-    not a substitute for the full methodology or a product valuation tool. Engine and daily price
-    data come unmodified from the
+    <p><strong>Method & limits.</strong> This page is an interactive companion to the working paper,
+    not a substitute for the full methodology or a product valuation tool. Results come from the
     reproducibility package of my working paper <em>When Winning Streaks Mislead</em>
-    (<a href="https://sinclairhuang.org/publications/">publications</a>). Notes are worst-of-3
-    baskets over nine US-listed semiconductor names, 63-trading-day tenor, autocall from day 21,
-    strike 80%, fixed 12% annual coupon as a comparability convention; windows start monthly with
-    immediate same-basket reinvestment, 2000–2026. "Delivery" on this page is the paper's
-    Scenario-D assignment: no autocall, barrier touched, and the worst name below strike at final
-    observation. Window metrics aggregate sequential 3-month notes over the selected horizon; they
-    should not be read as single-note assignment probabilities. The 60% barrier is the working
-    paper's reported configuration — its numbers here reproduce that configuration to the digit;
-    other barriers re-run the same engine and are an interactive extension beyond the paper.
-    Overlapping windows are not independent observations, and the nine names are survivors, which
-    flatters the results: because the universe is survivor-only, read these figures as a lower-bound
-    stress exhibit rather than a full market-history estimate, and expect a delisting-inclusive
-    database to deepen the left tail. The page is designed to show the sensitivity of streak
-    narratives to product terms, not to estimate a fair coupon — it prices no product, models no
-    issuer terms, and is not investment advice.
+    (<a href="https://sinclairhuang.org/publications/">publications</a>): its daily price data,
+    unmodified, and its settlement engine, re-implemented in vectorized form for speed and verified
+    bit for bit against the paper's own code for all 120 configurations offered here (60 term
+    combinations × two horizons). Notes are worst-of-3 baskets over nine US-listed
+    semiconductor names. The working paper's configuration is a 63-trading-day tenor, autocall from
+    day 21, strike 80%, knock-in barrier 60%, and a fixed 12% annual coupon as a comparability
+    convention; windows start monthly with immediate same-basket reinvestment, 2000–2026.
+    "Delivery" on this page is the paper's Scenario-D assignment: no autocall, barrier touched, and
+    the worst name below strike at final observation.</p>
+    <p>Window metrics aggregate sequential notes over the selected horizon; they should not be read
+    as single-note assignment probabilities. The single-note tile reports that per-note rate
+    separately, pooling every note started every five trading days in every basket, as the paper
+    does (8.1% at the paper's configuration). The paper's configuration reproduces its reported
+    numbers to the digit; every other barrier, strike, tenor and autocall start re-runs the same
+    engine and is an interactive extension beyond the paper. The coupon stays at 12% for every
+    combination — real notes would quote different coupons for different terms — so compare risk
+    across settings, and do not read the returns as offers.</p>
+    <p>The streak chart re-runs the paper's streak diagnostic for the selected barrier, with every
+    other term at the paper's configuration. Its bands resample whole calendar years of note starts,
+    the paper's block-bootstrap scheme; with 25 year blocks they are wide. Only in the paper's
+    configuration (60% barrier) is the flat tail after about four clean quarters read as a robust
+    pattern; at the other barriers the chart reports point estimates and bands without a claim about
+    the tail. At every barrier, the earlier decline is reported as point estimates whose bands overlap.
+    Overlapping windows are not independent observations,
+    and the nine names are survivors, which flatters the results: because the universe is
+    survivor-only, read these figures as a lower-bound stress exhibit rather than a full
+    market-history estimate, and expect a delisting-inclusive database to deepen the left tail.
+    The page is designed to show the sensitivity of streak narratives to product terms, not to
+    estimate a fair coupon — it prices no product, models no issuer terms, and is not investment
+    advice.</p>
   </div>
 
   <nav class="xlinks" aria-label="Related research links">
@@ -153,261 +220,553 @@ body.dark .fcnviz{--surface:#1d1e20;--ink:#ffffff;--ink2:#c3c2b7;--muted:#898781
 <script>
 (function () {
   "use strict";
-  var state = { h: "2y", b: "0.60" };
-  var DATA = null;
-  var tip = document.getElementById("tip");
+  var BASE = "/experiments/fcn/";
+  var INDEX_V = {{ $dataV }};
   var NS = "http://www.w3.org/2000/svg";
+  var root = document.getElementById("fcnviz");
+  var tip = document.getElementById("tip");
+  var live = document.getElementById("live");
+  var statusEl = document.getElementById("status");
+  var IDX = null, STREAK = null;
+  var pointCache = {};
+  var state = { h: "2y", ki: "0.60", k: "0.80", t: "63", a: "21" };
+  var DIM_FMT = {
+    h: function (v) { return v === "2y" ? "2 years" : "5 years"; },
+    ki: function (v) { return Math.round(v * 100) + "%"; },
+    k: function (v) { return Math.round(v * 100) + "%"; },
+    t: function (v) { return v + " days"; },
+    a: function (v) { return "day " + v; }
+  };
 
+  // ---------- small helpers ----------
   function el(name, attrs, parent) {
     var node = document.createElementNS(NS, name);
     for (var k in attrs) node.setAttribute(k, attrs[k]);
     if (parent) parent.appendChild(node);
     return node;
   }
-  function css(name) {
-    return getComputedStyle(document.getElementById("fcnviz")).getPropertyValue(name).trim();
+  function txt(parent, x, y, s, anchor, cls) {
+    var t = el("text", { x: x, y: y, "text-anchor": anchor || "middle" }, parent);
+    if (cls) t.setAttribute("class", cls);
+    t.textContent = s;
+    return t;
   }
-  function pct(x, digits) { return (x * 100).toFixed(digits === undefined ? 0 : digits) + "%"; }
-  function signedPct(x, digits) { return (x >= 0 ? "+" : "") + (x * 100).toFixed(digits === undefined ? 1 : digits) + "%"; }
-  function showTip(evt, lines) {
+  function pct(x, d) { return (x * 100).toFixed(d === undefined ? 0 : d) + "%"; }
+  function prange(lo, hi) { return (lo * 100).toFixed(0) + "–" + pct(hi, 0); }   // "15–62%"
+  function spct(x, d) {
+    var s = (x * 100).toFixed(d === undefined ? 1 : d);
+    if (+s === 0) return s.replace("-", "") + "%";
+    return (x > 0 ? "+" : "") + s + "%";
+  }
+  // Round axis maximum up to a readable step (≤ 5 gridlines): 0/10/20/30%, not 0/8/15/22%.
+  function niceAxis(max) {
+    var steps = [0.01, 0.02, 0.025, 0.05, 0.1, 0.2, 0.25];
+    for (var i = 0; i < steps.length; i++) {
+      var n = Math.ceil(max / steps[i] - 1e-9);
+      if (n <= 5) return { top: n * steps[i], n: Math.max(1, n) };
+    }
+    return { top: Math.ceil(max), n: Math.ceil(max) };
+  }
+  function cfgKey(s) { return (+s.ki).toFixed(2) + "|" + (+s.k).toFixed(2) + "|" + s.t + "|" + s.a; }
+  function pointKey(s) { return s.h + "|" + cfgKey(s); }
+  function isPaperTerms(s) {
+    var p = IDX.paper;
+    return +s.ki === p.ki && +s.k === p.k && +s.t === p.t && +s.a === p.a;
+  }
+  function getJSON(url) {
+    return fetch(url).then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status + " for " + url);
+      return r.json();
+    });
+  }
+  function clear(svg) { while (svg.firstChild) svg.removeChild(svg.firstChild); }
+  function barPath(x, y, w, h, r) {        // rounded data-end, square baseline
+    r = Math.max(0, Math.min(r, w / 2, h));
+    return "M" + x + "," + (y + h) + "V" + (y + r) + "Q" + x + "," + y + " " + (x + r) + "," + y +
+      "H" + (x + w - r) + "Q" + (x + w) + "," + y + " " + (x + w) + "," + (y + r) + "V" + (y + h) + "Z";
+  }
+  function hbarPath(x, y, w, h, r) {       // horizontal: square baseline at x, rounded data-end
+    r = Math.max(0, Math.min(r, h / 2, w));
+    return "M" + x + "," + y + "H" + (x + w - r) + "Q" + (x + w) + "," + y + " " + (x + w) + "," + (y + r) +
+      "V" + (y + h - r) + "Q" + (x + w) + "," + (y + h) + " " + (x + w - r) + "," + (y + h) + "H" + x + "Z";
+  }
+
+  // ---------- frame: charts render at their real width so text stays 11px ----------
+  function frame(svg, height, margins) {
+    clear(svg);
+    var W = Math.max(260, Math.round(svg.getBoundingClientRect().width));   // the svg's own CSS width (100%)
+    svg.setAttribute("viewBox", "0 0 " + W + " " + height);
+    var M = margins || { l: 46, r: 12, t: 10, b: 30 };
+    return { svg: svg, W: W, H: height, M: M, IW: W - M.l - M.r, IH: height - M.t - M.b };
+  }
+  function yAxis(f, yMin, yMax, fmt, steps) {
+    steps = steps || 4;
+    for (var i = 0; i <= steps; i++) {
+      var v = yMin + (yMax - yMin) * i / steps;
+      var y = f.M.t + f.IH - f.IH * i / steps;
+      el("line", { x1: f.M.l, x2: f.W - f.M.r, y1: y, y2: y, "class": "c-grid", "stroke-width": 1 }, f.svg);
+      txt(f.svg, f.M.l - 6, y + 4, fmt(v), "end");
+    }
+  }
+  function baseline(f, y) {
+    el("line", { x1: f.M.l, x2: f.W - f.M.r, y1: y, y2: y, "class": "c-axis", "stroke-width": 1 }, f.svg);
+  }
+
+  // ---------- tooltip + keyboard/touch interaction shared by every chart ----------
+  function showTipAt(cx, cy, lines) {
     while (tip.firstChild) tip.removeChild(tip.firstChild);
-    lines.forEach(function (line, index) {
+    lines.forEach(function (line, i) {
       var row = document.createElement("div");
-      if (index === 0) row.className = "v";
+      if (i === 0) row.className = "v";
       row.textContent = line;
       tip.appendChild(row);
     });
     tip.style.display = "block";
-    var x = Math.min(evt.clientX + 14, window.innerWidth - 250);
-    tip.style.left = x + "px";
-    tip.style.top = (evt.clientY + 14) + "px";
+    var w = tip.offsetWidth, h = tip.offsetHeight;
+    var x = Math.min(cx + 14, window.innerWidth - w - 8);
+    var y = cy + 14 + h > window.innerHeight ? cy - h - 10 : cy + 14;
+    tip.style.left = Math.max(8, x) + "px";
+    tip.style.top = Math.max(8, y) + "px";
   }
   function hideTip() { tip.style.display = "none"; }
 
-  // Rounded data-end, square baseline.
-  function barPath(x, y, w, h, r) {
-    r = Math.max(0, Math.min(r, w / 2, h));
-    return "M" + x + "," + (y + h) + "V" + (y + r) +
-      "Q" + x + "," + y + " " + (x + r) + "," + y +
-      "H" + (x + w - r) +
-      "Q" + (x + w) + "," + y + " " + (x + w) + "," + (y + r) +
-      "V" + (y + h) + "Z";
-  }
-
-  var M = { l: 46, r: 12, t: 10, b: 30 }, W = 720, H = 240;
-  var IW = W - M.l - M.r, IH = H - M.t - M.b;
-
-  function clearSvg(svg) { while (svg.firstChild) svg.removeChild(svg.firstChild); }
-
-  function yAxis(svg, yMax, fmt) {
-    var steps = 4;
-    for (var i = 0; i <= steps; i++) {
-      var value = yMax * i / steps;
-      var y = M.t + IH - IH * i / steps;
-      el("line", { x1: M.l, x2: W - M.r, y1: y, y2: y, stroke: css("--grid"), "stroke-width": 1 }, svg);
-      var label = el("text", { x: M.l - 6, y: y + 4, "text-anchor": "end" }, svg);
-      label.textContent = fmt(value);
+  // items: [{ cx, cy (svg units), lines: [...] }]; mark(i|null) draws the highlight.
+  function interact(f, items, mark, axis) {
+    var svg = f.svg, cur = -1;
+    svg.setAttribute("tabindex", "0");
+    function toClient(i) {
+      var r = svg.getBoundingClientRect(), s = r.width / f.W;
+      return { x: r.left + items[i].cx * s, y: r.top + items[i].cy * s };
     }
+    function pick(i, evt) {
+      cur = i;
+      mark(i);
+      var p = evt ? { x: evt.clientX, y: evt.clientY } : toClient(i);
+      showTipAt(p.x, p.y, items[i].lines);
+      if (!evt) live.textContent = items[i].lines.join(", ");
+    }
+    function nearest(evt) {
+      var r = svg.getBoundingClientRect(), s = f.W / r.width;
+      var px = (evt.clientX - r.left) * s, py = (evt.clientY - r.top) * s;
+      var best = 0, bd = Infinity;
+      items.forEach(function (it, i) {
+        var d = axis === "y" ? Math.abs(it.cy - py) : Math.abs(it.cx - px);
+        if (d < bd) { bd = d; best = i; }
+      });
+      return best;
+    }
+    function off() { cur = -1; mark(null); hideTip(); }
+    var hit = el("rect", { x: 0, y: 0, width: f.W, height: f.H, fill: "transparent" }, svg);
+    hit.addEventListener("pointermove", function (e) { pick(nearest(e), e); });
+    hit.addEventListener("pointerdown", function (e) { pick(nearest(e), e); });
+    hit.addEventListener("pointerleave", function (e) { if (e.pointerType === "mouse") off(); });
+    svg.onkeydown = function (e) {
+      var k = e.key, n = items.length;
+      if (k === "ArrowRight" || k === "ArrowDown") cur = Math.min(n - 1, cur + 1);
+      else if (k === "ArrowLeft" || k === "ArrowUp") cur = Math.max(0, cur < 0 ? 0 : cur - 1);
+      else if (k === "Home") cur = 0;
+      else if (k === "End") cur = n - 1;
+      else if (k === "Escape") { off(); return; }
+      else return;
+      e.preventDefault();
+      pick(cur, null);
+    };
+    svg.onfocus = function () { pick(cur < 0 ? 0 : cur, null); };
+    svg.onblur = off;
   }
 
-  function renderHist(point) {
-    var svg = document.getElementById("ch-hist");
-    clearSvg(svg);
-    var edges = point.hist_edges, counts = point.hist_counts;
+  // ---------- charts ----------
+  function renderSensitivity() {
+    var xs = IDX.dims.ki;
+    var rows = xs.map(function (ki) {
+      var c = cfgKey({ ki: ki, k: state.k, t: state.t, a: state.a });
+      return { ki: ki, d2: 1 - IDX.points["2y|" + c].no_d_rate, d5: 1 - IDX.points["5y|" + c].no_d_rate,
+        p2: IDX.points["2y|" + c].ret_p5, p5: IDX.points["5y|" + c].ret_p5, note: IDX.notes[c].pd };
+    });
+    var selIdx = xs.indexOf(+state.ki);
+    [["ch-sens-d", [["d2", "s-blue", "dot-blue", "2y windows"], ["d5", "s-orange", "dot-orange", "5y windows"],
+                     ["note", "s-note", "dot-muted", "single note"]], 0, 1, function (v) { return pct(v); }, pct],
+     ["ch-sens-p5", [["p2", "s-blue", "dot-blue", "2y windows"], ["p5", "s-orange", "dot-orange", "5y windows"]], -1, 0,
+       function (v) { return spct(v, 0); }, spct]].forEach(function (spec) {
+      var f = frame(document.getElementById(spec[0]), 210, { l: 46, r: 14, t: 12, b: 28 });
+      var lo = spec[2], hi = spec[3];
+      function X(i) { return f.M.l + f.IW * i / (xs.length - 1); }
+      function Y(v) { return f.M.t + f.IH - f.IH * (v - lo) / (hi - lo); }
+      yAxis(f, lo, hi, spec[4]);
+      var xSel = X(selIdx);
+      el("line", { x1: xSel, x2: xSel, y1: f.M.t, y2: f.M.t + f.IH, "class": "c-ink2", "stroke-width": 1,
+        "stroke-dasharray": "2 3" }, f.svg);
+      xs.forEach(function (ki, i) {
+        txt(f.svg, X(i), f.H - 8, pct(ki), i === 0 ? "start" : (i === xs.length - 1 ? "end" : "middle"),
+          i === selIdx ? "lbl-ink" : null);
+      });
+      baseline(f, lo < 0 ? Y(0) : f.M.t + f.IH);
+      spec[1].forEach(function (ser) {
+        var d = rows.map(function (r, i) { return (i ? "L" : "M") + X(i).toFixed(1) + "," + Y(r[ser[0]]).toFixed(1); }).join("");
+        el("path", { d: d, "class": ser[1], "stroke-width": 2, "stroke-linejoin": "round" }, f.svg);
+        rows.forEach(function (r, i) {
+          el("circle", { cx: X(i), cy: Y(r[ser[0]]), r: i === selIdx ? 4.5 : 3, "class": ser[2], "stroke-width": 1.5 }, f.svg);
+        });
+      });
+      var ring = el("circle", { r: 7, "class": "ring", visibility: "hidden" }, f.svg);
+      var items = rows.map(function (r, i) {
+        var lines = ["Barrier " + pct(r.ki)];
+        spec[1].forEach(function (ser) { lines.push(ser[3] + ": " + spec[5](r[ser[0]], 1)); });
+        return { cx: X(i), cy: Y(r[spec[1][0][0]]), lines: lines };
+      });
+      interact(f, items, function (i) {
+        if (i === null) { ring.setAttribute("visibility", "hidden"); return; }
+        ring.setAttribute("cx", items[i].cx); ring.setAttribute("cy", items[i].cy);
+        ring.setAttribute("visibility", "visible");
+      });
+    });
+  }
+
+  function renderHist(detail) {
+    var f = frame(document.getElementById("ch-hist"), 240);
+    var edges = detail.hist_edges, counts = detail.hist_counts;
     var total = counts.reduce(function (a, b) { return a + b; }, 0);
     var shares = counts.map(function (c) { return c / total; });
-    var yMax = Math.max.apply(null, shares) * 1.12;
-    yAxis(svg, yMax, function (v) { return pct(v); });
-    var n = counts.length, gap = 2;
-    var bw = IW / n - gap;
+    var ax = niceAxis(Math.max.apply(null, shares) * 1.05), yMax = ax.top;
+    yAxis(f, 0, yMax, function (v) { return pct(v); }, ax.n);
+    var n = counts.length, slot = f.IW / n, gap = slot > 6 ? 2 : 1, bw = slot - gap;
     for (var i = 0; i < n; i++) {
-      var x = M.l + (IW / n) * i + gap / 2;
-      var h = IH * shares[i] / yMax;
-      var y = M.t + IH - h;
-      if (h > 0.5) el("path", { d: barPath(x, y, bw, h, 4), fill: css("--blue") }, svg);
-      (function (i) {
-        var hit = el("rect", { x: M.l + (IW / n) * i, y: M.t, width: IW / n, height: IH, fill: "transparent" }, svg);
-        hit.addEventListener("pointermove", function (evt) {
-          showTip(evt, [pct(shares[i], 1) + " of windows",
-            "return " + signedPct(edges[i], 0) + " to " + signedPct(edges[i + 1], 0),
-            counts[i].toLocaleString() + " windows"]);
-        });
-        hit.addEventListener("pointerleave", hideTip);
-      })(i);
+      var h = f.IH * shares[i] / yMax, x = f.M.l + slot * i + gap / 2, y = f.M.t + f.IH - h;
+      if (h > 0.5) el("path", { d: barPath(x, y, bw, h, Math.min(4, bw / 2)), "class": "f-blue" }, f.svg);
     }
-    el("line", { x1: M.l, x2: W - M.r, y1: M.t + IH, y2: M.t + IH, stroke: css("--axis"), "stroke-width": 1 }, svg);
-    [-1, -0.5, 0, 0.5, 1, 1.5].forEach(function (v) {
-      var x = M.l + IW * (v - edges[0]) / (edges[edges.length - 1] - edges[0]);
-      var anchor = v === 1.5 ? "end" : (v === -1 ? "start" : "middle");
-      var label = el("text", { x: x, y: H - 8, "text-anchor": anchor }, svg);
-      label.textContent = signedPct(v, 0);
+    baseline(f, f.M.t + f.IH);
+    var lo = edges[0], hi = edges[edges.length - 1];
+    var ticks = f.W < 420 ? [-1, 0, 1] : [-1, -0.5, 0, 0.5, 1, 1.5];
+    ticks.forEach(function (v) {
+      var x = f.M.l + f.IW * (v - lo) / (hi - lo);
+      txt(f.svg, x, f.H - 8, spct(v, 0), v === lo ? "start" : (v === hi ? "end" : "middle"));
+    });
+    var cursor = el("rect", { y: f.M.t, height: f.IH, width: slot, "class": "f-muted", opacity: 0.12, visibility: "hidden" }, f.svg);
+    var items = shares.map(function (s, i) {
+      return { cx: f.M.l + slot * (i + 0.5), cy: f.M.t + f.IH - f.IH * s / yMax,
+        lines: [pct(s, 1) + " of windows", "return " + spct(edges[i], 0) + " to " + spct(edges[i + 1], 0),
+          counts[i].toLocaleString() + " windows"] };
+    });
+    interact(f, items, function (i) {
+      if (i === null) { cursor.setAttribute("visibility", "hidden"); return; }
+      cursor.setAttribute("x", f.M.l + slot * i); cursor.setAttribute("visibility", "visible");
     });
   }
 
-  function renderTimeline(point) {
-    var svg = document.getElementById("ch-time");
-    clearSvg(svg);
-    var dates = Object.keys(point.timeline).sort();
-    var values = dates.map(function (d) { return point.timeline[d]; });
-    var t0 = new Date(dates[0]).getTime(), t1 = new Date(dates[dates.length - 1]).getTime();
-    function X(d) { return M.l + IW * (new Date(d).getTime() - t0) / (t1 - t0); }
-    var yMax = 1.0;
-    yAxis(svg, yMax, function (v) { return pct(v); });
-    var y0 = new Date(dates[0]).getFullYear(), y1 = new Date(dates[dates.length - 1]).getFullYear();
-    for (var yr = Math.ceil(y0 / 5) * 5; yr <= y1; yr += 5) {
-      var x = X(yr + "-01-01");
-      var label = el("text", { x: x, y: H - 8, "text-anchor": "middle" }, svg);
-      label.textContent = yr;
-    }
-    var line = "", area = "";
-    dates.forEach(function (d, i) {
-      var x = X(d), y = M.t + IH - IH * values[i] / yMax;
-      line += (i ? "L" : "M") + x.toFixed(1) + "," + y.toFixed(1);
+  function renderTimeline(detail) {
+    var f = frame(document.getElementById("ch-time"), 240);
+    var dates = Object.keys(detail.timeline).sort();
+    var values = dates.map(function (d) { return detail.timeline[d]; });
+    var t0 = Date.parse(dates[0]), t1 = Date.parse(dates[dates.length - 1]);
+    function X(d) { return f.M.l + f.IW * (Date.parse(d) - t0) / (t1 - t0); }
+    function Y(v) { return f.M.t + f.IH - f.IH * v; }
+    yAxis(f, 0, 1, function (v) { return pct(v); });
+    var y0 = +dates[0].slice(0, 4), y1 = +dates[dates.length - 1].slice(0, 4), step = f.W < 420 ? 10 : 5;
+    for (var yr = Math.ceil(y0 / step) * step; yr <= y1; yr += step) txt(f.svg, X(yr + "-01-01"), f.H - 8, String(yr));
+    var line = dates.map(function (d, i) { return (i ? "L" : "M") + X(d).toFixed(1) + "," + Y(values[i]).toFixed(1); }).join("");
+    el("path", { d: line + "L" + X(dates[dates.length - 1]).toFixed(1) + "," + Y(0) + "L" + X(dates[0]).toFixed(1) + "," + Y(0) + "Z",
+      "class": "f-wash" }, f.svg);
+    el("path", { d: line, "class": "s-blue", "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }, f.svg);
+    baseline(f, Y(0));
+    var cross = el("line", { y1: f.M.t, y2: f.M.t + f.IH, "class": "cursor", "stroke-width": 1, visibility: "hidden" }, f.svg);
+    var dot = el("circle", { r: 4.5, "class": "dot-blue", "stroke-width": 2, visibility: "hidden" }, f.svg);
+    var items = dates.map(function (d, i) {
+      return { cx: X(d), cy: Y(values[i]), lines: [pct(values[i], 0) + " of baskets hit", "window starting " + d.slice(0, 7)] };
     });
-    area = line + "L" + X(dates[dates.length - 1]).toFixed(1) + "," + (M.t + IH) +
-      "L" + X(dates[0]).toFixed(1) + "," + (M.t + IH) + "Z";
-    el("path", { d: area, fill: css("--blue-wash") }, svg);
-    el("path", { d: line, fill: "none", stroke: css("--blue"), "stroke-width": 2,
-      "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
-    el("line", { x1: M.l, x2: W - M.r, y1: M.t + IH, y2: M.t + IH, stroke: css("--axis"), "stroke-width": 1 }, svg);
-
-    var cross = el("line", { x1: 0, x2: 0, y1: M.t, y2: M.t + IH, stroke: css("--axis"),
-      "stroke-width": 1, visibility: "hidden" }, svg);
-    var dot = el("circle", { r: 4.5, fill: css("--blue"), stroke: css("--surface"),
-      "stroke-width": 2, visibility: "hidden" }, svg);
-    var hit = el("rect", { x: M.l, y: M.t, width: IW, height: IH, fill: "transparent" }, svg);
-    hit.addEventListener("pointermove", function (evt) {
-      var rect = svg.getBoundingClientRect();
-      var px = (evt.clientX - rect.left) * (W / rect.width);
-      var best = 0, bestDist = Infinity;
-      dates.forEach(function (d, i) {
-        var dist = Math.abs(X(d) - px);
-        if (dist < bestDist) { bestDist = dist; best = i; }
-      });
-      var x = X(dates[best]), y = M.t + IH - IH * values[best] / yMax;
-      cross.setAttribute("x1", x); cross.setAttribute("x2", x); cross.setAttribute("visibility", "visible");
-      dot.setAttribute("cx", x); dot.setAttribute("cy", y); dot.setAttribute("visibility", "visible");
-      showTip(evt, [pct(values[best], 0) + " of baskets hit",
-        "window starting " + dates[best].slice(0, 7)]);
-    });
-    hit.addEventListener("pointerleave", function () {
-      cross.setAttribute("visibility", "hidden");
-      dot.setAttribute("visibility", "hidden");
-      hideTip();
+    interact(f, items, function (i) {
+      if (i === null) { cross.setAttribute("visibility", "hidden"); dot.setAttribute("visibility", "hidden"); return; }
+      cross.setAttribute("x1", items[i].cx); cross.setAttribute("x2", items[i].cx);
+      dot.setAttribute("cx", items[i].cx); dot.setAttribute("cy", items[i].cy);
+      cross.setAttribute("visibility", "visible"); dot.setAttribute("visibility", "visible");
     });
   }
 
-  function streakRows() {
-    var exact = DATA.streak_d_within_1y.exact;
-    var rows = [], aggN = 0, aggE = 0;
-    Object.keys(exact).forEach(function (k) {
-      var q = parseInt(k, 10);
-      if (q <= 11) rows[q] = { label: String(q), n: exact[k].n, e: exact[k].events };
-      else { aggN += exact[k].n; aggE += exact[k].events; }
+  function renderAttribution() {
+    var note = IDX.notes[cfgKey(state)];
+    var rows = IDX.tickers.map(function (t, i) { return { t: t, s: note.worst_share[i] }; })
+      .sort(function (a, b) { return b.s - a.s; });
+    var rowH = 22, f = frame(document.getElementById("ch-attr"), rows.length * rowH + 30, { l: 52, r: 46, t: 6, b: 24 });
+    var ax = niceAxis(Math.max(0.05, Math.max.apply(null, rows.map(function (r) { return r.s; })))), xMax = ax.top;
+    for (var i = 0; i <= ax.n; i++) {
+      var gx = f.M.l + f.IW * i / ax.n;
+      el("line", { x1: gx, x2: gx, y1: f.M.t, y2: f.M.t + rows.length * rowH, "class": "c-grid", "stroke-width": 1 }, f.svg);
+      txt(f.svg, gx, f.H - 6, pct(xMax * i / ax.n), i === 0 ? "start" : "middle");
+    }
+    var items = rows.map(function (r, i) {
+      var y = f.M.t + i * rowH + 4, h = rowH - 8, w = f.IW * r.s / xMax;
+      txt(f.svg, f.M.l - 8, y + h / 2 + 4, r.t, "end", "lbl-ink");
+      if (w > 0.5) el("path", { d: hbarPath(f.M.l, y, w, h, 4), "class": "f-blue" }, f.svg);
+      txt(f.svg, f.M.l + w + 6, y + h / 2 + 4, pct(r.s, 1), "start");
+      return { cx: f.M.l + w, cy: y + h / 2, lines: [r.t + ": " + pct(r.s, 1) + " of delivered notes",
+        "worst name at final observation", note.n_d.toLocaleString() + " delivered notes in total"] };
     });
-    if (aggN > 0) rows.push({ label: "12+", n: aggN, e: aggE });
-    return rows.filter(Boolean).map(function (r) {
-      return { label: r.label, n: r.n, p: r.e / r.n };
-    });
+    el("line", { x1: f.M.l, x2: f.M.l, y1: f.M.t, y2: f.M.t + rows.length * rowH, "class": "c-axis", "stroke-width": 1 }, f.svg);
+    var band = el("rect", { x: 0, width: f.W, height: rowH, "class": "f-muted", opacity: 0.1, visibility: "hidden" }, f.svg);
+    interact(f, items, function (i) {
+      if (i === null) { band.setAttribute("visibility", "hidden"); return; }
+      band.setAttribute("y", f.M.t + i * rowH); band.setAttribute("visibility", "visible");
+    }, "y");
   }
 
   function renderStreak() {
-    var svg = document.getElementById("ch-streak");
-    clearSvg(svg);
-    var rows = streakRows();
-    var totalN = 0, totalE = 0;
-    Object.keys(DATA.streak_d_within_1y.exact).forEach(function (k) {
-      totalN += DATA.streak_d_within_1y.exact[k].n;
-      totalE += DATA.streak_d_within_1y.exact[k].events;
+    var data = STREAK.by_barrier[(+state.ki).toFixed(2)];
+    var rows = data.rows, base = data.base, tail = data.pooled_tail;
+    var f = frame(document.getElementById("ch-streak"), 250);
+    var ax = niceAxis(Math.min(1, Math.max.apply(null, rows.map(function (r) { return r.hi; }).concat([base.hi])) * 1.02));
+    var yMax = ax.top;
+    yAxis(f, 0, yMax, function (v) { return pct(v); }, ax.n);
+    function Y(v) { return f.M.t + f.IH - f.IH * v / yMax; }
+    el("rect", { x: f.M.l, width: f.IW, y: Y(base.hi), height: Math.max(1, Y(base.lo) - Y(base.hi)), "class": "band" }, f.svg);
+    el("line", { x1: f.M.l, x2: f.W - f.M.r, y1: Y(base.p), y2: Y(base.p), "class": "c-muted", "stroke-width": 1 }, f.svg);
+    document.getElementById("streak-base").textContent = "Grey line and band: all observations, " + pct(base.p, 1) +
+      " (resampling band " + pct(base.lo, 1) + "–" + pct(base.hi, 1) + ").";
+    var n = rows.length, slot = f.IW / n, bw = Math.min(24, slot - 6);
+    var thin = f.W < 420;
+    var items = rows.map(function (r, i) {
+      var cx = f.M.l + slot * (i + 0.5), x = cx - bw / 2;
+      el("path", { d: barPath(x, Y(r.p), bw, f.M.t + f.IH - Y(r.p), 4), "class": "f-orange" }, f.svg);
+      el("line", { x1: cx, x2: cx, y1: Y(r.hi), y2: Y(r.lo), "class": "c-ink2", "stroke-width": 1.2 }, f.svg);
+      el("line", { x1: cx - 4, x2: cx + 4, y1: Y(r.hi), y2: Y(r.hi), "class": "c-ink2", "stroke-width": 1.2 }, f.svg);
+      el("line", { x1: cx - 4, x2: cx + 4, y1: Y(r.lo), y2: Y(r.lo), "class": "c-ink2", "stroke-width": 1.2 }, f.svg);
+      if (!thin || i % 2 === 0 || i === n - 1) txt(f.svg, cx, f.H - 8, r.label);
+      var lines = [pct(r.p, 1) + " chance of delivery within 1y",
+        "after " + r.label + " clean quarters",
+        "resampling band " + pct(r.lo, 1) + "–" + pct(r.hi, 1),
+        r.n.toLocaleString() + " observations"];
+      if (r.label.slice(-1) === "+") lines.push("pools streaks of 12–" + tail.max_streak + " quarters; single lengths with ≥" +
+        tail.range_n_min + " obs. range " + pct(tail.p_min, 0) + "–" + pct(tail.p_max, 0));
+      return { cx: cx, cy: Y(r.p), lines: lines };
     });
-    var base = totalE / totalN;
-    var yMax = Math.max.apply(null, rows.map(function (r) { return r.p; })) * 1.15;
-    yAxis(svg, yMax, function (v) { return pct(v); });
-    var n = rows.length, gap = 6;
-    var bw = Math.min(24, IW / n - gap);
-    rows.forEach(function (row, i) {
-      var slot = IW / n;
-      var x = M.l + slot * i + (slot - bw) / 2;
-      var h = IH * row.p / yMax;
-      var y = M.t + IH - h;
-      el("path", { d: barPath(x, y, bw, h, 4), fill: css("--orange") }, svg);
-      var label = el("text", { x: M.l + slot * i + slot / 2, y: H - 8, "text-anchor": "middle" }, svg);
-      label.textContent = row.label;
-      var hit = el("rect", { x: M.l + slot * i, y: M.t, width: slot, height: IH, fill: "transparent" }, svg);
-      hit.addEventListener("pointermove", function (evt) {
-        showTip(evt, [pct(row.p, 1) + " chance of delivery within 1y",
-          "after " + row.label + " clean quarters",
-          row.n.toLocaleString() + " observations"]);
-      });
-      hit.addEventListener("pointerleave", hideTip);
+    baseline(f, f.M.t + f.IH);
+    var cursor = el("rect", { y: f.M.t, height: f.IH, width: slot, "class": "f-muted", opacity: 0.1, visibility: "hidden" }, f.svg);
+    interact(f, items, function (i) {
+      if (i === null) { cursor.setAttribute("visibility", "hidden"); return; }
+      cursor.setAttribute("x", f.M.l + slot * i); cursor.setAttribute("visibility", "visible");
     });
-    var yBase = M.t + IH - IH * base / yMax;
-    el("line", { x1: M.l, x2: W - M.r, y1: yBase, y2: yBase, stroke: css("--muted"), "stroke-width": 1 }, svg);
-    var caption = el("text", { x: W - M.r, y: yBase - 5, "text-anchor": "end" }, svg);
-    caption.textContent = "all observations " + pct(base, 0);
-    el("line", { x1: M.l, x2: W - M.r, y1: M.t + IH, y2: M.t + IH, stroke: css("--axis"), "stroke-width": 1 }, svg);
+    // Tail claim: the flat-tail sentence is reserved for the paper's configuration (60%);
+    // extension barriers get a neutral, data-filled description instead.
+    var tailRows = rows.slice(4);
+    var tailP = tailRows.map(function (r) { return r.p; });
+    var tailOverlap = Math.max.apply(null, tailRows.map(function (r) { return r.lo; })) <=
+                      Math.min.apply(null, tailRows.map(function (r) { return r.hi; }));
+    document.getElementById("streak-tail").textContent = (+state.ki === IDX.paper.ki) ?
+      "The flat tail is the point: in the paper's configuration, after about four clean quarters, additional clean " +
+      "quarters add little incremental information about next-year delivery risk — from four quarters on, the bars' " +
+      "resampling bands all overlap one another." :
+      "This barrier is an extension beyond the paper. From four clean quarters on, the point estimates range from " +
+      pct(Math.min.apply(null, tailP), 0) + " to " + pct(Math.max.apply(null, tailP), 0) +
+      (tailOverlap ? ", and their resampling bands all overlap one another." : "; see each bar's resampling band.");
+    // Early decline: point estimates only, with their bands; overlap stated from the data.
+    var q0 = rows[0], q4 = rows[4];
+    var overlap = q0.lo <= q4.hi && q4.lo <= q0.hi;
+    document.getElementById("streak-early").textContent = "At this barrier the point estimate falls from " +
+      pct(q0.p, 0) + " after zero clean quarters to " + pct(q4.p, 0) + " after four, but " +
+      (overlap ? "the two bars' resampling bands (" + prange(q0.lo, q0.hi) + " and " + prange(q4.lo, q4.hi) + ") overlap, so the size of that early decline cannot be distinguished in this sample."
+               : "read the size of that decline together with the bands (" + prange(q0.lo, q0.hi) + " and " +
+        prange(q4.lo, q4.hi) + ").");
+    document.getElementById("streak-years").textContent = "; with only " + data.n_years +
+      " year blocks the bands are wide";
+    var paperKI = +state.ki === IDX.paper.ki;
+    document.getElementById("streak-sub").textContent = "(barrier " + pct(+state.ki) +
+      (paperKI ? ", the paper's configuration)" : "; other terms at the paper's configuration — an extension)");
+    var others = +state.k !== IDX.paper.k || +state.t !== IDX.paper.t || +state.a !== IDX.paper.a;
+    document.getElementById("streak-note").textContent = others ?
+      "This chart follows the barrier only; strike, tenor and autocall start stay at the paper's 80%, 63 days and day 21." : "";
   }
 
-  function renderTable(point) {
-    var host = document.getElementById("tbl-out");
-    while (host.firstChild) host.removeChild(host.firstChild);
-    var table = document.createElement("table");
-    var rows = [
-      ["Paths (start month × basket)", point.n_paths.toLocaleString()],
-      ["Windows with ≥1 delivery", pct(1 - point.no_d_rate, 1)],
-      ["Median return", signedPct(point.ret_median)],
-      ["Mean return", signedPct(point.ret_mean)],
-      ["25th / 75th percentile", signedPct(point.ret_p25) + " / " + signedPct(point.ret_p75)],
-      ["5th percentile", signedPct(point.ret_p5)],
-      ["Worst window", signedPct(point.ret_worst)],
-      ["Windows positive", pct(point.pct_positive, 1)]
-    ];
+  // ---------- tables (keyboard / screen-reader / no-hover access to every chart) ----------
+  function table(host, title, head, rows, scroll) {
+    var h = document.createElement("h4"); h.textContent = title; host.appendChild(h);
+    var wrap = document.createElement("div"); if (scroll) wrap.className = "scroll";
+    var t = document.createElement("table");
+    if (head) {
+      var th = document.createElement("thead"), tr = document.createElement("tr");
+      head.forEach(function (c) { var x = document.createElement("th"); x.scope = "col"; x.textContent = c; tr.appendChild(x); });
+      th.appendChild(tr); t.appendChild(th);
+    }
+    var tb = document.createElement("tbody");
     rows.forEach(function (r) {
       var tr = document.createElement("tr");
-      r.forEach(function (cell, i) {
+      r.forEach(function (c, i) {
         var td = document.createElement(i === 0 ? "th" : "td");
-        td.textContent = cell;
-        tr.appendChild(td);
+        if (i === 0) td.scope = "row";
+        td.textContent = c; tr.appendChild(td);
       });
-      table.appendChild(tr);
+      tb.appendChild(tr);
     });
-    host.appendChild(table);
+    t.appendChild(tb); wrap.appendChild(t); host.appendChild(wrap);
+  }
+  function renderTables(point, detail) {
+    var host = document.getElementById("tbl-out");
+    while (host.firstChild) host.removeChild(host.firstChild);
+    var note = IDX.notes[cfgKey(state)];
+    table(host, "Summary", null, [
+      ["Paths (start month × basket)", point.n_paths.toLocaleString()],
+      ["Windows with ≥1 delivery", pct(1 - point.no_d_rate, 1)],
+      ["Single-note delivery rate", pct(note.pd, 1) + " of " + note.n.toLocaleString() + " notes"],
+      ["Median return", spct(point.ret_median)],
+      ["Mean return", spct(point.ret_mean)],
+      ["25th / 75th percentile", spct(point.ret_p25) + " / " + spct(point.ret_p75)],
+      ["5th percentile", spct(point.ret_p5)],
+      ["Worst window", spct(point.ret_worst)],
+      ["Windows positive", pct(point.pct_positive, 1)]
+    ]);
+    table(host, "By barrier (other terms as selected)", ["Barrier", "2y windows hit", "5y windows hit", "Single note", "2y 5th pct", "5y 5th pct"],
+      IDX.dims.ki.map(function (ki) {
+        var c = cfgKey({ ki: ki, k: state.k, t: state.t, a: state.a });
+        return [pct(ki), pct(1 - IDX.points["2y|" + c].no_d_rate, 1), pct(1 - IDX.points["5y|" + c].no_d_rate, 1),
+          pct(IDX.notes[c].pd, 1), spct(IDX.points["2y|" + c].ret_p5), spct(IDX.points["5y|" + c].ret_p5)];
+      }));
+    table(host, "Worst name at delivery", ["Name", "Share of delivered notes"],
+      IDX.tickers.map(function (t, i) { return [t, pct(note.worst_share[i], 1)]; }));
+    var sb = STREAK.by_barrier[(+state.ki).toFixed(2)];
+    table(host, "Streak illusion (barrier " + pct(+state.ki) + ")", ["Clean quarters", "P(delivery within 1y)", "Resampling band", "Observations"],
+      sb.rows.map(function (r) { return [r.label, pct(r.p, 1), pct(r.lo, 1) + "–" + pct(r.hi, 1), r.n.toLocaleString()]; })
+        .concat([["All", pct(sb.base.p, 1), pct(sb.base.lo, 1) + "–" + pct(sb.base.hi, 1), sb.base.n.toLocaleString()]]));
+    table(host, "Distribution of window returns", ["Return range", "Windows", "Share"],
+      detail.hist_counts.map(function (c, i) {
+        return [spct(detail.hist_edges[i], 0) + " to " + spct(detail.hist_edges[i + 1], 0), c.toLocaleString(), pct(c / point.n_paths, 1)];
+      }), true);
+    table(host, "Windows hit by delivery, by start month", ["Start month", "Baskets hit"],
+      Object.keys(detail.timeline).sort().map(function (d) { return [d.slice(0, 7), pct(detail.timeline[d], 0)]; }), true);
   }
 
-  function render() {
-    var point = DATA.grid[state.h + ":" + state.b];
-    if (!point) return;
+  // ---------- controls + URL state (?h=5y&b=70&k=90&t=126&a=42) ----------
+  function valueOf(key, v) { return key === "h" ? String(v) : (key === "ki" || key === "k" ? (+v).toFixed(2) : String(+v)); }
+  function buildControls() {
+    var p = IDX.paper, paperOf = { ki: p.ki, k: p.k, t: p.t, a: p.a };
+    Array.prototype.forEach.call(root.querySelectorAll(".seg"), function (seg) {
+      var key = seg.getAttribute("data-key");
+      IDX.dims[key].forEach(function (v) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.setAttribute("data-v", valueOf(key, v));
+        b.textContent = DIM_FMT[key](v);
+        if (key in paperOf && +v === paperOf[key]) {
+          var m = document.createElement("span"); m.className = "pm"; m.textContent = "paper"; b.appendChild(m);
+        }
+        seg.appendChild(b);
+      });
+      seg.addEventListener("click", function (evt) {
+        var btn = evt.target.closest("button");
+        if (!btn) return;
+        state[key] = btn.getAttribute("data-v");
+        update(true);
+      });
+    });
+  }
+  var PARAM = { h: "h", b: "ki", k: "k", t: "t", a: "a" };
+  function readURL() {
+    var q = new URLSearchParams(location.search);
+    Object.keys(PARAM).forEach(function (param) {
+      var key = PARAM[param], raw = q.get(param);
+      if (raw === null) return;
+      var v = (key === "ki" || key === "k") ? (+raw > 1 ? +raw / 100 : +raw) : raw;
+      var wanted = valueOf(key, v);
+      var ok = IDX.dims[key].some(function (d) { return valueOf(key, d) === wanted; });
+      if (ok) state[key] = wanted;
+    });
+  }
+  function writeURL() {
+    var q = new URLSearchParams(location.search);
+    Object.keys(PARAM).forEach(function (param) { q.delete(param); });
+    if (!(state.h === "2y" && isPaperTerms(state))) {
+      q.set("h", state.h); q.set("b", Math.round(state.ki * 100)); q.set("k", Math.round(state.k * 100));
+      q.set("t", state.t); q.set("a", state.a);
+    }
+    var s = q.toString();
+    history.replaceState(null, "", location.pathname + (s ? "?" + s : "") + location.hash);
+  }
+  function syncButtons() {
+    Array.prototype.forEach.call(root.querySelectorAll(".seg"), function (seg) {
+      var key = seg.getAttribute("data-key");
+      Array.prototype.forEach.call(seg.querySelectorAll("button"), function (b) {
+        b.setAttribute("aria-pressed", b.getAttribute("data-v") === String(state[key]) ? "true" : "false");
+      });
+    });
+    var paper = isPaperTerms(state), note = document.getElementById("termnote");
+    while (note.firstChild) note.removeChild(note.firstChild);
+    var strong = document.createElement("strong");
+    strong.textContent = paper ? "The working paper's configuration." : "Extension beyond the paper.";
+    note.appendChild(strong);
+    note.appendChild(document.createTextNode(paper ?
+      " These numbers reproduce the paper's reported figures." :
+      " Same engine and data, terms changed from the paper's (marked “paper”); the coupon stays at 12% for comparability."));
+  }
+
+  // ---------- render orchestration ----------
+  var lastPoint = null, lastDetail = null;
+  function loadPoint(point) {
+    var url = BASE + point.file + "?v=" + point.v;
+    if (!pointCache[url]) {
+      pointCache[url] = getJSON(url).catch(function (err) { delete pointCache[url]; throw err; });
+    }
+    return pointCache[url];
+  }
+  function renderAll() {
+    if (!lastPoint || !lastDetail) return;
+    renderSensitivity();
+    renderHist(lastDetail);
+    renderTimeline(lastDetail);
+    renderAttribution();
+    renderStreak();
+  }
+  function update(fromClick) {
+    syncButtons();
+    if (fromClick) writeURL();
+    hideTip();
+    var point = IDX.points[pointKey(state)];
+    var note = IDX.notes[cfgKey(state)];
     document.getElementById("t-del").textContent = pct(1 - point.no_d_rate);
-    document.getElementById("t-med").textContent = signedPct(point.ret_median);
-    document.getElementById("t-p5").textContent = signedPct(point.ret_p5);
+    document.getElementById("t-note").textContent = pct(note.pd, 1);
+    document.getElementById("t-note-s").textContent = "share of individual " + state.t +
+      "-day notes that ended in Scenario-D assignment (" + note.n.toLocaleString() + " notes)";
+    document.getElementById("t-med").textContent = spct(point.ret_median);
+    document.getElementById("t-p5").textContent = spct(point.ret_p5);
     document.getElementById("t-pos").textContent = pct(point.pct_positive);
     document.getElementById("t-n").textContent = "of " + point.n_paths.toLocaleString() + " windows";
-    renderHist(point);
-    renderTimeline(point);
-    renderTable(point);
-  }
-
-  function wireSeg(id, attr, key) {
-    document.getElementById(id).addEventListener("click", function (evt) {
-      var btn = evt.target.closest("button");
-      if (!btn) return;
-      state[key] = btn.getAttribute(attr);
-      this.querySelectorAll("button").forEach(function (b) {
-        b.setAttribute("aria-pressed", b === btn ? "true" : "false");
-      });
-      render();
+    document.getElementById("sens-sub").textContent = "(strike " + pct(+state.k) + ", " + state.t +
+      "-day tenor, autocall from day " + state.a + ")";
+    var key = pointKey(state);
+    statusEl.textContent = "";
+    loadPoint(point).then(function (detail) {
+      if (pointKey(state) !== key) return;        // a newer selection superseded this one
+      lastPoint = point; lastDetail = detail;
+      renderAll();
+      renderTables(point, detail);
+    }).catch(function () {
+      statusEl.textContent = "Chart data for this selection failed to load — try again, or refresh the page.";
     });
   }
-  wireSeg("seg-h", "data-h", "h");
-  wireSeg("seg-b", "data-b", "b");
 
-  fetch("/experiments/fcn/grid.json")
-    .then(function (resp) { return resp.json(); })
-    .then(function (json) { DATA = json; render(); renderStreak(); })
+  var lastWidth = 0, raf = 0;
+  if ("ResizeObserver" in window) {
+    new ResizeObserver(function (entries) {
+      var w = Math.round(entries[0].contentRect.width);
+      if (w === lastWidth) return;
+      lastWidth = w;
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(function () { hideTip(); renderAll(); });
+    }).observe(root);
+  }
+
+  statusEl.textContent = "Loading data…";
+  getJSON(BASE + "index.json?v=" + INDEX_V)
+    .then(function (idx) {
+      IDX = idx;
+      return getJSON(BASE + IDX.streak.file + "?v=" + IDX.streak.v);
+    })
+    .then(function (streak) {
+      STREAK = streak;
+      statusEl.textContent = "";
+      buildControls();
+      readURL();
+      update(false);
+    })
     .catch(function () {
-      document.getElementById("fcnviz").insertAdjacentText("afterbegin",
-        "Data failed to load — refresh, or view the paper instead.");
+      statusEl.textContent = "Data failed to load — refresh, or view the paper instead.";
     });
 })();
 </script>
+</article>
 {{ end }}
