@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>生管指揮中心模擬器</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+TC:wght@700&display=swap">
+<style>
+/* Layout: executive briefing — printer story, four time horizons, one-day event game with report-version counter, CTP console, factory-as-robot vision */
+:root{
+  --bg:#f3f5f7; --panel:#ffffff; --ink:#18222d; --muted:#5b6876; --line:#d9dfe6;
+  --accent:#1f5f8b; --accent-soft:#e3eef6; --inv:#8a4b2a; --inv-soft:#f6e9e1; --ai:#5a4a9e; --ai-soft:#ece9f7;
+  --ok:#2f7d4f; --ok-soft:#e2f2e8; --warn:#a86a0c; --warn-soft:#fbefd9; --bad:#b33a3a; --bad-soft:#f8e1e1;
+  --f-display:"Noto Serif TC","Songti TC",serif; --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11161c; --panel:#18202a; --ink:#e4e9ef; --muted:#93a1b0; --line:#2b3644;
+  --accent:#6fb0dc; --accent-soft:#1c3346; --inv:#e0a07c; --inv-soft:#3a2619; --ai:#b3a5ef; --ai-soft:#2a2545;
+  --ok:#6cc792; --ok-soft:#1a3326; --warn:#e3a94a; --warn-soft:#3a2d16; --bad:#ec7f7f; --bad-soft:#3d1f22; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161c; --panel:#18202a; --ink:#e4e9ef; --muted:#93a1b0; --line:#2b3644;
+  --accent:#6fb0dc; --accent-soft:#1c3346; --inv:#e0a07c; --inv-soft:#3a2619; --ai:#b3a5ef; --ai-soft:#2a2545;
+  --ok:#6cc792; --ok-soft:#1a3326; --warn:#e3a94a; --warn-soft:#3a2d16; --bad:#ec7f7f; --bad-soft:#3d1f22; color-scheme:dark}
+*{box-sizing:border-box}
+html{font-size:106.25%}
+@media (max-width:480px){html{font-size:100%}}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1rem;line-height:1.65}
+.wrap{max-width:1040px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:24px}
+h1{font-family:var(--f-display);font-size:clamp(1.7rem,4.6vw,2.4rem);line-height:1.25;margin:4px 0 0;text-wrap:balance}
+h2{font-family:var(--f-display);font-size:1.25rem;margin:0;text-wrap:balance}
+h3{font-size:1rem;margin:0}
+p{margin:0}
+.lead{color:var(--muted);max-width:66ch;margin-top:10px}
+.eyebrow{font-size:.78rem;letter-spacing:.12em;color:var(--ai);font-weight:500}
+.label{font-size:.72rem;letter-spacing:.08em;color:var(--muted)}
+.mono,.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.note{color:var(--muted);font-size:.84rem}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px}
+a{color:var(--accent)}
+.opener{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.opener div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 14px;display:flex;flex-direction:column;gap:2px}
+.opener b{font-size:1rem}.opener span{color:var(--muted);font-size:.84rem}
+.opener a{text-decoration:none}
+.thesis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.thesis div{padding:12px 14px;border-left:3px solid var(--inv);background:var(--panel);border-radius:0 6px 6px 0}
+.thesis p{color:var(--muted);font-size:.88rem;margin-top:2px}
+.sec{display:flex;flex-direction:column;gap:10px}
+.tablebox{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:680px}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap;font-size:.88rem}
+th{font-weight:500;color:var(--muted);font-size:.78rem}
+td.num,th.num{text-align:right}
+.score{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.score>div{padding:12px 16px;border-radius:8px;border:1px solid var(--line);background:var(--panel)}
+.score>div.ag{border-color:var(--ai);background:var(--ai-soft)}
+.score dl{display:grid;grid-template-columns:auto 1fr;gap:2px 14px;margin:6px 0 0}
+.score dt{color:var(--muted);font-size:.86rem}.score dd{margin:0;font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.weeks{display:flex;gap:6px;flex-wrap:wrap}
+.weeks span{font-family:var(--f-mono);font-size:.78rem;padding:2px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.weeks span.on{border-color:var(--inv);color:var(--inv);background:var(--inv-soft);font-weight:500}
+.weeks span.done{color:var(--ok);border-color:var(--ok)}
+.event{padding:18px;display:flex;flex-direction:column;gap:12px}
+.event .what{border-left:3px solid var(--inv);padding-left:12px}
+.lag{font-size:.86rem;color:var(--bad)}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.opts button{all:unset;cursor:pointer;border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:var(--bg);display:flex;flex-direction:column;gap:2px}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.opts button:disabled{cursor:default}
+.opts button.pick{border-color:var(--accent);background:var(--accent-soft)}
+.opts small{color:var(--muted);font-size:.8rem}
+.res{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.res>div{border-radius:6px;padding:10px 14px}
+.r-me{background:var(--bg);border:1px solid var(--line)}
+.r-ag{background:var(--ai-soft);border:1px solid var(--ai)}
+.r-ag b{color:var(--ai)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.chip{font-family:var(--f-mono);font-size:.76rem;padding:1px 7px;border-radius:3px;background:var(--panel);border:1px solid var(--line)}
+.c-bad{color:var(--bad);border-color:var(--bad)}.c-warn{color:var(--warn);border-color:var(--warn)}.c-ok{color:var(--ok);border-color:var(--ok)}
+.btn{font:inherit;cursor:pointer;border-radius:5px;padding:8px 16px;border:1px solid var(--accent);background:var(--accent);color:var(--panel);font-weight:500;align-self:flex-start}
+.btn.ai{border-color:var(--ai);background:var(--ai)}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.6;cursor:default}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chg{background:var(--ai-soft);color:var(--ai);font-weight:500;border-radius:3px;padding:0 4px}
+.strat{font-size:.74rem;padding:1px 7px;border-radius:999px;font-weight:500}
+.s-jit{background:var(--ok-soft);color:var(--ok)}.s-jic{background:var(--warn-soft);color:var(--warn)}
+.console{padding:18px;background:var(--ai-soft);border-color:var(--ai);display:flex;flex-direction:column;gap:10px}
+.console textarea{font:inherit;width:100%;min-height:70px;padding:8px;border:1px solid var(--line);border-radius:4px;background:var(--panel);color:var(--ink)}
+.console textarea:focus-visible{outline:2px solid var(--ai)}
+.ex{display:flex;flex-wrap:wrap;gap:6px}
+.ex button{font:inherit;font-size:.82rem;cursor:pointer;border:1px solid var(--ai);background:var(--panel);color:var(--ai);border-radius:999px;padding:2px 10px}
+.agents{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.agents div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+.agents p{font-size:.84rem;color:var(--muted)}
+details{border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:12px 16px}
+details summary{cursor:pointer;font-weight:700}
+details summary:focus-visible{outline:2px solid var(--accent)}
+details>div{margin-top:12px;display:flex;flex-direction:column;gap:10px}
+.bar{height:8px;border-radius:2px;background:var(--line);overflow:hidden;width:120px;display:inline-block;vertical-align:middle;margin-right:6px}
+.bar i{display:block;height:100%}
+@media (max-width:820px){.opener,.thesis,.opts,.res,.score,.agents{grid-template-columns:1fr}}
+.hz{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.hz div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.hz div:nth-child(1){border-top:4px solid var(--bad)}.hz div:nth-child(2){border-top:4px solid var(--warn)}.hz div:nth-child(3){border-top:4px solid var(--accent)}.hz div:nth-child(4){border-top:4px solid var(--ai)}
+.hz .rng{font-family:var(--f-mono);font-size:.8rem;color:var(--muted)}
+.hz dl{margin:4px 0 0;display:flex;flex-direction:column;gap:4px;font-size:.84rem}
+.hz dt{color:var(--muted);font-size:.74rem}.hz dd{margin:0}
+.report{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:baseline;padding:10px 14px;border-radius:6px;background:var(--warn-soft);font-size:.9rem}
+.report b{font-family:var(--f-mono)}
+.cap td.f{font-family:var(--f-mono);text-align:right}
+.ctp{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:flex-end}
+.ctp label{display:flex;flex-direction:column;gap:2px;font-size:.82rem;color:var(--muted)}
+.ctp input,.ctp select{font:inherit;font-family:var(--f-mono);padding:5px 8px;border:1px solid var(--line);border-radius:4px;background:var(--panel);color:var(--ink);width:130px}
+.layers{display:flex;flex-direction:column;gap:6px}
+.layers div{display:grid;grid-template-columns:150px 1fr;gap:10px;padding:10px 14px;border-radius:6px;background:var(--panel);border:1px solid var(--line)}
+.layers div:last-child{border-color:var(--accent);background:var(--accent-soft)}
+.callout{padding:14px 16px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 6px 6px 0;font-size:.95rem}
+@media (max-width:820px){.hz{grid-template-columns:1fr 1fr}.layers div{grid-template-columns:1fr}}
+@media (max-width:480px){.hz{grid-template-columns:1fr}}
+</style><style>
+[data-live] textarea,[data-live] label,[data-live] button,[data-live] input,[data-live] select,[data-live] .ex,[data-live] [aria-live],[data-live] .note{display:none!important}
+[data-live]::after{content:"這一區需要連接 AI 模型即時分析，網站版不開放操作。本頁其他區塊為規則試算或情境示範，可以完整操作。";display:block;margin-top:8px;padding:8px 12px;border:1px dashed var(--line,#ccc);border-radius:6px;font-size:.9rem;color:var(--muted,#666)}
+</style>
+</head>
+<body>
+<div style="background:#fbefd9;color:#6b4407;font:14px/1.5 system-ui,sans-serif;padding:8px max(16px,env(safe-area-inset-left,0px));text-align:center">網站版・測試版 2026-10-20：「規則試算」依公式即時計算；「情境示範」為預設結果或重播；標示「本版未提供即時 AI」的區塊需要連接 AI 模型，網站版不開放操作。</div>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">AI LAB · 現金循環系列 02C · 生產管理</span>
+    <h1>生管指揮中心模擬器</h1>
+    <p class="lead">晚上九點，生管還站在印表機旁，印今天第七版的生產報表。設備、物料、人力、客戶需求一直在變，報表一印出來就過時了。拿過時的報表做決定，比沒有報表更危險。這個模擬器讓你當一天生管，再看 AI agents 怎麼把生管從「追著報表跑」變成「即時指揮」。</p>
+    <div class="opener">
+      <div><b>5 分鐘</b><span>一天、6 個突發狀況，每個做一個決定</span></div>
+      <div><b>規則試算</b><span>輸入一張急單，依產能與機種限制試算能不能接</span></div>
+      <div><a href="index.html"><b>← 現金循環總覽</b></a><span>生管決定在製品、成品庫存與準時交貨，牽動存貨與應收天數</span></div>
+    </div>
+    <p class="note modeline" style="margin-top:12px;padding:8px 12px;border:1px dashed var(--line);border-radius:6px">本頁說明（網站版）：<b>情境示範</b>是依實務整理的預設結果或重播；<b>規則試算</b>是依公式即時計算；標示「本版未提供即時 AI」的區塊需要連接 AI 模型，網站版不開放操作。</p>
+  </header>
+
+  <section class="sec" aria-label="四層時間視野">
+    <div><span class="label">微生管、近生管、遠生管、遠遠生管</span><h2>生管不只看眼前，要分層看到不同時間點</h2>
+    <p class="note" style="margin-top:4px">一位 EMS 創辦人常用這四個詞形容生管：同一時間，要同時看清今天的產線、下個月的交期、半年後的產能，以及一年後的新產品。每一層的變化速度不同，該由誰決定、多久更新一次也不同。</p></div>
+    <div class="hz" id="hz"></div>
+  </section>
+
+  <section class="sec" aria-label="一天的生管">
+    <div><span class="label">你的一天</span><h2>早上 8 點印好的報表，撐得到幾點？</h2>
+    <p class="note" style="margin-top:4px">情境：三條 SMT 產線，生產兩個機種，今天要完成 8 張工單。每次狀況發生，你都得重新整理一版報表，再做決定。</p></div>
+    <div class="report" id="report"></div>
+    <div class="weeks" id="weeks"></div>
+    <div class="score" id="score"></div>
+    <details class="fair" style="border:1px solid var(--line);border-radius:8px;padding:10px 14px;background:var(--panel)"><summary style="cursor:pointer;font-weight:500">示範假設與比較限制</summary><div style="margin-top:8px;font-size:.9rem;display:flex;flex-direction:column;gap:6px"><p>畫面上「AI agents」的結果是預設示範，並假設系統已經整合、資料可即時取得，所以它常比人工更早知道問題。這呈現的是流程整合加上 AI 的潛力，不是實測省下的金額或時間。</p><p>比較合理的看法是分三層：</p><ul style="margin:0;padding-left:1.1em"><li><b>分散資料、人工追查</b>：看見資訊延遲的代價。</li><li><b>系統整合與既定規則</b>：一般自動化就能改善的部分，例如即時入庫回傳、到期提醒。</li><li><b>AI 輔助判讀與提案</b>：非結構資料、例外狀況與跨部門解釋的增益。</li></ul><p>很多改善在第二層就能拿到，不一定要等 AI；第三層的價值，在於處理規則寫不完的例外。</p></div></details>
+    <article class="panel event" id="event"></article>
+  </section>
+
+  <section class="panel console" aria-label="急單試算">
+    <div><span class="eyebrow">規則試算 · 急單能不能接</span><h2 style="margin-top:2px">客戶來了一張急單，3 分鐘內回覆</h2>
+      <p class="note" style="margin-top:4px" id="ctpHint">下表是未來 7 天各產線的剩餘產能。輸入急單，依產能與機種限制試算第幾天前可完成多少台（規則試算，不含加班與順延既有訂單）。加班與順延的取捨分析需要 AI 模型，網站版未提供。</p></div>
+    <div class="tablebox" style="background:var(--panel);border-radius:6px"><table class="cap" id="cap"></table></div>
+    <div class="ctp">
+      <label for="cModel">機種<select id="cModel"><option value="A">A 機種（1、2 號線可做）</option><option value="B">B 機種（1、3 號線可做）</option></select></label>
+      <label for="cQty">數量（台）<input id="cQty" type="number" min="1" step="100" value="3000"></label>
+      <label for="cDue">要求出貨（第幾天）<input id="cDue" type="number" min="1" max="7" value="5"></label>
+      <button class="btn ai" id="ctpBtn" type="button">試算能不能接</button>
+    </div>
+    <div id="ctpOut" aria-live="polite"></div>
+  </section>
+
+  <section class="sec" aria-label="願景">
+    <div><span class="label">下一步</span><h2>工廠本身，就是一台機器人</h2>
+    <p class="note" style="margin-top:4px">NVIDIA 執行長黃仁勳在 2025 年的訪談中提到，未來的工廠會是一台巨大的機器人，指揮著裡面的許多機器人。生管的角色，會從「排程的人」變成「指揮系統的設計者與負責人」。</p></div>
+    <div class="layers">
+      <div><b>實體 AI</b><span>機器人、自動化設備、AGV：執行生產與搬運，回報即時狀態</span></div>
+      <div><b>AI agents</b><span>產線、排程、物料、品質、人力：全天候監控、重排、預警、提出建議</span></div>
+      <div><b>人</b><span>設定目標與優先順序，做取捨，對客戶與公司承擔結果</span></div>
+    </div>
+    <p class="callout">管理流程上很多工作可以交給 AI agents，但人的責任、不同部門之間的分權分責，仍然要劃分清楚。不能把所有責任丟給 AI，就什麼都不管了。</p>
+  </section>
+
+  <p class="note">本頁產線、訂單、數字與情境皆為虛構示範，僅供教學與研究用途，與作者任職或服務的任何公司無關。黃仁勳的說法引自 OfficeChai 2025 年 5 月報導的訪談內容。</p>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+const HZ=[
+ ["微生管","現在～72 小時","產線稼動、設備狀態、線邊料、良率、出勤","線長、生管","產線 agent 每 5 分鐘讀取設備與製造執行系統，異常立即重排並通知","即時"],
+ ["近生管","1～4 週","工單排程、齊套、客戶交期承諾、加班","生管主管","排程 agent 每天重算排程，即時回覆可承諾交期","每天"],
+ ["遠生管","1～6 個月","主生產排程、產能負荷、長交期料、人力","生管、採購、業務","產能 agent 每週模擬負荷與瓶頸，提早提出加線或外包建議","每週"],
+ ["遠遠生管","6～18 個月","新產品導入、產能投資、策略料、新廠","經營層","情境 agent 每月模擬多種需求情境，評估投資時點","每月"],
+];
+$("hz").innerHTML=HZ.map(h=>`<div><b>${h[0]}</b><span class="rng">${h[1]}</span><dl><dt>看什麼</dt><dd>${h[2]}</dd><dt>誰決定</dt><dd>${h[3]}</dd><dt>AI agent</dt><dd>${h[4]}</dd><dt>更新頻率</dt><dd>${h[5]}</dd></dl></div>`).join("");
+
+const EV=[
+ {t:"10:00",title:"2 號線貼片機故障",what:"2 號線的貼片機停機，維修人員估計要 4 小時。線上有兩張今天要出貨的工單。",lag:"人工：你手上的是早上 8 點版的報表，要先打電話問清楚各線狀況，再重排。",
+  opts:[{t:"等修好再說",d:"不動其他產線",l:2,c:0,i:0},{t:"移到 3 號線",d:"換線要 2 小時，3 號線原本的工單會延後",l:1,c:8,i:0},{t:"晚班加班補回",d:"今天照原計畫出貨",l:0,c:25,i:0}],
+  ag:{who:"產線 agent",how:"從設備數據判斷維修約需 3.5 小時，只把今天要出貨的工單移到 3 號線，3 號線原本的低優先工單順延，並自動更新各訂單的完成時間。",l:0,c:6,i:0}},
+ {t:"11:30",title:"客戶急單：明天要 3,000 台",what:"重要客戶來電，明天要多出 3,000 台 A 機種，業務希望一小時內回覆。",lag:"人工：要先整理最新的產能與工單，至少半天才能回覆。",
+  opts:[{t:"先答應客戶",d:"再想辦法擠產能",l:2,c:15,i:0,lost:0},{t:"婉拒",d:"保住既有訂單",l:0,c:0,i:0,lost:1},{t:"下班前回覆",d:"慢慢算清楚",l:0,c:0,i:0,lost:1}],
+  ag:{who:"排程 agent",how:"3 分鐘內算出可承諾方案：明天出 2,000 台、後天補 1,000 台，不影響其他訂單。業務當場回覆，客戶接受。",l:0,c:10,i:0,lost:0}},
+ {t:"13:00",title:"電容下午才會到",what:"一顆電容的進料延到下午 4 點，原本 2 點要開工的工單會缺料。",lag:"人工：產線要開工時發料不出來，才知道缺料。",
+  opts:[{t:"停線等料",d:"其他工單不動",l:1,c:12,i:0},{t:"先做其他工單",d:"換線，下週的成品提前做",l:0,c:6,i:40},{t:"拆單先做有料的部分",d:"缺料的板子之後再補件",l:0,c:4,i:0}],
+  ag:{who:"物料 agent",how:"早上 9 點就從物流狀態預測進料會延誤，提前把有料的工單排到下午 2 點，缺料工單改到 4 點後開工。",l:0,c:0,i:0}},
+ {t:"15:00",title:"良率從 98% 掉到 92%",what:"測試站發現焊接不良增加，原因還不清楚。",lag:"人工：測試站的日報下午才出來，問題已經持續兩小時。",
+  opts:[{t:"繼續生產，事後重工",d:"不影響交期，但重工成本高",l:0,c:30,i:0},{t:"停線查原因",d:"品質優先",l:1,c:10,i:0},{t:"降速生產並加強抽檢",d:"折衷做法",l:0,c:12,i:0}],
+  ag:{who:"品質 agent",how:"14:20 就從錫膏檢測與光學檢測數據看出趨勢，建議調整回焊爐溫度曲線，製程工程師確認後 15 分鐘恢復。",l:0,c:3,i:0}},
+ {t:"17:00",title:"夜班 6 位作業員請假",what:"夜班有 6 位作業員臨時請假，原本三條線都要開。",lag:"人工：夜班組長上班前打電話來才知道。",
+  opts:[{t:"夜班少開一條線",d:"有一張工單延後",l:1,c:0,i:0},{t:"白班留下加班",d:"加班費高，隔天精神差",l:0,c:18,i:0},{t:"從其他課調人支援",d:"要找有技能的人",l:0,c:5,i:0}],
+  ag:{who:"人力 agent",how:"下午 3 點出勤系統一出現請假，就依技能矩陣找出可支援的人員，排程同步調整。",l:0,c:3,i:0}},
+ {t:"19:00",title:"客戶下週訂單延後兩週",what:"客戶通知下週 B 機種 6,000 台延後兩週交貨。這批料已經陸續到廠。",lag:"人工：業務的 email 隔天早上才轉到生管。",
+  opts:[{t:"照原計畫生產",d:"做好放成品倉",l:0,c:0,i:380},{t:"立即停產該機種",d:"在製品卡在線上",l:0,c:8,i:60},{t:"改產其他訂單並延後進料",d:"通知採購調整",l:0,c:4,i:20}],
+  ag:{who:"需求 agent",how:"讀到客戶入口網站的交期變更，立即重排生產，同時通知 MRP 延後尚未出貨的進料，避免料和成品一起堆在倉庫。",l:0,c:2,i:10}},
+];
+let S={i:0,picks:[]};
+const wan=n=>Math.round(n).toLocaleString("zh-TW")+" 萬";
+function tot(list){return list.reduce((a,r)=>({l:a.l+r.l,c:a.c+r.c,i:a.i+r.i,lost:a.lost+(r.lost||0)}),{l:0,c:0,i:0,lost:0})}
+function renderTop(){
+  const n=S.picks.length,v=1+n,last=n?EV[n-1].t:"08:00";
+  $("report").innerHTML=`<span>你手上的報表：<b>第 ${v} 版</b>，更新於 <b>${last}</b></span><span>AI 看板：<b>即時</b>，今天已自動更新 ${n?n*37+12:12} 次</span>`;
+  $("weeks").innerHTML=EV.map((e,k)=>`<span class="${k<n?"done":k===S.i?"on":""}">${e.t}</span>`).join("");
+  const me=tot(S.picks.map((p,k)=>EV[k].opts[p])),ag=tot(S.picks.map((p,k)=>EV[k].ag));
+  const card=(t,r,cls)=>`<div class="${cls}"><span class="label">${t}</span><dl><dt>延誤的訂單</dt><dd>${r.l} 張</dd><dt>錯失的訂單</dt><dd>${r.lost} 張</dd><dt>加班、換線與重工成本</dt><dd>${wan(r.c)}</dd><dt>多出來的在製品與成品</dt><dd>${wan(r.i)}</dd></dl></div>`;
+  $("score").innerHTML=card("你（人工生管）",me,"")+card("AI agents（預設情境結果）",ag,"ag");
+}
+function chips(x){return `<div class="chips"><span class="chip ${x.l?"c-bad":"c-ok"}">延誤 ${x.l} 張</span>${x.lost?'<span class="chip c-bad">錯失訂單</span>':""}<span class="chip ${x.c>=20?"c-bad":x.c?"c-warn":"c-ok"}">成本 ${wan(x.c)}</span><span class="chip ${x.i>=100?"c-bad":x.i?"c-warn":"c-ok"}">多出庫存 ${wan(x.i)}</span></div>`}
+function renderEvent(){
+  if(S.i>=EV.length){const me=tot(S.picks.map((p,k)=>EV[k].opts[p])),ag=tot(S.picks.map((p,k)=>EV[k].ag));
+    $("event").innerHTML=`<h2>晚上 9 點，今天結束</h2><p>你今天印了 ${1+EV.length} 版報表：延誤 ${me.l} 張、錯失 ${me.lost} 張訂單、成本 ${wan(me.c)}、多出庫存 ${wan(me.i)}。AI agents：延誤 ${ag.l} 張、錯失 ${ag.lost} 張、成本 ${wan(ag.c)}、多出庫存 ${wan(ag.i)}。</p>
+     <p class="note">每一個狀況，人工都是「發生後才知道」，而且手上的報表永遠落後現場。AI agents 的價值，是讓每個決定都建立在當下的真實資料上。最後怎麼取捨、對客戶承諾什麼，仍然是生管的責任。</p>
+     <button class="btn ghost" id="again" type="button">重新玩一次</button>`;return}
+  const e=EV[S.i],picked=S.picks.length>S.i;
+  $("event").innerHTML=`<span class="label">${e.t}</span><h2>${e.title}</h2><p class="what">${e.what}</p><p class="lag">${e.lag}</p>
+   <div class="opts">${e.opts.map((o,k)=>`<button type="button" data-opt="${k}" ${picked?"disabled":""} class="${picked&&S.picks[S.i]===k?"pick":""}"><b>${o.t}</b><small>${o.d}</small></button>`).join("")}</div>
+   ${picked?`<div class="res"><div class="r-me"><b>你的結果</b>${chips(e.opts[S.picks[S.i]])}</div><div class="r-ag"><b>${e.ag.who}</b><p style="margin-top:4px;font-size:.9rem">${e.ag.how}</p>${chips(e.ag)}</div></div>
+     <button class="btn" id="next" type="button">${S.i===EV.length-1?"看今天的總結":"下一個狀況"}</button>`:""}`;
+}
+function render(){renderTop();renderEvent()}
+document.addEventListener("click",e=>{
+  const o=e.target.closest("[data-opt]");if(o&&S.picks.length===S.i){S.picks.push(+o.dataset.opt);render();return}
+  if(e.target.id==="next"){S.i++;render();return}
+  if(e.target.id==="again"){S={i:0,picks:[]};render()}
+});
+render();
+
+/* 產能與急單 */
+const LINES=[{n:"1 號線",m:"A、B",cap:1500,free:[200,0,300,500,800,1500,1500]},{n:"2 號線",m:"A",cap:1200,free:[0,100,400,600,1200,1200,1200]},{n:"3 號線",m:"B",cap:1000,free:[300,300,0,200,500,1000,1000]}];
+$("cap").innerHTML=`<thead><tr><th>產線</th><th>可做機種</th><th class="num">日產能</th>${[1,2,3,4,5,6,7].map(d=>`<th class="num">第 ${d} 天剩餘</th>`).join("")}</tr></thead><tbody>${LINES.map(l=>`<tr><td><b>${l.n}</b></td><td>${l.m}</td><td class="f">${l.cap.toLocaleString()}</td>${l.free.map(f=>`<td class="f">${f.toLocaleString()}</td>`).join("")}</tr>`).join("")}</tbody>`;
+function ruleCTP(model,qty,due){
+  const ok=model==="A"?[0,1]:[0,2],days=Math.max(0,due-1);let avail=0;const plan=[];
+  for(let d=0;d<days;d++)ok.forEach(li=>{const f=LINES[li].free[d];if(f>0&&avail<qty){const t=Math.min(f,qty-avail);avail+=t;plan.push(`第 ${d+1} 天 ${LINES[li].n} ${t.toLocaleString()} 台`)}});
+  return{avail,plan};
+}
+function validate(plan,model,qty,due,answer){
+  const ok=model==="A"?[0,1]:[0,2],use={},issues=[];let total=0;const P=Array.isArray(plan)?plan:[];
+  P.forEach(p=>{
+    const num=x=>{const m=String(x??"").match(/[-−－]?\s*\d+/);return m?parseInt(m[0].replace(/[−－]/,"-").replace(/\s/g,""),10):NaN},day=num(p.day),li=num(p.line)-1,q=Number(p.qty);
+    if(!(day>=1&&day<=7)||!(li>=0&&li<=2)){issues.push(`無法辨識的排程：${p.day} ${p.line}`);return}
+    if(!Number.isInteger(q)||q<=0){issues.push(`${LINES[li].n} 第 ${day} 天的數量「${p.qty}」不是正整數`);return}
+    if(!ok.includes(li))issues.push(`${LINES[li].n} 不能生產 ${model} 機種`);
+    if(day>due-1)issues.push(`第 ${day} 天生產，來不及在第 ${due} 天出貨`);
+    const k=li+"-"+day;use[k]=(use[k]||0)+q;total+=q;
+  });
+  Object.entries(use).forEach(([k,q])=>{const[li,day]=k.split("-").map(Number),lim=LINES[li].free[day-1]+LINES[li].cap*0.2;if(q>lim+1)issues.push(`${LINES[li].n} 第 ${day} 天排 ${q.toLocaleString()} 台，超過剩餘產能加加班上限 ${Math.round(lim).toLocaleString()} 台`)});
+  const a=String(answer||"");
+  if(!P.length&&a!=="無法如期")issues.push("回覆可以接或部分可接，卻沒有提供任何排程");
+  if(total>qty)issues.push(`排程合計 ${total.toLocaleString()} 台，超過急單數量 ${qty.toLocaleString()} 台`);
+  if(a==="可以接"&&total<qty)issues.push(`回覆「可以接」，但排程只有 ${total.toLocaleString()} 台，未達急單 ${qty.toLocaleString()} 台`);
+  if(a==="部分可接"&&(total===0||total>=qty))issues.push(`回覆「部分可接」，但排程合計 ${total.toLocaleString()} 台，與結論不一致`);
+  if(a==="無法如期"&&total>=qty)issues.push("回覆「無法如期」，但排程已滿足全部數量，與結論不一致");
+  if(!["可以接","部分可接","無法如期"].includes(a))issues.push("無法辨識 AI 的結論");
+  return{total,issues};
+}
+const samp=window.claude?.use?window.claude.use("sample").catch(()=>null):Promise.resolve(null);
+samp.then(s=>{if(!s)$("ctpHint").textContent="網站版以規則試算：依產能表與機種限制計算，不含加班與順延既有訂單的取捨。"});
+$("ctpBtn").addEventListener("click",async()=>{
+  const model=$("cModel").value,qtyS=$("cQty").value.trim(),dueS=$("cDue").value.trim(),qty=Number(qtyS),due=Number(dueS),out=$("ctpOut"),btn=$("ctpBtn");
+  const bad=[];if(!/^\d+$/.test(qtyS)||!(qty>0))bad.push("急單數量請填正整數（至少 1 台）");if(!/^\d+$/.test(dueS)||!(due>=1&&due<=7))bad.push("要求出貨日請填 1 到 7 的整數");
+  if(bad.length){out.innerHTML=`<p class="note" style="color:var(--bad)">${bad.join("；")}。</p>`;return}
+  const rule=ruleCTP(model,qty,due),s=await samp;
+  const verdict=rule.avail>=qty?"可以接":rule.avail>0?"只能接一部分":"無法如期";
+  const ruleHtml=`<p><b>${verdict}</b>：第 ${due} 天前可完成 ${rule.avail.toLocaleString()} 台（測試與出貨需 1 天）。</p><p class="note">${rule.plan.join("；")||"出貨日前沒有剩餘產能"}</p>`;
+  if(!s){out.innerHTML=`<span class="chip c-warn">規則試算</span>${ruleHtml}`;return}
+  btn.disabled=true;out.innerHTML='<p class="note">AI 試算中，約需 30–60 秒……</p>';
+  const table=LINES.map(l=>`${l.n}（可做機種 ${l.m}，日產能 ${l.cap}）未來 7 天剩餘產能：${l.free.join("、")}`).join("\n");
+  const prompt=`你是電子組裝廠的生管主管，正在回覆業務一張急單能不能接（CTP，可承諾交期）。請用繁體中文（台灣用語），精簡、具體。
+
+產線剩餘產能（台／天，已扣除既有訂單）：
+${table}
+規則：A 機種只能在 1、2 號線生產；B 機種只能在 1、3 號線生產；完成後需 1 天測試與出貨，所以第 N 天出貨只能用到第 N-1 天的產能；另外可以考慮加班（每條線每天最多多做日產能的 20%，需付加班成本）或順延既有訂單（需說明影響）。
+
+急單：${model} 機種 ${qty} 台，要求第 ${due} 天出貨。
+參考：不加班、不動既有訂單時，第 ${due} 天前可用產能約 ${rule.avail} 台。
+
+只回覆一個 JSON 物件：
+{"answer":"可以接|部分可接|無法如期","summary":"一句話給業務的回覆（40 字內）","plan":[{"day":"第幾天","line":"產線","qty":數量,"note":"是否加班"}],"impacts":["對其他訂單或成本的影響，最多 3 項"],"counter_offer":"若無法完全如期，建議給客戶的替代方案","decide_by":"需要誰核准（例如：加班需生管主管核准）"}`;
+  try{const d=await s.json(prompt);const L=x=>Array.isArray(x)?x:[];
+    out.innerHTML=`<div class="r-ag" style="border-radius:6px;padding:12px 14px;background:var(--panel)"><b>${esc(d.answer)}</b>　${esc(d.summary)}</div>
+     <div class="tablebox" style="background:var(--panel);border-radius:6px;margin-top:8px"><table style="min-width:420px"><thead><tr><th>日期</th><th>產線</th><th class="num">數量</th><th>備註</th></tr></thead><tbody>${L(d.plan).map(p=>`<tr><td>${esc(p.day)}</td><td>${esc(p.line)}</td><td class="num">${esc(Number(p.qty).toLocaleString())}</td><td>${esc(p.note)}</td></tr>`).join("")}</tbody></table></div>
+     ${L(d.impacts).length?`<p style="margin-top:8px"><b>影響</b></p><ul style="margin:2px 0 0;padding-left:1.1em">${L(d.impacts).map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}
+     ${d.counter_offer?`<p style="margin-top:6px"><b>替代方案：</b>${esc(d.counter_offer)}</p>`:""}
+     ${d.decide_by?`<p class="note" style="margin-top:6px">需要核准：${esc(d.decide_by)}</p>`:""}
+     ${(()=>{const v=validate(d.plan,model,qty,due,d.answer);return `<div class="r-me" style="margin-top:8px;background:var(--panel);border-radius:6px;padding:10px 14px"><b>規則引擎驗證：${v.issues.length?"<span style=\"color:var(--bad)\">有 "+v.issues.length+" 項不成立</span>":"<span style=\"color:var(--ok)\">方案可行</span>"}</b><p class="note" style="margin-top:4px">AI 方案合計 ${v.total.toLocaleString()} 台（急單 ${qty.toLocaleString()} 台）。產能、機種與出貨日以規則引擎為準，AI 負責解釋與提出取捨。</p>${v.issues.length?`<ul style="margin:4px 0 0;padding-left:1.1em">${v.issues.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}</div>`})()}
+     <details style="margin-top:8px"><summary>對照：規則試算</summary><div>${ruleHtml}</div></details>`;
+  }catch(e){const HIDE=["not_granted","sampling_disabled","not_declared","capability_disabled","capability_removed"];
+    out.innerHTML=HIDE.includes(e.code)?`<span class="chip c-warn">規則試算（未取得 AI 使用許可）</span>${ruleHtml}`:`<p class="note">${e.code==="rate_limited"?"使用次數暫時達上限，請稍後再試。":e.code==="cancelled"?"":"這次沒有取得完整結果，請再按一次。"}</p>`}
+  finally{btn.disabled=false}
+});
+</script>
+
+</body>
+</html>

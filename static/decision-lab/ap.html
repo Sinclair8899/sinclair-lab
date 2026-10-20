@@ -1,0 +1,939 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>四方比對付款模擬器</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+TC:wght@700&display=swap">
+<style>
+/* Layout: AI Lab showcase — thesis + ERP-vs-AI contrast, triangle map + controls, case queue | cross-system match sheet with AI read-out, payment & intercompany run */
+:root{
+  --bg:#f3f5f7; --panel:#ffffff; --ink:#18222d; --muted:#5b6876; --line:#d9dfe6;
+  --accent:#1f5f8b; --accent-soft:#e3eef6; --cn:#8a4b2a; --cn-soft:#f6e9e1; --ai:#5a4a9e; --ai-soft:#ece9f7;
+  --ok:#2f7d4f; --ok-soft:#e2f2e8; --warn:#a86a0c; --warn-soft:#fbefd9; --bad:#b33a3a; --bad-soft:#f8e1e1;
+  --f-display:"Noto Serif TC","Songti TC",serif; --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11161c; --panel:#18202a; --ink:#e4e9ef; --muted:#93a1b0; --line:#2b3644;
+  --accent:#6fb0dc; --accent-soft:#1c3346; --cn:#e0a07c; --cn-soft:#3a2619; --ai:#b3a5ef; --ai-soft:#2a2545;
+  --ok:#6cc792; --ok-soft:#1a3326; --warn:#e3a94a; --warn-soft:#3a2d16; --bad:#ec7f7f; --bad-soft:#3d1f22; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161c; --panel:#18202a; --ink:#e4e9ef; --muted:#93a1b0; --line:#2b3644;
+  --accent:#6fb0dc; --accent-soft:#1c3346; --cn:#e0a07c; --cn-soft:#3a2619; --ai:#b3a5ef; --ai-soft:#2a2545;
+  --ok:#6cc792; --ok-soft:#1a3326; --warn:#e3a94a; --warn-soft:#3a2d16; --bad:#ec7f7f; --bad-soft:#3d1f22; color-scheme:dark}
+*{box-sizing:border-box}
+html{font-size:106.25%}
+@media (max-width:480px){html{font-size:100%}}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1rem;line-height:1.6}
+.wrap{max-width:1180px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px}
+h1{font-family:var(--f-display);font-size:1.75rem;margin:2px 0 0;text-wrap:balance}
+h2{font-size:1rem;margin:0;font-weight:700}
+.sub{color:var(--muted);margin:6px 0 0;max-width:74ch}
+.mono,.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.label{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.eyebrow{font-size:.78rem;letter-spacing:.1em;color:var(--ai);font-weight:500}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px}
+.vs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.vs div{padding:12px 14px;border-left:3px solid var(--ai);background:var(--panel);border-radius:0 6px 6px 0}
+.vs b{display:block;margin-bottom:2px}
+.vs p{margin:0;color:var(--muted);font-size:.86rem}
+.top{display:grid;grid-template-columns:1.1fr 1fr;gap:14px}
+.map{padding:12px 14px;min-width:0;margin:0}
+.map svg{width:100%;height:auto;display:block}
+.map text{font-family:var(--f-body);font-size:13px;fill:var(--ink)}
+.map .sm{font-size:11px;fill:var(--muted)}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;padding:14px 16px;align-content:start}
+.ctl{display:flex;flex-direction:column;gap:4px}
+.ctl .row{display:flex;justify-content:space-between;align-items:baseline}
+.ctl input[type=number]{font:inherit;font-family:var(--f-mono);padding:3px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:3px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.tile{padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.tile .v{font-family:var(--f-mono);font-size:1.3rem;font-variant-numeric:tabular-nums}
+.tile .h{font-size:.78rem;color:var(--muted)}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.main{display:grid;grid-template-columns:310px 1fr;gap:14px;align-items:start}
+.queue{display:flex;flex-direction:column}
+.queue button{all:unset;cursor:pointer;display:grid;grid-template-columns:1fr auto;gap:2px 8px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.queue button:last-child{border-bottom:0}
+.queue button:hover{background:var(--accent-soft)}
+.queue button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.queue button[aria-current="true"]{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+.queue .t{font-weight:500}.queue .s{grid-column:1/-1;color:var(--muted);font-size:.8rem}
+.pill{font-size:.75rem;padding:1px 8px;border-radius:999px;white-space:nowrap;font-weight:500}
+.p-ok{background:var(--ok-soft);color:var(--ok)}.p-warn{background:var(--warn-soft);color:var(--warn)}.p-bad{background:var(--bad-soft);color:var(--bad)}.p-ai{background:var(--ai-soft);color:var(--ai)}
+.ent{font-size:.72rem;padding:0 6px;border-radius:3px;margin-left:6px;font-weight:500}
+.e-TW{background:var(--accent-soft);color:var(--accent)}.e-CN{background:var(--cn-soft);color:var(--cn)}
+.detail{padding:16px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.dhead{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-start}
+.docs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.doc{border:1px solid var(--line);border-radius:4px;padding:10px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.doc .k{display:flex;justify-content:space-between;gap:6px;font-size:.83rem}
+.doc .k span:first-child,.doc .k label{color:var(--muted)}
+.doc .sys{font-size:.75rem;color:var(--muted)}
+.doc input{width:90px;font:inherit;font-family:var(--f-mono);text-align:right;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:3px;padding:1px 4px}
+.doc input:focus-visible{outline:2px solid var(--accent)}
+.doc.inv{border-color:var(--accent)}.doc.cn{border-color:var(--cn)}
+.checks{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:4px}
+.chk{display:grid;grid-template-columns:22px 160px 1fr;gap:8px;padding:8px 10px;border-bottom:1px solid var(--line);align-items:start}
+.chk:last-child{border-bottom:0}
+.dot{width:12px;height:12px;border-radius:50%;margin-top:5px}
+.d-pass{background:var(--ok)}.d-warn{background:var(--warn)}.d-fail{background:var(--bad)}
+.chk .n{font-weight:500}.chk .m{color:var(--muted)}
+.two{display:grid;grid-template-columns:1fr 1.4fr;gap:10px}
+.verdict{padding:12px 14px;border-radius:4px;display:flex;flex-direction:column;gap:4px}
+.v-ok{background:var(--ok-soft)}.v-warn{background:var(--warn-soft)}.v-bad{background:var(--bad-soft)}
+.verdict strong{font-size:1.05rem}
+.ai{padding:12px 14px;border-radius:4px;background:var(--ai-soft);display:flex;flex-direction:column;gap:6px}
+.ai .lab{color:var(--ai);font-weight:700;font-size:.85rem}
+.ai p{margin:0}
+.ai .exp{font-size:.84rem;color:var(--muted);border-top:1px dashed var(--ai);padding-top:6px}
+.btn{font:inherit;background:transparent;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:3px 10px;cursor:pointer}
+.btn.ai-btn{color:var(--panel);background:var(--ai);border-color:var(--ai);align-self:flex-start}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tablebox{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:920px}
+th,td{padding:8px 12px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{font-weight:500;color:var(--muted);font-size:.8rem}
+td.num,th.num{text-align:right}
+tr.ic td{color:var(--muted);font-size:.85rem}
+tfoot td{font-weight:700;border-bottom:0}
+.note{color:var(--muted);font-size:.82rem;max-width:84ch}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{all:unset;cursor:pointer;padding:10px 14px;border-bottom:3px solid transparent;white-space:nowrap;color:var(--muted)}
+.tabs button span{font-family:var(--f-mono);font-size:.8rem;margin-right:6px}
+.tabs button[aria-selected="true"]{color:var(--ink);border-color:var(--accent);font-weight:500}
+.tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.tabp{display:flex;flex-direction:column;gap:18px}
+.then{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.then div{padding:12px 14px;border-radius:6px;background:var(--panel);border:1px solid var(--line)}
+.then div.now{border-color:var(--ai);background:var(--ai-soft)}
+.then p{margin:4px 0 0;color:var(--muted);font-size:.88rem}
+.fmts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.fmt{padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.fmt h3{margin:0;font-size:.98rem}
+pre.raw{margin:0;padding:10px;background:var(--bg);border:1px solid var(--line);border-radius:4px;font-family:var(--f-mono);font-size:.74rem;line-height:1.5;overflow-x:auto;white-space:pre}
+.map2{width:100%;border-collapse:collapse;min-width:0}
+.map2 td{padding:4px 6px;border-bottom:1px solid var(--line);white-space:normal;font-size:.82rem;vertical-align:top}
+.map2 td:first-child{color:var(--muted);width:74px}
+.conf{font-family:var(--f-mono);font-size:.72rem;padding:0 5px;border-radius:3px}
+.c-hi{background:var(--ok-soft);color:var(--ok)}.c-mid{background:var(--warn-soft);color:var(--warn)}
+.fix{color:var(--ai);font-size:.78rem;display:block}
+.steps{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.85rem;color:var(--muted)}
+.steps b{color:var(--ink);background:var(--accent-soft);padding:3px 9px;border-radius:3px;font-weight:500}
+.mctl{display:flex;flex-wrap:wrap;gap:14px 24px;padding:12px 16px;align-items:center}
+.mctl label{display:flex;gap:8px;align-items:center}
+.mctl input[type=range]{width:140px}
+.chip{display:inline-block;font-family:var(--f-mono);font-size:.74rem;padding:0 6px;border-radius:3px;background:var(--cn-soft);color:var(--cn);margin:1px 3px 1px 0}
+.chip.s{background:var(--warn-soft);color:var(--warn)}
+.dots{display:flex;gap:5px}
+.dots i{width:11px;height:11px;border-radius:50%;display:inline-block}
+.ainotes{display:flex;flex-direction:column;gap:8px;padding:0 16px 16px}
+.ainotes div{background:var(--ai-soft);border-radius:4px;padding:10px 12px}
+.ainotes b{color:var(--ai)}
+td.wrap{white-space:normal;min-width:160px}
+.h2pad{padding:14px 16px 6px}
+.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.modes button{all:unset;cursor:pointer;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:14px;display:flex;flex-direction:column;gap:4px}
+.modes button:hover{border-color:var(--accent)}
+.modes button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.modes button[aria-checked="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
+.modes b{font-size:1rem}.modes span{color:var(--muted);font-size:.86rem}
+.mdetail{margin-top:10px;padding:14px 16px;display:grid;grid-template-columns:1.2fr 1fr;gap:16px}
+.mdetail ol,.mdetail ul{margin:6px 0 0;padding-left:1.2em;display:flex;flex-direction:column;gap:3px}
+.clock{display:flex;flex-wrap:wrap;gap:8px 28px;padding:12px 16px;align-items:baseline}
+.clock .v{font-family:var(--f-mono);font-size:1.25rem;font-variant-numeric:tabular-nums}
+.clock .ot{color:var(--bad);font-weight:500}
+.game{display:grid;grid-template-columns:280px 1fr;gap:14px;align-items:start;margin-top:10px}
+.desk{padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.paper{border:1px dashed var(--muted);border-radius:4px;padding:12px 14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px 16px;background:var(--bg)}
+.paper div{display:flex;flex-direction:column}
+.paper span{font-size:.75rem;color:var(--muted)}
+.acts{display:flex;flex-wrap:wrap;gap:8px}
+.acts button{font:inherit;cursor:pointer;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:6px 10px;display:flex;gap:6px;align-items:baseline}
+.acts button:hover:not(:disabled){border-color:var(--accent)}
+.acts button:disabled{opacity:.5;cursor:default}
+.acts button small{font-family:var(--f-mono);color:var(--muted)}
+.acts button:focus-visible,.decide button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.log{display:flex;flex-direction:column;gap:6px}
+.log div{border-left:3px solid var(--cn);padding:4px 10px;background:var(--cn-soft);border-radius:0 4px 4px 0}
+.log div b{font-size:.8rem;color:var(--cn)}
+.decide{display:flex;flex-wrap:wrap;gap:8px}
+.decide button{font:inherit;cursor:pointer;border-radius:4px;padding:7px 14px;border:1px solid var(--accent);background:var(--accent);color:var(--panel);font-weight:500}
+.decide button.alt{background:transparent;color:var(--accent)}
+.score{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.score>div{padding:14px 16px;border-radius:6px;border:1px solid var(--line);background:var(--panel)}
+.score>div.ai2{border-color:var(--ai);background:var(--ai-soft)}
+.score dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:8px 0 0}
+.score dt{color:var(--muted)}.score dd{margin:0;font-family:var(--f-mono);text-align:right}
+.cause{display:flex;flex-direction:column;gap:6px;padding:14px 16px}
+.cause .r{display:grid;grid-template-columns:150px 1fr 30px;gap:8px;align-items:center}
+.cause .b{height:12px;border-radius:2px;background:var(--cn)}
+.bridge{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline;font-size:.88rem}
+.bridge b{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.bridge .eq{color:var(--muted)}
+.appr{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;align-items:center}
+.appr button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:4px;padding:6px 12px;display:flex;flex-direction:column;align-items:flex-start;gap:0}
+.appr button small{color:var(--muted);font-size:.75rem}
+.appr button.done{border-color:var(--ok);background:var(--ok-soft)}
+.appr button:disabled:not(.done){opacity:.5;cursor:default}
+.appr button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.appr .arrow{color:var(--muted)}
+.jv{display:grid;grid-template-columns:1fr auto auto;gap:3px 18px;font-size:.88rem;max-width:560px}
+.jv .h{color:var(--muted);font-size:.75rem}
+.jv .n{font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.sub2{margin:14px 0 6px;font-weight:700}
+.opener{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.opener div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 14px;display:flex;flex-direction:column;gap:2px}
+.opener b{font-size:1rem}.opener span{color:var(--muted);font-size:.84rem}
+.opener a{color:var(--accent);text-decoration:none}
+.airun{margin-top:12px;padding:16px;border-color:var(--ai);background:var(--ai-soft);display:flex;flex-direction:column;gap:6px}
+.mine{padding:16px;display:flex;flex-direction:column;gap:10px;border-color:var(--ai)}
+.mine textarea{font:inherit;font-family:var(--f-mono);font-size:.82rem;width:100%;min-height:120px;padding:8px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink)}
+@media (max-width:760px){.opener{grid-template-columns:1fr}}
+@media (max-width:960px){.fmts,.then,.modes,.mdetail,.game,.score{grid-template-columns:1fr}}
+@media (max-width:960px){.top,.main,.two{grid-template-columns:1fr}.docs{grid-template-columns:repeat(2,1fr)}.tiles{grid-template-columns:repeat(2,1fr)}.vs{grid-template-columns:1fr}}
+@media (max-width:480px){.docs{grid-template-columns:1fr}.controls{grid-template-columns:1fr}.chk{grid-template-columns:22px 1fr}.chk .m{grid-column:2}}
+</style><style>
+[data-live] textarea,[data-live] label,[data-live] button,[data-live] input,[data-live] select,[data-live] .ex,[data-live] [aria-live],[data-live] .note{display:none!important}
+[data-live]::after{content:"這一區需要連接 AI 模型即時分析，網站版不開放操作。本頁其他區塊為規則試算或情境示範，可以完整操作。";display:block;margin-top:8px;padding:8px 12px;border:1px dashed var(--line,#ccc);border-radius:6px;font-size:.9rem;color:var(--muted,#666)}
+</style>
+</head>
+<body>
+<div style="background:#fbefd9;color:#6b4407;font:14px/1.5 system-ui,sans-serif;padding:8px max(16px,env(safe-area-inset-left,0px));text-align:center">網站版・測試版 2026-10-20：「規則試算」依公式即時計算；「情境示範」為預設結果或重播；標示「本版未提供即時 AI」的區塊需要連接 AI 模型，網站版不開放操作。</div>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">AI LAB · 現金循環系列 01 · 應付天數</span>
+    <h1>四方比對付款模擬器</h1>
+    <p class="sub">2008 年到 2011 年，我們花了約三年，讓大型 EMS 廠的應付帳款從人工核對走向系統比對。這個模擬器讓你在 5 分鐘內親身體驗那段過程：先當一天 AP 人員，再看 AI 如何處理同一批發票。</p>
+    <div class="opener">
+      <div><b>5 分鐘</b><span>選交易模式 → 查核 6 張發票 → 對照 AI</span></div>
+      <div><b>情境示範</b><span>AI agents 的處理結果為預設情境，可與人工流程對照</span></div>
+      <div><a href="index.html"><b>← 現金循環總覽</b></a><span>AP 影響的是應付天數，回總覽看現金轉換循環（CCC）全貌</span></div>
+    </div>
+    <p class="note modeline" style="margin-top:12px;padding:8px 12px;border:1px dashed var(--line);border-radius:6px">本頁說明（網站版）：<b>情境示範</b>是依實務整理的預設結果或重播；<b>規則試算</b>是依公式即時計算；標示「本版未提供即時 AI」的區塊需要連接 AI 模型，網站版不開放操作。</p>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="流程階段">
+    <button role="tab" id="t-play" aria-controls="tab-play" aria-selected="true" type="button"><span>00</span>老闆體驗</button>
+    <button role="tab" id="t-ingest" aria-controls="tab-ingest" aria-selected="false" type="button"><span>01</span>單據擷取</button>
+    <button role="tab" id="t-match" aria-controls="tab-match" aria-selected="false" type="button"><span>02</span>多對多比對</button>
+    <button role="tab" id="t-pay" aria-controls="tab-pay" aria-selected="false" type="button"><span>03</span>付款決策</button>
+    <button role="tab" id="t-bank" aria-controls="tab-bank" aria-selected="false" type="button"><span>04</span>對帳與銀行作業</button>
+  </nav>
+
+  <div id="tab-play" class="tabp" role="tabpanel" aria-labelledby="t-play">
+    <section>
+      <span class="label">第一步</span><h2 style="font-size:1.15rem">選擇你公司的交易模式</h2>
+      <p class="note" style="margin:4px 0 10px">交易模式決定由哪個主體付款、貨送到哪裡、AP 要湊齊哪些單據，也決定錯誤最常出在哪裡。</p>
+      <div class="modes" id="modes" role="radiogroup" aria-label="交易模式"></div>
+      <div class="panel mdetail" id="mdetail"></div>
+    </section>
+    <section>
+      <span class="label">第二步</span><h2 style="font-size:1.15rem">回到 2008 年，當一天 AP 人員</h2>
+      <p class="note" style="margin:4px 0 10px">桌上有 6 張發票。系統還沒整合，供應商有的傳真、有的手寫，大陸廠的收料單要等快遞寄回。你可以調單據、打電話給各部門，查清楚後再判定。每個動作都會花時間。</p>
+      <div class="panel clock" id="clock"></div>
+      <div class="game">
+        <nav class="panel queue" id="gq" aria-label="待審發票"></nav>
+        <article class="panel desk" id="desk"></article>
+      </div>
+    </section>
+    <section id="aisec">
+      <span class="label">第三步</span><h2 style="font-size:1.15rem">同一批發票，交給 AI</h2>
+      <div id="aiout"><p class="note">完成第二步的 6 張判定後，這裡會顯示 AI 處理同一批發票的結果與對照。<button class="btn" id="skip" type="button" style="margin-left:8px">先看 AI 結果</button></p></div>
+    </section>
+  </div>
+
+  <div id="tab-ingest" class="tabp" role="tabpanel" aria-labelledby="t-ingest" hidden>
+    <section class="then">
+      <div><b>當年：請供應商配合我們的格式</b><p>每家供應商的發票格式都不同。系統人員得一家一家協調欄位、寫轉檔程式，大廠各有自己的規格，不一定配合；光是格式對齊就耗掉大量時間。</p></div>
+      <div class="now"><b>現在：接受對方原本的格式，由 AI 讀進來</b><p>EDI、Excel、PDF 甚至掃描檔都直接收。AI 擷取欄位、換算單位、對照料號、補正 PO 號碼，只有信心度不足的欄位才交給人確認。</p></div>
+    </section>
+    <section class="fmts" id="fmts"></section>
+    <section class="panel mine" data-live aria-label="試試你自己的發票">
+      <div><span class="eyebrow">本版未提供即時 AI · 試試你自己的發票</span><h2 style="font-size:1.05rem;margin-top:2px">拍一張發票，或貼上發票文字</h2>
+      <p class="note" style="margin-top:4px" id="mineHint">AI 會把它讀成上面同樣的標準欄位，並標出可能的問題。本版未提供即時 AI；請勿上傳含機密的正式文件。</p></div>
+      <label for="mineImg" id="mineImgLab" hidden>發票照片或掃描檔 <input id="mineImg" type="file" accept="image/*"></label>
+      <label for="mineTxt" class="note">或貼上發票內容（Excel 複製、EDI、PDF 文字都可以）</label>
+      <textarea id="mineTxt" placeholder="例如：Invoice No. 2026-0915 / PO 4500-0331 / ABC Co. / 2,000 pcs @ USD 1.25 / FOB Shanghai / Net 60"></textarea>
+      <button class="btn ai-btn" id="mineBtn" type="button">交給 AI 擷取</button>
+      <div id="mineOut" aria-live="polite"></div>
+    </section>
+    <p class="note">三份發票擷取後的標準化資料，會直接進入「02 多對多比對」。信心度是模型的自我評估，不代表經驗證的正確率，不能單獨作為自動放行的依據；信心度低於 0.95 的欄位在實務上應保留人工覆核。</p>
+  </div>
+
+  <div id="tab-match" class="tabp" role="tabpanel" aria-labelledby="t-match" hidden>
+    <div class="steps"><b>BOM 展開</b>→<b>整批 PR</b>→<b>依供應商拆 PO・排分批交期</b>→<b>分批收料・IQC</b>→<b>多行發票</b>→<b>料件層級比對</b></div>
+    <section class="panel">
+      <div class="h2pad"><h2 id="bomh"></h2><p class="note" style="margin:4px 0 0">PR 數量 = 用量 × 生產數 × (1 + 損耗率)，再依最小包裝量 (MPQ) 進位。一張 PR 依供應商拆成多張 PO，一張 PO 可有多行、每行再排多個交期批次。</p></div>
+      <div class="tablebox"><table id="bom"></table></div>
+    </section>
+    <section class="panel mctl" aria-label="比對參數">
+      <label for="mg">交期寬限 <input id="mg" type="range" min="0" max="7" step="1" value="3"><span class="num" id="mgv"></span></label>
+      <label for="mp">遲交罰則 (每日) <input id="mp" type="range" min="0" max="1" step="0.1" value="0.5"><span class="num" id="mpv"></span></label>
+      <label for="ms"><input id="ms" type="checkbox"> 品保已簽核特採（議定折讓 10%）</label>
+    </section>
+    <section class="tiles" id="mtiles"></section>
+    <section class="panel">
+      <div class="h2pad"><h2>發票行比對</h2><p class="note" style="margin:4px 0 0">每一行發票對到 PO 行，再依先進先出分配到收料批。燈號依序為：數量、單價、交期、品質、交易條件。交期依交易條件判定：FCA 看交付承運人日，DAP 看到廠日。</p></div>
+      <div class="tablebox"><table id="mtab"></table></div>
+      <div class="ainotes" id="mnotes"></div>
+    </section>
+    <section class="panel">
+      <div class="h2pad"><h2>PO 行餘額</h2><p class="note" style="margin:4px 0 0">一個 PO 行可能被多張發票請款，一張發票也可能涵蓋多個 PO 行。系統要隨時算得出每一行還剩多少可請款。</p></div>
+      <div class="tablebox"><table id="ptab"></table></div>
+    </section>
+  </div>
+
+  <div id="tab-pay" class="tabp" role="tabpanel" aria-labelledby="t-pay" hidden>
+  <section class="vs" aria-label="與一般 ERP 的差別">
+    <div><b>既定規則：標示「價差 9%」</b><p>AI 協助：認出這是記憶體季初換價，對照當季合約價後建議更新 PO，一鍵放行。</p></div>
+    <div><b>既定規則：價格下跌視為通過</b><p>AI 協助：反過來提醒在庫料適用價格保護，應向原廠請求折讓，找回可能漏掉的錢。</p></div>
+    <div><b>既定規則：例外交給 AP 人員逐張查</b><p>AI 協助：判斷原因、指定處理單位、附上依據，人只需確認，處理時間大幅縮短。</p></div>
+  </section>
+
+  <section class="top">
+    <figure class="panel map" aria-label="三角貿易單據與貨物流向">
+      <svg viewBox="0 0 560 250" role="img">
+        <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" style="fill:var(--muted)"/></marker></defs>
+        <rect x="200" y="12" width="160" height="58" rx="5" style="fill:var(--accent-soft);stroke:var(--accent)"/>
+        <text x="280" y="36" text-anchor="middle" font-weight="700">台灣主體</text><text x="280" y="56" text-anchor="middle" class="sm">PR · PO · AP 比對 · 付款</text>
+        <rect x="14" y="172" width="150" height="58" rx="5" style="fill:var(--panel);stroke:var(--line)"/>
+        <text x="89" y="196" text-anchor="middle" font-weight="700">供應商／原廠</text><text x="89" y="216" text-anchor="middle" class="sm">韓、美、星、台 · USD/TWD</text>
+        <rect x="396" y="172" width="150" height="58" rx="5" style="fill:var(--cn-soft);stroke:var(--cn)"/>
+        <text x="471" y="196" text-anchor="middle" font-weight="700">大陸工廠</text><text x="471" y="216" text-anchor="middle" class="sm">SAP／Oracle／Tiptop</text>
+        <line x1="210" y1="72" x2="110" y2="168" style="stroke:var(--accent);stroke-width:1.5" marker-end="url(#ar)"/>
+        <text x="118" y="112" class="sm">① PO／③ 付款</text>
+        <line x1="96" y1="168" x2="194" y2="74" style="stroke:var(--ink);stroke-width:1.2;stroke-dasharray:4 3" marker-end="url(#ar)"/>
+        <text x="152" y="148" class="sm">② 發票寄台灣</text>
+        <line x1="168" y1="200" x2="392" y2="200" style="stroke:var(--cn);stroke-width:2.5" marker-end="url(#ar)"/>
+        <text x="280" y="192" text-anchor="middle" class="sm">貨物直送（不經台灣）</text>
+        <line x1="440" y1="168" x2="350" y2="74" style="stroke:var(--cn);stroke-width:1.2;stroke-dasharray:4 3" marker-end="url(#ar)"/>
+        <text x="420" y="112" class="sm">GRN 介面回傳</text>
+        <line x1="356" y1="62" x2="470" y2="166" style="stroke:var(--accent);stroke-width:1.2" marker-end="url(#ar)"/>
+        <text x="470" y="140" class="sm">④ 內部轉撥</text>
+      </svg>
+    </figure>
+    <section class="panel controls" aria-label="比對參數">
+      <div class="ctl"><div class="row"><label for="tp">單價容差</label><span class="num" id="tpv"></span></div><input id="tp" type="range" min="0" max="5" step="0.5" value="1"></div>
+      <div class="ctl"><div class="row"><label for="tq">數量容差</label><span class="num" id="tqv"></span></div><input id="tq" type="range" min="0" max="5" step="0.5" value="0"></div>
+      <div class="ctl"><div class="row"><label for="ta">差異金額上限 (TWD)</label><span class="num" id="tav"></span></div><input id="ta" type="range" min="0" max="50000" step="5000" value="10000"></div>
+      <div class="ctl"><div class="row"><label for="mk">內部轉撥加成</label><span class="num" id="mkv"></span></div><input id="mk" type="range" min="0" max="10" step="0.5" value="3"></div>
+      <div class="ctl"><label for="fx1">USD/TWD</label><input id="fx1" type="number" step="0.01" value="32.40"></div>
+      <div class="ctl"><label for="fx2">RMB/TWD</label><input id="fx2" type="number" step="0.01" value="4.50"></div>
+    </section>
+  </section>
+
+  <section class="tiles" aria-label="批次摘要">
+    <div class="panel tile"><span class="label">自動放行率</span><span class="v" id="s1"></span><span class="h" id="s1h"></span></div>
+    <div class="panel tile"><span class="label">本批付款 (TWD 約當)</span><span class="v" id="s2"></span><span class="h">不含內部轉撥</span></div>
+    <div class="panel tile"><span class="label">AI 找回金額</span><span class="v" id="s3"></span><span class="h">價格保護折讓，ERP 不會提示</span></div>
+    <div class="panel tile"><span class="label">估計人工工時</span><span class="v" id="s4"></span><span class="h" id="s4h"></span></div>
+  </section>
+
+  <div class="bar"><p class="note" style="margin:0">點左側發票查看比對細節。紫色區塊是 AI 協助層的判讀；有「採納建議」按鈕的，代表 AI 判斷可安全修正後放行。</p>
+    <span style="display:flex;gap:8px"><button class="btn ai-btn" id="applyAll" type="button">套用全部 AI 建議</button><button class="btn" id="resetAll" type="button">全部還原</button></span></div>
+
+  <section class="main">
+    <nav class="panel queue" id="queue" aria-label="發票佇列"></nav>
+    <article class="panel detail" id="detail"></article>
+  </section>
+
+  <section class="panel">
+    <div style="padding:14px 16px 6px"><h2>付款建議與內部轉撥清單</h2><p class="note" style="margin:4px 0 0">付款日依「月結 N 天」推算（發票月份月底 + N 天）。三角貿易案件付款後，台灣主體對收貨工廠開立內部轉撥（成本 × 加成），以灰色列列出。</p></div>
+    <div class="tablebox"><table id="run"></table></div>
+  </section>
+
+  <p class="note">規則層：供應商一致、重複發票、PR→PO、收貨廠別、跨系統入庫回傳、數量、單價、稅別稅額、預付款沖銷、差異金額上限。AI 協助層：季度合約價辨識、價格保護、預付款與配額、介面延遲、廠間調料、稅別誤開等實務判讀。工時估算假設：人工處理一張例外約 25 分鐘，採 AI 判讀後確認約 5 分鐘，自動放行約 1 分鐘。</p>
+  </div>
+
+  <div id="tab-bank" class="tabp" role="tabpanel" aria-labelledby="t-bank" hidden>
+    <div class="steps"><b>供應商對帳單</b>→<b>付款批次</b>→<b>分層簽核</b>→<b>銀行付款檔</b>→<b>銀行回覆</b>→<b>沖銷・銀行對帳</b>→<b>集團內部往來沖銷</b></div>
+    <p class="note" style="margin:0">比對通過只是立帳。錢要付得出去、付得正確，還要和供應商對帳、經過簽核、送進銀行，最後沖帳並與銀行對帳單調節。海關帳另案處理，不在此頁範圍。</p>
+
+    <section class="panel">
+      <div class="h2pad"><span class="label">步驟 ①</span><h2>供應商月結對帳單：Apex Semiconductor (SG)・2026 年 8 月</h2><p class="note" style="margin:4px 0 0">供應商寄來的對帳單餘額，和我方應付帳款餘額幾乎永遠對不上。以前要逐筆勾稽、寫 email 來回解釋；AI 自動逐筆配對，把每一筆差異歸類並附上處理方式。</p></div>
+      <div class="tablebox"><table id="stmt"></table></div>
+      <div class="h2pad" style="padding-top:4px"><div id="bridge" class="bridge"></div></div>
+    </section>
+
+    <section class="panel">
+      <div class="h2pad"><span class="label">步驟 ②</span><h2>付款批次與分層簽核・2026-09-10 付款日</h2><p class="note" style="margin:4px 0 0">到期且比對通過的應付帳款，依付款主體與帳戶分組：境外供應商由台灣 OBU 美元帳戶付款，台灣供應商由 DBU 台幣帳戶，大陸當地供應商由大陸廠人民幣帳戶。</p></div>
+      <div class="tablebox"><table id="pbatch"></table></div>
+      <div class="ainotes" id="pbnotes"></div>
+      <div class="h2pad" style="padding-top:0"><span class="label">簽核（依金額決定層級，經辦不得自行簽核）</span><div class="appr" id="appr"></div></div>
+    </section>
+
+    <section class="panel">
+      <div class="h2pad"><span class="label">步驟 ③</span><h2>銀行付款檔與銀行回覆</h2><p class="note" style="margin:4px 0 0">簽核完成後產生網銀媒體檔，經加密直連傳送銀行，不再由出納逐筆登打。</p></div>
+      <div id="bankout" class="h2pad" style="padding-top:0"></div>
+    </section>
+
+    <section class="panel">
+      <div class="h2pad"><span class="label">步驟 ④</span><h2>沖銷、銀行對帳與集團內部往來</h2></div>
+      <div id="recon" class="h2pad" style="padding-top:0"></div>
+    </section>
+  </div>
+  <p class="note" style="margin-top:8px">本頁供應商、單據、金額與情境皆為虛構示範，僅供教學與研究用途，與作者任職或服務的任何公司無關。</p>
+</div>
+
+<script>
+const BASE=[
+ {id:1,tag:"美系 SoC・預付款沖銷",ent:"TW",vendor:"美系 SoC 晶片原廠",item:"手機 SoC 應用處理器",unit:"pcs",terms:30,cur:"USD",tax:{type:"免稅（境外供應商）",rate:0},
+  pr:{no:"PR-TW-2406-102",qty:40000,budget:38.5},po:{no:"PO-TW-2406-0310",qty:40000,price:38.0,vendor:"美系 SoC 晶片原廠",shipTo:"鄭州廠",note:"終端客戶指定料・指定價"},
+  grn:{no:"GR-ZZ-240702-05",rec:40000,rej:0,plant:"鄭州廠",sys:"鄭州廠 Oracle",synced:true},inv:{no:"US-5508812",vendor:"美系 SoC 晶片原廠",qty:40000,price:38.0,taxAmt:0,date:"2026-07-02"},prior:0,prepaid:456000},
+ {id:2,tag:"韓系 DRAM・季度換價",ent:"TW",vendor:"韓系 DRAM 原廠",item:"LPDDR5 12GB",unit:"pcs",terms:30,cur:"USD",tax:{type:"免稅（境外供應商）",rate:0},
+  pr:{no:"PR-TW-2406-115",qty:60000,budget:22.0},po:{no:"PO-TW-2406-0322",qty:60000,price:19.8,vendor:"韓系 DRAM 原廠",shipTo:"深圳廠"},
+  grn:{no:"GR-SZ-240703-12",rec:60000,rej:0,plant:"深圳廠",sys:"深圳廠 SAP",synced:true},inv:{no:"KR-24Q3-01877",vendor:"韓系 DRAM 原廠",qty:60000,price:21.6,taxAmt:0,date:"2026-07-03"},prior:0,
+  contract:{q:"2026 Q3",price:21.6,prev:19.8}},
+ {id:3,tag:"韓系 DRAM・價格保護",ent:"TW",vendor:"韓系 DRAM 原廠",item:"DDR5 16Gb 顆粒",unit:"pcs",terms:30,cur:"USD",tax:{type:"免稅（境外供應商）",rate:0},
+  pr:{no:"PR-TW-2406-119",qty:100000,budget:4.2},po:{no:"PO-TW-2406-0333",qty:100000,price:4.05,vendor:"韓系 DRAM 原廠",shipTo:"昆山廠"},
+  grn:{no:"GR-KS-240705-03",rec:100000,rej:0,plant:"昆山廠",sys:"昆山廠 Tiptop",synced:true},inv:{no:"KR-24Q3-01902",vendor:"韓系 DRAM 原廠",qty:100000,price:3.82,taxAmt:0,date:"2026-07-05"},prior:0,
+  pp:{onHand:180000,oldPrice:4.05}},
+ {id:4,tag:"三角貿易・完全吻合",ent:"TW",vendor:"Apex Semiconductor (SG)",item:"PMIC 電源管理 IC",unit:"pcs",terms:60,cur:"USD",tax:{type:"免稅（境外供應商）",rate:0},
+  pr:{no:"PR-TW-2406-118",qty:200000,budget:0.42},po:{no:"PO-TW-2406-0331",qty:200000,price:0.41,vendor:"Apex Semiconductor (SG)",shipTo:"深圳廠"},
+  grn:{no:"GR-SZ-240702-17",rec:200000,rej:0,plant:"深圳廠",sys:"深圳廠 SAP",synced:true},inv:{no:"AS-24-07781",vendor:"Apex Semiconductor (SG)",qty:200000,price:0.41,taxAmt:0,date:"2026-07-03"},prior:0},
+ {id:5,tag:"台灣供應商・單方漲價",ent:"TW",vendor:"東昇機構件",item:"M1.4 精密螺絲",unit:"千顆",terms:90,cur:"TWD",tax:{type:"零稅率（貨物直接出口）",rate:0},
+  pr:{no:"PR-TW-2406-125",qty:8000,budget:120},po:{no:"PO-TW-2406-0344",qty:8000,price:115,vendor:"東昇機構件",shipTo:"深圳廠"},
+  grn:{no:"GR-SZ-240706-08",rec:8000,rej:0,plant:"深圳廠",sys:"深圳廠 SAP",synced:true},inv:{no:"TS-20483310",vendor:"東昇機構件",qty:8000,price:122,taxAmt:0,date:"2026-07-06"},prior:0},
+ {id:6,tag:"三角貿易・分批到貨",ent:"TW",vendor:"榮達精密",item:"鋁合金中框",unit:"pcs",terms:90,cur:"TWD",tax:{type:"零稅率（貨物直接出口）",rate:0},
+  pr:{no:"PR-TW-2406-133",qty:80000,budget:48},po:{no:"PO-TW-2406-0358",qty:80000,price:46.5,vendor:"榮達精密",shipTo:"鄭州廠"},
+  grn:{no:"GR-ZZ-240708-21",rec:60000,rej:0,plant:"鄭州廠",sys:"鄭州廠 Oracle",synced:true},inv:{no:"RD-30019922",vendor:"榮達精密",qty:80000,price:46.5,taxAmt:0,date:"2026-07-09"},prior:0},
+ {id:7,tag:"三角貿易・入庫資料未回傳",ent:"TW",vendor:"Apex Semiconductor (SG)",item:"LDO 穩壓 IC",unit:"pcs",terms:60,cur:"USD",tax:{type:"免稅（境外供應商）",rate:0},
+  pr:{no:"PR-TW-2407-007",qty:150000,budget:0.12},po:{no:"PO-TW-2407-0015",qty:150000,price:0.115,vendor:"Apex Semiconductor (SG)",shipTo:"昆山廠"},
+  grn:{no:"GR-KS-240710-14",rec:150000,rej:0,plant:"昆山廠",sys:"昆山廠 Tiptop",synced:false},inv:{no:"AS-24-07902",vendor:"Apex Semiconductor (SG)",qty:150000,price:0.115,taxAmt:0,date:"2026-07-10"},prior:0},
+ {id:8,tag:"三角貿易・收貨廠別不符",ent:"TW",vendor:"Kinwa Connector Ltd. (HK)",item:"Type-C 連接器",unit:"pcs",terms:60,cur:"USD",tax:{type:"免稅（境外供應商）",rate:0},
+  pr:{no:"PR-TW-2407-011",qty:300000,budget:0.09},po:{no:"PO-TW-2407-0022",qty:300000,price:0.088,vendor:"Kinwa Connector Ltd. (HK)",shipTo:"深圳廠"},
+  grn:{no:"GR-KS-240712-04",rec:300000,rej:0,plant:"昆山廠",sys:"昆山廠 Tiptop",synced:true},inv:{no:"KW-H-55120",vendor:"Kinwa Connector Ltd. (HK)",qty:300000,price:0.088,taxAmt:0,date:"2026-07-12"},prior:0},
+ {id:9,tag:"台灣供應商誤開 5% 稅額",ent:"TW",vendor:"台鉅電子",item:"晶片電阻 0201",unit:"千顆",terms:90,cur:"TWD",tax:{type:"零稅率（貨物直接出口）",rate:0},
+  pr:{no:"PR-TW-2407-014",qty:5000,budget:9},po:{no:"PO-TW-2407-0030",qty:5000,price:8.8,vendor:"台鉅電子",shipTo:"深圳廠"},
+  grn:{no:"GR-SZ-240714-11",rec:5000,rej:0,plant:"深圳廠",sys:"深圳廠 SAP",synced:true},inv:{no:"QA-20482090",vendor:"台鉅電子",qty:5000,price:8.8,taxAmt:2200,date:"2026-07-15"},prior:0},
+ {id:10,tag:"重複請款",ent:"TW",vendor:"Apex Semiconductor (SG)",item:"PMIC 電源管理 IC",unit:"pcs",terms:60,cur:"USD",tax:{type:"免稅（境外供應商）",rate:0},
+  pr:{no:"PR-TW-2406-118",qty:200000,budget:0.42},po:{no:"PO-TW-2406-0331",qty:200000,price:0.41,vendor:"Apex Semiconductor (SG)",shipTo:"深圳廠"},
+  grn:{no:"GR-SZ-240702-17",rec:200000,rej:0,plant:"深圳廠",sys:"深圳廠 SAP",synced:true},inv:{no:"AS-24-07781",vendor:"Apex Semiconductor (SG)",qty:200000,price:0.41,taxAmt:0,date:"2026-07-18"},prior:0},
+ {id:11,tag:"大陸當地購料",ent:"CN",vendor:"東莞匯聯包裝",item:"防靜電包材",unit:"箱",terms:60,cur:"RMB",tax:{type:"增值稅專用發票 13%",rate:0.13},
+  pr:{no:"PR-SZ-2407-052",qty:1200,budget:85},po:{no:"PO-SZ-2407-0198",qty:1200,price:82,vendor:"東莞匯聯包裝",shipTo:"深圳廠"},
+  grn:{no:"GR-SZ-240716-30",rec:1200,rej:0,plant:"深圳廠",sys:"深圳廠 SAP",synced:true},inv:{no:"44031987",vendor:"東莞匯聯包裝",qty:1200,price:82,taxAmt:12792,date:"2026-07-17"},prior:0},
+];
+let cases=structuredClone(BASE),sel=1,fixed=new Set();
+const $=id=>document.getElementById(id);
+const fmt=n=>Math.round(n).toLocaleString("zh-TW");
+const fmtP=n=>(+n).toLocaleString("zh-TW",{maximumFractionDigits:4});
+const fmtC=(n,cur)=>cur==="TWD"?fmt(n):(+n).toLocaleString("zh-TW",{minimumFractionDigits:2,maximumFractionDigits:2});
+const P=()=>({p:+$("tp").value/100,q:+$("tq").value/100,a:+$("ta").value,mk:+$("mk").value/100,fx:{TWD:1,USD:+$("fx1").value||0,RMB:+$("fx2").value||0}});
+const dueDate=(d,n)=>{const t=new Date(d+"T00:00:00");const e=new Date(t.getFullYear(),t.getMonth()+1,0);e.setDate(e.getDate()+n);return `${e.getFullYear()}-${String(e.getMonth()+1).padStart(2,"0")}-${String(e.getDate()).padStart(2,"0")}`};
+const payer=c=>c.ent==="TW"?"台灣主體":c.po.shipTo;
+
+function evaluate(c,seen,T){
+  const ch=[],add=(n,s,m)=>ch.push({n,s,m}),iv=c.inv,net=iv.qty*iv.price,fx=T.fx[c.cur];
+  add("供應商一致",iv.vendor===c.po.vendor?"pass":"fail",`發票 ${iv.vendor}／PO ${c.po.vendor}`);
+  const dup=seen.has(iv.vendor+"|"+iv.no);
+  add("重複發票偵測",dup?"fail":"pass",dup?`${iv.no} 已於本批較早入帳`:"未發現相同供應商＋發票號碼");
+  const prOk=c.po.qty<=c.pr.qty&&c.po.price<=c.pr.budget;
+  add("PR → PO",prOk?"pass":"fail",prOk?`PO ${fmt(c.po.qty)} ≤ 核准 ${fmt(c.pr.qty)}；單價在預算內`:`PO 超出核准請購`);
+  if(c.ent==="TW"){
+    add("收貨廠別",c.grn.plant===c.po.shipTo?"pass":"fail",c.grn.plant===c.po.shipTo?`PO 送貨地與收貨廠皆為 ${c.po.shipTo}`:`PO 送 ${c.po.shipTo}，實際由 ${c.grn.plant} 收貨`);
+    add("跨系統入庫回傳",c.grn.synced?"pass":"warn",c.grn.synced?`${c.grn.sys} 入庫單已回傳台灣`:`${c.grn.sys} 尚無入庫資料`);
+  }
+  const acc=c.grn.rec-c.grn.rej,open=acc-c.prior;let payQty=iv.qty,qS="pass",qM;
+  if(!c.grn.synced){qS="warn";payQty=0;qM="無入庫資料，暫不比對數量"}
+  else if(iv.qty<=open*(1+T.q))qM=`發票 ${fmt(iv.qty)} ≤ 可請款量 ${fmt(open)}`;
+  else if(c.grn.rej>0){qS="fail";payQty=0;qM=`含驗退 ${fmt(c.grn.rej)}，需供應商開立折讓`}
+  else{qS="warn";payQty=Math.max(open,0);qM=`僅收貨 ${fmt(open)}，餘 ${fmt(iv.qty-open)} 待到貨`}
+  add("數量 (GRN → 發票)",qS,qM);
+  const pv=(iv.price-c.po.price)/c.po.price;
+  add("單價 (PO → 發票)",pv<=T.p+1e-9?"pass":"fail",`發票 ${fmtP(iv.price)}／PO ${fmtP(c.po.price)} ${c.cur}，差異 ${(pv*100).toFixed(2)}%（容差 ${(T.p*100).toFixed(1)}%）`);
+  const exp=Math.round(net*c.tax.rate*100)/100,tOk=Math.abs(iv.taxAmt-exp)<=1;
+  add("稅別與稅額",tOk?"pass":"fail",`${c.tax.type}：應為 ${fmtC(exp,c.cur)}，發票為 ${fmtC(iv.taxAmt,c.cur)}`);
+  if(c.prepaid) add("預付款沖銷",c.prepaid<=net+iv.taxAmt?"pass":"fail",`已預付 ${fmtC(c.prepaid,c.cur)}，本次付款扣除`);
+  const va=Math.max(0,(iv.price-c.po.price)*iv.qty)*fx;
+  add("差異金額上限",va<=T.a?"pass":"fail",`價差約 NT$ ${fmt(va)}（上限 ${fmt(T.a)}）`);
+  const fails=ch.filter(x=>x.s==="fail");let disp,cls,route,pay=0;
+  if(dup){disp="拒付";cls="bad";route="退回供應商"}
+  else if(fails.length){disp="例外待審";cls="warn";route="轉人工處理"}
+  else if(!c.grn.synced){disp="暫扣";cls="warn";route="等待入庫回傳"}
+  else if(qS==="warn"){disp="部分付款";cls="warn";route="已收部分進付款，餘額暫扣";pay=payQty*iv.price*(1+c.tax.rate)}
+  else{disp="自動核准";cls="ok";route="進付款批次";pay=net+iv.taxAmt-(c.prepaid||0)}
+  if(fixed.has(c.id)&&disp==="自動核准"){disp="AI 協助放行";cls="ai"}
+  const ic=(c.ent==="TW"&&pay>0)?((pay+(disp.includes("核准")||disp.includes("放行")?(c.prepaid||0):0))*fx)*(1+T.mk):0;
+  return{ch,disp,cls,route,pay,payTWD:pay*fx,gross:net+iv.taxAmt,due:dueDate(iv.date,c.terms),ic,pv,dup,qS,fails};
+}
+
+/* AI 協助層：把實務經驗寫成判讀規則 */
+function insight(c,r,T){
+  const fx=T.fx[c.cur],f=r.fails.map(x=>x.n);
+  if(r.dup) return{cause:"同一原廠、同一發票號碼已在本批入帳，日期不同，屬重複寄送或重複請款。",action:"拒付並自動通知供應商與採購；不需 AP 人員追查。",exp:"實務經驗：原廠月底常同時寄電子檔與紙本，兩條路徑各掃描一次就會重複。"};
+  if(c.contract&&f.some(n=>n.startsWith("單價"))&&Math.abs(c.inv.price-c.contract.price)<1e-6)
+    return{cause:`發票單價 ${c.contract.price} 等於 ${c.contract.q} 季度合約價；PO 仍是上一季的 ${c.contract.prev}。不是供應商多收，是 PO 未隨季度換價。`,action:`依合約價表更新 PO 單價後重新比對，可直接放行。`,exp:"實務經驗：記憶體按季議價，季初第一批發票幾乎都會卡價差。只看價差百分比，AP 會把整批 DRAM 發票都退回採購。",fix:{label:`採納建議：PO 改為 ${c.contract.q} 合約價`,apply:x=>{x.po.price=x.contract.price}}};
+  if(f.some(n=>n.startsWith("單價"))) return{cause:`單價高出 PO ${(r.pv*100).toFixed(1)}%，查無對應的合約價調整或報價單。`,action:"轉採購確認是否同意漲價；附上近 6 個月成交價供議價使用。",exp:"實務經驗：沒有合約依據的漲價不能讓系統自動放行，這是 AI 也必須守住的控制點。"};
+  if(f.some(n=>n.startsWith("收貨"))) return{cause:`PO 指定 ${c.po.shipTo}，實際由 ${c.grn.plant} 收貨，數量與單價皆相符，研判為產線臨時調料。`,action:`補開 ${c.po.shipTo}→${c.grn.plant} 廠間調撥，內部轉撥改開給 ${c.grn.plant}，即可放行。`,exp:"實務經驗：缺料時物控常把料直接轉到急需的廠，貨是對的，只是單據沒跟上。",fix:{label:"採納建議：補建廠間調撥、改正收貨廠",apply:x=>{x.po.shipTo=x.grn.plant}}};
+  if(f.some(n=>n.startsWith("稅"))) return{cause:"貨物由台灣供應商直接出口至大陸廠，應適用零稅率，發票卻開立 5% 應稅。",action:"不可放行；已草擬通知請供應商作廢重開零稅率發票，並附出口報單號。",exp:"實務經驗：若照付 5%，這筆進項稅在三角貿易下多半無法扣抵，等於白付。"};
+  if(!c.grn.synced) return{cause:`${c.grn.sys} 已有入庫單 ${c.grn.no}，但介面批次尚未回傳台灣。`,action:"不退件，排程下一個介面批次後自動重跑比對。",exp:"實務經驗：月底結帳週期大陸廠系統負載高，介面延遲很常見；退件只會讓供應商重寄一次發票。",fix:{label:"模擬：介面批次已回傳",apply:x=>{x.grn.synced=true}}};
+  if(r.qS==="warn") return{cause:`已收 ${fmt(c.grn.rec)}，發票開 ${fmt(c.inv.qty)}，剩餘數量仍在途。`,action:"先付已收部分，餘額掛暫扣，到貨後自動釋放。",exp:"實務經驗：機構件多為分批出貨，整張退件會影響供應商資金週轉與後續交期。"};
+  if(c.pp){const amt=(c.pp.oldPrice-c.inv.price)*c.pp.onHand;
+    return{cause:`本次發票單價 ${c.inv.price} 低於前批 ${c.pp.oldPrice}，規則判定通過。但工廠在庫仍有 ${fmt(c.pp.onHand)} pcs 為舊價購入。`,action:`依價格保護條款，向原廠請求折讓約 USD ${fmtC(amt,"USD")}（約 NT$ ${fmt(amt*fx)}）。`,exp:"實務經驗：價格下跌時沒人會主動提醒，價保若沒在期限內申請就拿不回來。",found:amt*fx};}
+  if(c.prepaid) return{cause:`終端客戶指定料，指定價 ${c.po.price}；先前因配額緊張已預付 USD ${fmtC(c.prepaid,"USD")}。`,action:"本次付款自動扣除預付款，內部轉撥以全額成本計算。",exp:"實務經驗：缺貨時原廠要求預付才給配額，預付款若沒沖銷，帳上會同時出現預付與應付。"};
+  if(c.ent==="CN") return{cause:"大陸廠就地採購，增值稅專票稅額正確。",action:"由大陸主體付款，不經台灣，也不需開內部轉撥。",exp:"實務經驗：就地採購要回到大陸主體的帳上，避免混入三角貿易流程。"};
+  return{cause:"四份單據全部吻合。",action:"直接進付款批次，無須人工。",exp:"這類案件應占多數，AI 層不介入，讓人力集中在例外。"};
+}
+const evalAll=()=>{const T=P(),seen=new Set();return cases.map(c=>{const r=evaluate(c,seen,T);seen.add(c.inv.vendor+"|"+c.inv.no);r.ai=insight(c,r,T);return r})};
+
+function render(){
+  const T=P();$("tpv").textContent=(T.p*100).toFixed(1)+"%";$("tqv").textContent=(T.q*100).toFixed(1)+"%";$("tav").textContent="NT$ "+fmt(T.a);$("mkv").textContent=(T.mk*100).toFixed(1)+"%";
+  const R=evalAll(),n=R.length;
+  const auto=R.filter(r=>r.cls==="ok"||r.cls==="ai").length,fixable=R.filter(r=>r.ai.fix).length;
+  $("s1").textContent=Math.round(auto/n*100)+"%";
+  $("s1h").textContent=fixable?`另有 ${fixable} 張可由 AI 建議放行`:`其中 ${fixed.size} 張由 AI 協助放行`;
+  $("s2").textContent="NT$ "+fmt(R.reduce((a,r)=>a+r.payTWD,0));
+  $("s3").textContent="NT$ "+fmt(R.reduce((a,r)=>a+(r.ai.found||0),0));
+  const exc=R.filter(r=>!(r.cls==="ok"||r.cls==="ai")).length,manual=(exc*25+auto*1),assisted=(exc*5+auto*1);
+  $("s4").textContent=`${manual} → ${assisted} 分`;$("s4h").textContent=`純人工 vs. AI 判讀後確認`;
+  $("queue").innerHTML=cases.map((c,i)=>`<button type="button" data-id="${c.id}" aria-current="${c.id===sel}"><span class="t">${c.vendor}<span class="ent e-${c.ent}">${c.ent==="TW"?"台灣付款":"大陸付款"}</span></span><span class="pill p-${R[i].cls}">${R[i].disp}</span><span class="s">${c.tag}${R[i].ai.found?" · AI 發現價保":""}</span></button>`).join("");
+  const i=cases.findIndex(c=>c.id===sel),c=cases[i],r=R[i],a=r.ai;
+  $("detail").innerHTML=`
+   <div class="dhead"><div><span class="label">案例 ${c.id} · ${c.tag}</span><h2 style="font-size:1.15rem;margin-top:2px">${c.item}</h2><span class="note">${c.vendor} · ${c.cur} · ${c.tax.type} · 付款主體：${payer(c)}${c.po.note?" · "+c.po.note:""}</span></div><button class="btn" id="reset" type="button">還原此案例</button></div>
+   <div class="docs">
+    <div class="doc"><span class="label">請購單 PR</span><span class="mono">${c.pr.no}</span><span class="sys">${c.ent==="TW"?"台灣 Tiptop":c.grn.sys}</span><div class="k"><span>核准數量</span><span class="num">${fmt(c.pr.qty)}</span></div><div class="k"><span>預算單價</span><span class="num">${fmtP(c.pr.budget)}</span></div></div>
+    <div class="doc"><span class="label">採購單 PO</span><span class="mono">${c.po.no}</span><span class="sys">${c.ent==="TW"?"台灣 Tiptop":c.grn.sys}</span><div class="k"><span>數量</span><span class="num">${fmt(c.po.qty)}</span></div><div class="k"><span>單價</span><span class="num">${fmtP(c.po.price)}</span></div><div class="k"><span>送貨地</span><span>${c.po.shipTo}</span></div><div class="k"><span>條件</span><span>月結 ${c.terms} 天</span></div></div>
+    <div class="doc cn"><span class="label">驗收入庫單 GRN</span><span class="mono">${c.grn.no}</span><span class="sys">${c.grn.sys}${c.ent==="TW"?(c.grn.synced?" → 已回傳":" → 未回傳"):""}</span><div class="k"><span>收貨廠</span><span>${c.grn.plant}</span></div><div class="k"><span>實收</span><span class="num">${fmt(c.grn.rec)}</span></div><div class="k"><span>驗退</span><span class="num">${fmt(c.grn.rej)}</span></div></div>
+    <div class="doc inv"><span class="label">發票（可修改）</span><span class="mono">${c.inv.no}</span><span class="sys">寄${payer(c)}</span>
+     <div class="k"><label for="iq">數量</label><input id="iq" type="number" value="${c.inv.qty}"></div>
+     <div class="k"><label for="ip">單價</label><input id="ip" type="number" step="0.001" value="${c.inv.price}"></div>
+     <div class="k"><label for="it">稅額</label><input id="it" type="number" step="0.01" value="${c.inv.taxAmt}"></div>
+     <div class="k"><span>含稅 ${c.cur}</span><span class="num">${fmtC(r.gross,c.cur)}</span></div></div>
+   </div>
+   <div class="checks">${r.ch.map(x=>`<div class="chk"><span class="dot d-${x.s}"></span><span class="n">${x.n}</span><span class="m">${x.m}</span></div>`).join("")}</div>
+   <div class="two">
+    <div class="verdict v-${r.cls==="ai"?"ok":r.cls}"><span class="label">規則判定（既定規則層）</span><strong>${r.disp}</strong><span>${r.route}</span>
+     <span class="num" style="margin-top:6px">本批付款 ${c.cur} ${fmtC(r.pay,c.cur)}</span>${r.pay?`<span class="note">約 NT$ ${fmt(r.payTWD)} · 付款日 ${r.due}${r.ic?`<br>內部轉撥 NT$ ${fmt(r.ic)} 予 ${c.po.shipTo}`:""}</span>`:""}</div>
+    <div class="ai"><span class="lab">AI 判讀</span><p><b>原因：</b>${a.cause}</p><p><b>建議：</b>${a.action}</p>${a.fix?`<button class="btn ai-btn" id="fix" type="button">${a.fix.label}</button>`:""}<p class="exp">${a.exp}</p></div>
+   </div>`;
+  let rows="";cases.forEach((c,i)=>{const x=R[i];
+    rows+=`<tr><td>${payer(c)}</td><td>${c.vendor}</td><td class="mono">${c.inv.no}</td><td><span class="pill p-${x.cls}">${x.disp}</span></td><td>${c.cur}</td><td class="num">${fmtC(x.pay,c.cur)}</td><td class="num">${fmt(x.payTWD)}</td><td class="mono">${x.pay?x.due:"—"}</td><td>${x.ai.action.split("；")[0].split("，")[0]}</td></tr>`;
+    if(x.ic)rows+=`<tr class="ic"><td>台灣主體 → ${c.po.shipTo}</td><td colspan="3">內部轉撥（加成 ${(T.mk*100).toFixed(1)}%）· ${c.item}</td><td>TWD</td><td class="num">${fmt(x.ic)}</td><td class="num">${fmt(x.ic)}</td><td colspan="2">應收關係人，非本批付款</td></tr>`});
+  $("run").innerHTML=`<thead><tr><th>付款主體</th><th>供應商</th><th>發票號碼</th><th>判定</th><th>幣別</th><th class="num">本批付款 (原幣)</th><th class="num">TWD 約當</th><th>付款日</th><th>處理</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><td colspan="6">本批付款合計（不含內部轉撥）</td><td class="num">${fmt(R.reduce((a,r)=>a+r.payTWD,0))}</td><td colspan="2"></td></tr></tfoot>`;
+}
+function applyFix(id){const T=P(),R=evalAll(),i=cases.findIndex(c=>c.id===id);const f=R[i].ai.fix;if(f){f.apply(cases[i]);fixed.add(id)}}
+document.addEventListener("input",e=>{
+  if(["tp","tq","ta","mk","fx1","fx2"].includes(e.target.id))return render();
+  const c=cases.find(x=>x.id===sel),m={iq:"qty",ip:"price",it:"taxAmt"}[e.target.id];
+  if(m&&e.target.value!==""){c.inv[m]=+e.target.value;const id=e.target.id;render();$(id).focus()}
+});
+document.addEventListener("click",e=>{
+  const b=e.target.closest("#queue button");if(b){sel=+b.dataset.id;render();return}
+  if(e.target.id==="reset"){const i=cases.findIndex(x=>x.id===sel);cases[i]=structuredClone(BASE[i]);fixed.delete(sel);render()}
+  if(e.target.id==="fix"){applyFix(sel);render()}
+  if(e.target.id==="applyAll"){cases.forEach(c=>applyFix(c.id));render()}
+  if(e.target.id==="resetAll"){cases=structuredClone(BASE);fixed.clear();render()}
+});
+render();
+</script>
+<script>
+/* ===== 01 單據擷取 ===== */
+const FMTS=[
+ {title:"Apex Semiconductor (SG)",src:"EDI 810（ANSI X12）",then:"只有大型供應商有 EDI，雙方 IT 對測常需數月",
+  raw:`ST*810*0001~
+BIG*20260815*AS-24-08110*20260801*PO-TW-2408-0103~
+CUR*SE*USD~
+ITD*01*3*****60~
+FOB*PP*OR*SINGAPORE*01*FCA~
+IT1*1*10500*EA*0.41**BP*PMIC-88*VP*APX-PM88-QFN~
+IT1*2*10500*EA*0.115**BP*LDO-33*VP*APX-LDO33-SOT~
+TDS*551250~
+SE*9*0001~`,
+  rows:[["發票號碼","AS-24-08110","BIG02",1],["PO 號碼","PO-TW-2408-0103","BIG04",1],["幣別","USD","CUR02",1],["交易條件","FCA 新加坡","FOB 段",1],["付款條件","月結 60 天","ITD 段 net 60",1],
+   ["明細 1","PMIC-88 × 10,500 @ 0.41","IT1，以我方料號 BP 為準",1],["明細 2","LDO-33 × 10,500 @ 0.115","IT1；供應商料號 VP 存入對照表",1],["總額","USD 5,512.50","TDS 以分計，已驗算",1]]},
+ {title:"台鉅電子",src:"Excel／CSV（供應商自訂欄位）",then:"要求供應商改欄位、加我方料號，往返多次仍常漏填",
+  raw:`發票號碼,開立日,貴公司訂單,品名規格,廠內料號,數量,單位,單價(NT$),金額,交貨條件
+TJ-20485521,2026/08/07,4500-0104,MLCC 0402 X7R 104K 10V,TJ-0402-104K,184,Reel(10K),600,110400,DAP SZ`,
+  rows:[["發票號碼","TJ-20485521","欄位名稱不同，語意對應",0.99],["PO 號碼","PO-TW-2408-0104","供應商只填流水號 0104，以供應商＋料號＋金額比對補全",0.93,"已補正"],["我方料號","C0402-104K","「廠內料號」是供應商料號，經料號對照表轉換",0.97,"已轉換"],
+   ["數量","1,840,000 pcs","184 Reel × 10,000",0.99,"單位換算"],["單價","TWD 0.06 / pcs","每捲 600 ÷ 10,000",0.99,"單位換算"],["交易條件","DAP 深圳廠","「DAP SZ」縮寫",0.96],["付款條件","月結 90 天","發票未載明，取自供應商主檔",0.95,"已補全"]]},
+ {title:"Kinwa Connector Ltd. (HK)",src:"PDF 掃描檔（OCR）",then:"由 AP 人員手動 key in，月底常加班趕單",
+  raw:`KINWA CONNECTOR LTD.       COMMERCIAL INVOICE
+Invoice No.: KW-H-55488    Date: 15-Aug-2026
+Bill To: 台灣主體, Taipei
+Ship To: Shenzhen Plant
+Terms: FOB Hong Kong   Payment: O/A 60 days
+Your Ref: P0-TW-2408-O1O5
+
+Item Description           Qty   U/P(USD/K)  Amount
+1    USB TYPE-C 24P RCPT  12,000    88.00   1,056.00
+                              TOTAL USD   1,056.00`,
+  rows:[["發票號碼","KW-H-55488","OCR",0.98],["PO 號碼","PO-TW-2408-0105","OCR 把 0 讀成 O，比對既有 PO 後更正",0.93,"已更正"],["我方料號","USBC-24P","品名相似度＋該 PO 只有一行",0.94,"推定"],
+   ["單價","USD 0.088 / pcs","每千顆 88.00 ÷ 1,000",0.99,"單位換算"],["交易條件","FOB 香港","與 PO 的 DAP 深圳廠不符，帶入比對階段處理",0.98,"不符"],["付款條件","月結 60 天","O/A 60 days",0.97],["總額","USD 1,056.00","12,000 × 0.088 已驗算",0.99]]},
+];
+document.getElementById("fmts").innerHTML=FMTS.map(f=>`<article class="panel fmt"><div><span class="label">${f.src}</span><h3>${f.title}</h3><span class="note">當年：${f.then}</span></div>
+ <pre class="raw">${f.raw.replace(/</g,"&lt;")}</pre>
+ <table class="map2"><tbody>${f.rows.map(r=>`<tr><td>${r[0]}</td><td><b>${r[1]}</b> <span class="conf ${r[3]>=0.95?"c-hi":"c-mid"}">${r[3].toFixed(2)}</span><span class="note" style="display:block">${r[2]}</span>${r[4]?`<span class="fix">AI ${r[4]}</span>`:""}</td></tr>`).join("")}</tbody></table></article>`).join("");
+
+/* ===== 02 多對多比對 ===== */
+const MB={model:"T-11 平板主機板",build:10000,pr:"PR-TW-2408-001"};
+const BOM=[
+ {pn:"SOC-A78",desc:"SoC 應用處理器",use:1,attr:0,mpq:1000,po:"PO-TW-2408-0101",note:"高單價料不加損耗"},
+ {pn:"LP5-12G",desc:"LPDDR5 12GB",use:2,attr:0,mpq:1000,po:"PO-TW-2408-0102",note:"高單價料不加損耗"},
+ {pn:"PMIC-88",desc:"PMIC 電源管理 IC",use:1,attr:0.002,mpq:500,po:"PO-TW-2408-0103"},
+ {pn:"LDO-33",desc:"LDO 穩壓 IC",use:2,attr:0.005,mpq:3000,po:"PO-TW-2408-0103"},
+ {pn:"C0402-104K",desc:"積層陶瓷電容 0402",use:180,attr:0.02,mpq:10000,po:"PO-TW-2408-0104",note:"被動元件 SMT 拋料多"},
+ {pn:"USBC-24P",desc:"Type-C 連接器",use:1,attr:0.01,mpq:2000,po:"PO-TW-2408-0105"},
+];
+const MPO=[
+ {no:"PO-TW-2408-0101",vendor:"美系 SoC 晶片原廠",cur:"USD",inco:"FCA 新加坡",basis:"ship",pay:"月結 30 天",lines:[{ln:1,pn:"SOC-A78",qty:10000,price:38.0,sched:[{d:"2026-08-12",q:10000}]}]},
+ {no:"PO-TW-2408-0102",vendor:"韓系 DRAM 原廠",cur:"USD",inco:"DAP 深圳廠",basis:"arrive",pay:"月結 30 天",lines:[{ln:1,pn:"LP5-12G",qty:20000,price:21.6,sched:[{d:"2026-08-10",q:10000},{d:"2026-08-24",q:10000}]}]},
+ {no:"PO-TW-2408-0103",vendor:"Apex Semiconductor (SG)",cur:"USD",inco:"FCA 新加坡",basis:"ship",pay:"月結 60 天",lines:[{ln:1,pn:"PMIC-88",qty:10500,price:0.41,sched:[{d:"2026-08-08",q:10500}]},{ln:2,pn:"LDO-33",qty:21000,price:0.115,sched:[{d:"2026-08-08",q:10500},{d:"2026-08-22",q:10500}]}]},
+ {no:"PO-TW-2408-0104",vendor:"台鉅電子",cur:"TWD",inco:"DAP 深圳廠",basis:"arrive",pay:"月結 90 天",lines:[{ln:1,pn:"C0402-104K",qty:1840000,price:0.06,sched:[{d:"2026-08-06",q:1840000}]}]},
+ {no:"PO-TW-2408-0105",vendor:"Kinwa Connector Ltd. (HK)",cur:"USD",inco:"DAP 深圳廠",basis:"arrive",pay:"月結 60 天",lines:[{ln:1,pn:"USBC-24P",qty:12000,price:0.088,sched:[{d:"2026-08-09",q:12000}]}]},
+];
+const MGRN=[
+ {no:"GR-SZ-240814-02",po:"PO-TW-2408-0101",ln:1,ship:"2026-08-12",arr:"2026-08-17",qty:10000,acc:10000,spec:0,rej:0},
+ {no:"GR-SZ-240810-05",po:"PO-TW-2408-0102",ln:1,arr:"2026-08-10",qty:10000,acc:10000,spec:0,rej:0},
+ {no:"GR-SZ-240829-01",po:"PO-TW-2408-0102",ln:1,arr:"2026-08-29",qty:10000,acc:10000,spec:0,rej:0},
+ {no:"GR-SZ-240811-07",po:"PO-TW-2408-0103",ln:1,ship:"2026-08-08",arr:"2026-08-11",qty:10500,acc:10500,spec:0,rej:0},
+ {no:"GR-SZ-240811-08",po:"PO-TW-2408-0103",ln:2,ship:"2026-08-08",arr:"2026-08-11",qty:10500,acc:10500,spec:0,rej:0},
+ {no:"GR-SZ-240825-03",po:"PO-TW-2408-0103",ln:2,ship:"2026-08-22",arr:"2026-08-25",qty:10500,acc:10500,spec:0,rej:0},
+ {no:"GR-SZ-240806-11",po:"PO-TW-2408-0104",ln:1,arr:"2026-08-06",qty:1840000,acc:1640000,spec:200000,rej:0,iqc:"200,000 pcs 端電極輕微氧化，品保判定特採"},
+ {no:"GR-SZ-240811-04",po:"PO-TW-2408-0105",ln:1,arr:"2026-08-11",qty:12000,acc:11700,spec:0,rej:300,iqc:"300 pcs 插拔力不足，退貨"},
+];
+const MINV=[
+ {no:"AS-24-08110",vendor:"Apex Semiconductor (SG)",src:"EDI",inco:"FCA 新加坡",pay:"月結 60 天",lines:[{po:"PO-TW-2408-0103",ln:1,qty:10500,price:0.41},{po:"PO-TW-2408-0103",ln:2,qty:10500,price:0.115}]},
+ {no:"AS-24-08236",vendor:"Apex Semiconductor (SG)",src:"EDI",inco:"FCA 新加坡",pay:"月結 60 天",lines:[{po:"PO-TW-2408-0103",ln:2,qty:10500,price:0.115}]},
+ {no:"KR-24Q3-02210",vendor:"韓系 DRAM 原廠",src:"EDI",inco:"DAP 深圳廠",pay:"月結 30 天",lines:[{po:"PO-TW-2408-0102",ln:1,qty:10000,price:21.6}]},
+ {no:"KR-24Q3-02388",vendor:"韓系 DRAM 原廠",src:"EDI",inco:"DAP 深圳廠",pay:"月結 30 天",lines:[{po:"PO-TW-2408-0102",ln:1,qty:10000,price:21.6}]},
+ {no:"TJ-20485521",vendor:"台鉅電子",src:"CSV",inco:"DAP 深圳廠",pay:"月結 90 天",lines:[{po:"PO-TW-2408-0104",ln:1,qty:1840000,price:0.06}]},
+ {no:"US-5509930",vendor:"美系 SoC 晶片原廠",src:"PDF",inco:"FCA 新加坡",pay:"月結 30 天",lines:[{po:"PO-TW-2408-0101",ln:1,qty:10000,price:38.0}]},
+ {no:"KW-H-55488",vendor:"Kinwa Connector Ltd. (HK)",src:"PDF 掃描",inco:"FOB 香港",pay:"月結 60 天",lines:[{po:"PO-TW-2408-0105",ln:1,qty:12000,price:0.088}]},
+];
+const MFX={USD:32.4,TWD:1};
+const mfmt=n=>Math.round(n).toLocaleString("zh-TW");
+const mfc=(n,c)=>c==="TWD"?mfmt(n):(+n).toLocaleString("zh-TW",{minimumFractionDigits:2,maximumFractionDigits:2});
+const ddiff=(a,b)=>Math.round((new Date(a)-new Date(b))/864e5);
+const prQty=b=>Math.ceil(b.use*MB.build*(1+b.attr)/b.mpq)*b.mpq;
+
+function runMatch(){
+  const g=document.getElementById.bind(document);
+  const grace=+g("mg").value,rate=+g("mp").value/100,specOK=g("ms").checked,disc=0.10;
+  g("mgv").textContent=grace+" 天";g("mpv").textContent=(rate*100).toFixed(1)+"%";
+  const lots={};MGRN.forEach(x=>{const k=x.po+"/"+x.ln;(lots[k]=lots[k]||[]).push({...x,ra:x.acc,rs:x.spec})});
+  const res=[];
+  MINV.forEach(iv=>iv.lines.forEach((l,li)=>{
+    const po=MPO.find(p=>p.no===l.po),pl=po.lines.find(x=>x.ln===l.ln),L=lots[l.po+"/"+l.ln]||[];
+    let need=l.qty;const alloc=[];
+    L.forEach((x,gi)=>{if(need>0&&x.ra>0){const t=Math.min(need,x.ra);x.ra-=t;need-=t;alloc.push({x,gi,q:t,t:"acc"})}});
+    let specQ=0;L.forEach((x,gi)=>{if(need>0&&x.rs>0){const t=Math.min(need,x.rs);x.rs-=t;need-=t;specQ+=t;alloc.push({x,gi,q:t,t:"spec"})}});
+    const unmatched=need;let late=0;
+    alloc.forEach(a=>{const s=pl.sched[a.gi]||pl.sched[pl.sched.length-1];const d=ddiff(po.basis==="ship"?a.x.ship:a.x.arr,s.d);if(d>late)late=d});
+    const accQ=alloc.filter(a=>a.t==="acc").reduce((s,a)=>s+a.q,0),accAmt=accQ*l.price,specAmt=specQ*l.price;
+    const pv=(l.price-pl.price)/pl.price,priceOK=pv<=0.01;
+    const termsOK=iv.inco===po.inco&&iv.pay===po.pay;
+    const lateFlag=late>grace,pen=lateFlag?Math.min(late*rate,0.10)*accAmt:0;
+    const qual=alloc.map(a=>a.x).filter((x,i,arr)=>arr.indexOf(x)===i).filter(x=>x.iqc);
+    let pay=0,st,cls;
+    if(!termsOK||!priceOK){st="待決";cls="bad"}
+    else{pay=accAmt+(specOK?specAmt*(1-disc):0)-pen;
+      if(unmatched>0||(specQ>0&&!specOK)){st="部分付款";cls="warn"}
+      else if(pen>0){st="可付・扣罰款";cls="warn"}
+      else if(specQ>0){st="可付・特採折讓";cls="ai"}
+      else{st="可付款";cls="ok"}}
+    const notes=[];
+    if(!termsOK)notes.push(`PO 約定 ${po.inco}，發票寫 ${iv.inco}。若照單接受，香港到深圳廠的運費、保險與運輸風險會轉回我方。整張暫不付款，請供應商依 PO 更正後重開。`);
+    if(unmatched>0)notes.push(`發票 ${mfmt(l.qty)}，允收僅 ${mfmt(accQ+specQ)}；差額 ${mfmt(unmatched)} 為 IQC 退貨，需供應商開立折讓單或補貨後才能請款。`);
+    if(specQ>0)notes.push(specOK?`特採 ${mfmt(specQ)} pcs 已由品保簽核，依議定折讓 10% 付款。`:`特採 ${mfmt(specQ)} pcs 尚待品保簽核與議價，先付允收部分，特採部分暫扣。`);
+    if(lateFlag)notes.push(`${po.basis==="ship"?"交付承運人":"到廠"}比排定交期晚 ${late} 天，超過寬限 ${grace} 天。依合約每日 ${(rate*100).toFixed(1)}%（上限 10%）建議扣款 ${po.cur} ${mfc(pen,po.cur)}，需採購確認是否執行。`);
+    if(!lateFlag&&late>0)notes.push(`晚 ${late} 天，在寬限內，不扣款。`);
+    if(po.basis==="ship"&&alloc.some(a=>a.x.ship&&a.x.arr!==a.x.ship&&ddiff(a.x.arr,pl.sched[a.gi]?.d||a.x.arr)>grace)&&!lateFlag)notes.push(`到廠日晚於交期，但交易條件為 ${po.inco}，交期以交付承運人日判定，供應商準時交貨，不應扣款。`);
+    res.push({iv,l,li,po,pl,alloc,accQ,specQ,unmatched,late,lateFlag,pen,termsOK,priceOK,qual,pay,payTWD:pay*MFX[po.cur],gross:l.qty*l.price*MFX[po.cur],st,cls,notes});
+  }));
+  // BOM
+  g("bomh").textContent=`${MB.model} · 生產 ${mfmt(MB.build)} 台 · ${MB.pr}`;
+  g("bom").innerHTML=`<thead><tr><th>料號</th><th>品名</th><th class="num">單機用量</th><th class="num">損耗率</th><th class="num">MPQ</th><th class="num">PR 數量</th><th>拆單至 PO</th><th>說明</th></tr></thead><tbody>${BOM.map(b=>`<tr><td class="mono">${b.pn}</td><td>${b.desc}</td><td class="num">${b.use}</td><td class="num">${(b.attr*100).toFixed(1)}%</td><td class="num">${mfmt(b.mpq)}</td><td class="num">${mfmt(prQty(b))}</td><td class="mono">${b.po}</td><td class="note">${b.note||""}</td></tr>`).join("")}</tbody>`;
+  // tiles
+  const pass=res.filter(r=>r.cls==="ok").length,payT=res.reduce((s,r)=>s+r.payTWD,0),gross=res.reduce((s,r)=>s+r.gross,0);
+  g("mtiles").innerHTML=`<div class="panel tile"><span class="label">發票／行</span><span class="v">${MINV.length} 張／${res.length} 行</span><span class="h">對應 ${MPO.length} 張 PO、${MGRN.length} 筆收料</span></div>
+   <div class="panel tile"><span class="label">一次比對通過</span><span class="v">${pass} 行</span><span class="h">其餘由 AI 判讀原因與處理方式</span></div>
+   <div class="panel tile"><span class="label">本批可付 (TWD)</span><span class="v">${mfmt(payT)}</span><span class="h">USD 以 ${MFX.USD} 換算</span></div>
+   <div class="panel tile"><span class="label">暫扣／待決 (TWD)</span><span class="v">${mfmt(gross-payT)}</span><span class="h">含罰款、退貨、特採、條件不符</span></div>`;
+  // table
+  const dot=ok=>`<i style="background:var(${ok===true?"--ok":ok===false?"--bad":"--warn"})"></i>`;
+  g("mtab").innerHTML=`<thead><tr><th>發票／行</th><th>來源</th><th>PO／行</th><th>料號</th><th class="num">數量</th><th>分配到收料批</th><th>檢查</th><th>結果</th><th class="num">可付 (原幣)</th></tr></thead><tbody>${res.map(r=>`<tr>
+    <td class="mono">${r.iv.no} / ${r.li+1}</td><td>${r.iv.src}</td><td class="mono">${r.po.no.slice(-4)} / ${r.l.ln}</td><td class="mono">${r.pl.pn}</td><td class="num">${mfmt(r.l.qty)}</td>
+    <td class="wrap">${r.alloc.map(a=>`<span class="chip ${a.t==="spec"?"s":""}">${a.x.no.slice(6)} ×${mfmt(a.q)}${a.t==="spec"?" 特採":""}</span>`).join("")}${r.unmatched?`<span class="chip s" style="background:var(--bad-soft);color:var(--bad)">退貨 ${mfmt(r.unmatched)}</span>`:""}</td>
+    <td><span class="dots" title="數量・單價・交期・品質・交易條件">${dot(r.unmatched?false:r.specQ&&!document.getElementById("ms").checked?null:true)}${dot(r.priceOK)}${dot(r.lateFlag?null:true)}${dot(r.qual.length?null:true)}${dot(r.termsOK)}</span></td>
+    <td><span class="pill p-${r.cls}">${r.st}</span></td><td class="num">${r.po.cur} ${mfc(r.pay,r.po.cur)}</td></tr>`).join("")}</tbody>`;
+  g("mnotes").innerHTML=res.filter(r=>r.notes.length).map(r=>`<div><b>AI 判讀 · ${r.iv.no} / ${r.li+1}（${r.pl.pn}）</b>${r.qual.length?`<br><span class="note">IQC：${r.qual.map(q=>q.iqc).join("；")}</span>`:""}<br>${r.notes.join("<br>")}</div>`).join("");
+  // PO line balance
+  g("ptab").innerHTML=`<thead><tr><th>PO／行</th><th>供應商</th><th>料號</th><th>交易條件</th><th class="num">訂購</th><th>交期批次</th><th class="num">已收</th><th class="num">允收</th><th class="num">特採</th><th class="num">退貨</th><th class="num">已請款</th><th>對應發票</th></tr></thead><tbody>${MPO.flatMap(p=>p.lines.map(pl=>{const G=MGRN.filter(x=>x.po===p.no&&x.ln===pl.ln),R=res.filter(r=>r.po.no===p.no&&r.l.ln===pl.ln),sum=k=>G.reduce((s,x)=>s+x[k],0);
+    return `<tr><td class="mono">${p.no.slice(-4)} / ${pl.ln}</td><td>${p.vendor}</td><td class="mono">${pl.pn}</td><td>${p.inco}</td><td class="num">${mfmt(pl.qty)}</td><td>${pl.sched.map(s=>`<span class="chip">${s.d.slice(5)} ×${mfmt(s.q)}</span>`).join("")}</td><td class="num">${mfmt(sum("qty"))}</td><td class="num">${mfmt(sum("acc"))}</td><td class="num">${mfmt(sum("spec"))}</td><td class="num">${mfmt(sum("rej"))}</td><td class="num">${mfmt(R.reduce((s,r)=>s+r.l.qty,0))}</td><td class="mono">${[...new Set(R.map(r=>r.iv.no))].join("、")}</td></tr>`})).join("")}</tbody>`;
+}
+["mg","mp","ms"].forEach(id=>document.getElementById(id).addEventListener("input",runMatch));
+document.getElementById("ms").addEventListener("change",runMatch);
+runMatch();
+
+/* ===== 00 老闆體驗 ===== */
+const MODES={
+ tri:{name:"三角貿易",short:"台灣接單、台灣下單付款，貨直送大陸廠",
+  flow:["客戶下單給台灣主體","台灣主體向供應商下 PO、收發票、付款","貨物直送大陸工廠收料（不經台灣）","大陸廠收料單寄回台灣，AP 才能比對","台灣主體對大陸廠開內部轉撥"],
+  pain:["發票在台灣，收料單在大陸廠，兩地單據要湊齊","收料紙本靠快遞或傳真，常晚到甚至遺失","原廠季度換價，採購 PO 沒跟上"],
+  acts:{grn:{label:"請大陸廠傳真收料單",min:40}}},
+ local:{name:"大陸廠自主採購＋關鍵料進口",short:"大陸廠多數就地採購，少量關鍵零件由海外進口",
+  flow:["大陸廠自行下 PO、收料、付款（RMB）","當地供應商開增值稅專用發票","關鍵零件（晶片、記憶體）由海外原廠進口","進口料需報關單、繳進口關稅與增值稅","台灣主要負責管理與資金調度"],
+  pain:["當地供應商多、電腦化程度不一","發票種類開錯（普票／專票）影響進項稅抵扣","報關單由報關行建檔，數量常與發票對不上"],
+  acts:{}},
+ mix:{name:"混合模式",short:"主料走三角貿易，輔料與包材由大陸廠就地採購",
+  flow:["關鍵主料：台灣下單付款、貨直送大陸廠","部分主料以進口報關方式入廠","輔料、包材：大陸廠就地採購付款","兩個主體各自付款、各自比對","台灣與大陸廠間有內部轉撥"],
+  pain:["同一個廠同時有三種單據流程，AP 規則各不相同","跨主體、跨系統的單據最容易對不上","供應商與料件數量最多、例外最雜"],
+  acts:{grn:{label:"請大陸廠傳真收料單",min:40}}},
+};
+const ACTS=[
+ {id:"po",label:"調閱 ERP 採購單",min:5,who:"ERP 系統"},
+ {id:"grn",label:"索取收料單",min:15,who:"倉庫"},
+ {id:"buyer",label:"打電話給採購",min:15,who:"採購",call:1},
+ {id:"mat",label:"打電話給物料／倉庫",min:15,who:"物料／倉庫",call:1},
+ {id:"qa",label:"詢問品保",min:15,who:"品保",call:1},
+ {id:"vendor",label:"聯絡供應商",min:20,who:"供應商",call:1},
+ {id:"customs",label:"調閱報關單",min:20,who:"關務",only:["local","mix"]},
+];
+const DEF={po:"PO 數量、單價與發票相符。",grn:"收料單數量與發票相符，已入庫。",buyer:"採購：這張沒問題，照付就好。",mat:"倉庫：貨有收到，數量沒錯。",qa:"品保：IQC 已允收。",vendor:"供應商：發票內容沒有問題。",customs:"這張不是進口料，沒有報關單。"};
+const DEC={pay:"全額付款",partial:"部分付款",hold:"暫扣待查",reject:"退件"};
+const LIB={
+ clean_us:{vendor:"Apex Semiconductor (SG)",item:"PMIC 電源管理 IC",form:"傳真＋正本郵寄",no:"AS-09-08110",date:"2009-08-15",po:"PO-TW-0908-0117",qty:"10,500 pcs",price:"USD 0.41",amt:"USD 4,305.00",tax:"免稅（境外）",
+  clues:{},ans:"pay",cause:null,ai:"pay",aiSec:3,aiWhy:"PO、收料、發票三方自動吻合，直接放行。"},
+ clean_cn:{vendor:"東莞匯聯包裝",item:"防靜電包材",form:"紙本增值稅專票",no:"44031987",date:"2009-08-12",po:"PO-SZ-0908-0198",qty:"1,200 箱",price:"RMB 82.00",amt:"RMB 98,400＋稅 12,792",tax:"增值稅專票 13%",
+  clues:{customs:"這是當地採購，沒有報關單。"},ans:"pay",cause:null,ai:"pay",aiSec:3,aiWhy:"專票驗證通過，數量單價吻合，直接放行。"},
+ grn_paper:{vendor:"Kinwa Connector Ltd. (HK)",item:"USB 連接器",form:"傳真",no:"KW-H-09-0488",date:"2009-08-16",po:"PO-TW-0908-0105",qty:"12,000 pcs",price:"USD 0.088",amt:"USD 1,056.00",tax:"免稅（境外）",
+  clues:{grn:"台灣 ERP 查無收料。大陸廠回傳真：8/11 已收 12,000 pcs，紙本收料單月底才會隨快遞寄回。",mat:"深圳廠倉庫：貨早就收了，單子還在廠裡，月底一起寄。"},
+  ans:"hold",cause:"物料（跨廠單據傳遞）",risk:0,ai:"pay",aiSec:4,aiWhy:"直接讀取大陸廠系統的入庫資料，收料已存在，比對吻合後放行。人工時代卡在紙本，AI 時代不用等。"},
+ price_po:{vendor:"韓系 DRAM 原廠",item:"行動記憶體",form:"EDI",no:"KR-09Q3-02210",date:"2009-07-03",po:"PO-TW-0906-0322",qty:"60,000 pcs",price:"USD 21.60",amt:"USD 1,296,000.00",tax:"免稅（境外）",
+  clues:{po:"PO 單價為 USD 19.80，發票 21.60，差 9.1%，金額差 USD 108,000。",buyer:{t:"採購出差中，下午才回電：上週跟原廠談定 Q3 新價，PO 還沒改，我回去馬上改。",x:120},vendor:"原廠：Q3 合約價就是 21.60，已經發公告。"},
+  ans:"hold",cause:"採購（PO 未隨季度換價）",risk:3499200,riskTxt:"PO 未修改前照付，金額與採購單不一致，屬控制缺失",ai:"hold",aiSec:5,aiWhy:"比對季度合約價表，確認 21.60 為 Q3 合約價；自動通知採購修改 PO，改好後自動放行。"},
+ dup:{form:"正本郵寄",clues:{vendor:"供應商：我們先傳真一次，正本又寄了一次，同一張。"},ans:"reject",cause:"供應商（重複寄送）",ai:"reject",aiSec:1,aiWhy:"同供應商、同發票號碼已入帳，自動退件並通知供應商。"},
+ partial:{vendor:"榮達精密",item:"鋁合金機殼",form:"紙本統一發票",no:"RD-30019922",date:"2009-07-09",po:"PO-TW-0906-0358",qty:"80,000 pcs",price:"TWD 46.50",amt:"TWD 3,720,000",tax:"零稅率",
+  clues:{grn:"收料單：實收 60,000 pcs。",mat:"物料：另外 20,000 下週才到，供應商先開了全額發票。"},ans:"partial",cause:"供應商（提前開票）",risk:930000,riskTxt:"多付尚未到貨的 20,000 pcs",ai:"partial",aiSec:3,aiWhy:"可請款量依收料自動計算，先付 60,000 pcs，餘額待到貨後釋放。"},
+ handwritten:{vendor:"建興五金",item:"機構件螺絲",form:"手寫三聯式發票",no:"BX-0912-031",date:"2009-08-20",po:"PO-TW-0908-0215（手寫）",qty:"800 千顆",price:"TWD 115",amt:"TWD 92,000＋稅 4,600",tax:"5% 應稅",
+  clues:{po:"查無 PO-TW-0908-0215。同供應商有 PO-TW-0908-0251，品項、數量、單價都相符。",vendor:{t:"老闆娘接電話：喔，是 0251，我寫反了，歹勢。",x:10},buyer:"採購：建興的單子是 0251 沒錯。"},
+  ans:"pay",cause:"供應商（手寫錯誤）",ai:"pay",aiSec:6,aiWhy:"OCR 讀到的 PO 號碼不存在，自動找出同供應商最相符的 PO 0251 並補正，信心度 0.96。"},
+ customs:{vendor:"美系 SoC 晶片原廠",item:"應用處理器（進口）",form:"Commercial Invoice",no:"US-09-5509930",date:"2009-08-18",po:"PO-SZ-0908-0101",qty:"10,000 pcs",price:"USD 38.00",amt:"USD 380,000.00",tax:"進口關稅＋進口增值稅",
+  clues:{customs:"報關單記載數量 1,000 pcs，發票 10,000 pcs。",mat:"倉庫：實收 10,000，點過了沒錯。",vendor:"原廠：出貨 10,000 pcs，裝箱單也是 10,000。"},
+  ans:"hold",cause:"關務（報關行建檔錯誤）",risk:0,riskTxt:"報關數量錯誤未更正前付款，日後海關稽核與進口增值稅抵扣都會出問題",ai:"hold",aiSec:5,aiWhy:"讀取報關電子資料發現數量少一個零，通知關務請報關行更正，付款暫扣。"},
+ qa_reject:{vendor:"Kinwa Connector Ltd. (HK)",item:"Type-C 連接器",form:"傳真",no:"KW-H-09-0512",date:"2009-08-22",po:"PO-SZ-0908-0105",qty:"12,000 pcs",price:"USD 0.088",amt:"USD 1,056.00",tax:"免稅（境外）",
+  clues:{grn:"收料單：實收 12,000 pcs，IQC 欄註記退 300。",qa:"品保：300 pcs 插拔力不良，已退回供應商。",vendor:"供應商：退貨收到了，折讓單下個月開。"},
+  ans:"partial",cause:"品保／供應商品質",risk:850,riskTxt:"多付退貨的 300 pcs",ai:"partial",aiSec:3,aiWhy:"讀取 IQC 結果，只付允收 11,700 pcs，退貨 300 pcs 等折讓單。"},
+ wrong_vat:{vendor:"惠州盛達電子",item:"線材組件",form:"紙本增值稅普通發票",no:"44120065",date:"2009-08-25",po:"PO-SZ-0908-0233",qty:"5,000 條",price:"RMB 12.00",amt:"RMB 60,000＋稅 7,800",tax:"增值稅普票 13%",
+  clues:{vendor:"供應商：我們開普票比較方便，不都一樣嗎？",buyer:"採購：合約有寫要開專票。"},ans:"reject",cause:"供應商（發票種類錯誤）",risk:34000,riskTxt:"普票進項稅不能抵扣，等於多付 RMB 7,800",ai:"reject",aiSec:2,aiWhy:"辨識為普通發票，與合約要求的專用發票不符，自動退件並說明原因。"},
+ wh_missed:{vendor:"深圳德興塑膠",item:"塑膠外殼",form:"紙本增值稅專票",no:"44102231",date:"2009-08-26",po:"PO-SZ-0908-0241",qty:"20,000 pcs",price:"RMB 3.20",amt:"RMB 64,000＋稅 8,320",tax:"增值稅專票 13%",
+  clues:{grn:"系統查無收料記錄。",mat:{t:"倉庫找了一下：有收，8/20 到貨，忘了入系統，今天補登。",x:20}},ans:"hold",cause:"物料（倉庫漏登）",risk:0,riskTxt:"系統無收料就付款，屬控制缺失",ai:"hold",aiSec:4,aiWhy:"發現有發票、無收料，比對門禁與送貨單記錄後，通知倉庫補登，補登後自動放行。"},
+};
+const BATCH={tri:["clean_us","grn_paper","price_po","partial","handwritten","dup"],local:["clean_cn","customs","qa_reject","wrong_vat","wh_missed","dup"],mix:["clean_us","grn_paper","customs","price_po","qa_reject","handwritten"]};
+let G={mode:"tri",cases:[],cur:0,min:0,calls:0,done:false};
+function buildBatch(){
+  G.cases=BATCH[G.mode].map((k,i,arr)=>{let c=structuredClone(LIB[k]);
+    if(k==="dup"){const o=structuredClone(LIB[arr[0]]);
+      c={...o,form:c.form,clues:{vendor:LIB.dup.clues.vendor},ans:"reject",cause:LIB.dup.cause,ai:"reject",aiSec:1,aiWhy:LIB.dup.aiWhy,
+         date:"2009-08-28",risk:arr[0]==="clean_cn"?500400:139500,riskTxt:"同一張發票付兩次"};}
+    return {...c,key:k,seen:{},dec:null}});
+  G.cur=0;G.min=0;G.calls=0;G.done=false;
+}
+const clockStr=m=>{const t=9*60+m,h=Math.floor(t/60),mm=t%60;return `${String(h).padStart(2,"0")}:${String(mm).padStart(2,"0")}`};
+function renderModes(){
+  document.getElementById("modes").innerHTML=Object.entries(MODES).map(([k,m])=>`<button type="button" role="radio" aria-checked="${k===G.mode}" data-mode="${k}"><b>${m.name}</b><span>${m.short}</span></button>`).join("");
+  const m=MODES[G.mode];
+  document.getElementById("mdetail").innerHTML=`<div><span class="label">單據與付款流程</span><ol>${m.flow.map(x=>`<li>${x}</li>`).join("")}</ol></div><div><span class="label">這個模式下 AP 最常卡在</span><ul>${m.pain.map(x=>`<li>${x}</li>`).join("")}</ul></div>`;
+}
+function actCfg(a){return {...a,...(MODES[G.mode].acts[a.id]||{})}}
+function renderGame(){
+  const n=G.cases.filter(c=>c.dec).length,days=Math.floor(G.min/540);
+  document.getElementById("clock").innerHTML=`<div><span class="label">時鐘</span><br><span class="v">${days?`第 ${days+1} 天 `:""}${clockStr(G.min%540)}</span> ${G.min>=540?`<span class="ot">已超過下班時間</span>`:""}</div>
+   <div><span class="label">已花時間</span><br><span class="v">${Math.floor(G.min/60)} 小時 ${G.min%60} 分</span></div>
+   <div><span class="label">電話</span><br><span class="v">${G.calls} 通</span></div>
+   <div><span class="label">已判定</span><br><span class="v">${n} / ${G.cases.length}</span></div>
+   <div style="margin-left:auto"><button class="btn" id="restart" type="button">重新開始</button></div>`;
+  document.getElementById("gq").innerHTML=G.cases.map((c,i)=>`<button type="button" data-g="${i}" aria-current="${i===G.cur}"><span class="t">${c.vendor}</span>${c.dec?`<span class="pill p-ok">${DEC[c.dec]}</span>`:`<span class="pill p-warn">待審</span>`}<span class="s mono">${c.no} · ${c.form}</span></button>`).join("");
+  const c=G.cases[G.cur];
+  const acts=ACTS.filter(a=>!a.only||a.only.includes(G.mode)).map(actCfg);
+  document.getElementById("desk").innerHTML=`<div class="dhead"><div><span class="label">發票 ${G.cur+1} / ${G.cases.length} · ${c.form}</span><h2 style="font-size:1.1rem;margin-top:2px">${c.vendor}</h2></div></div>
+   <div class="paper"><div><span>發票號碼</span><b class="mono">${c.no}</b></div><div><span>日期</span><b class="mono">${c.date}</b></div><div><span>品項</span><b>${c.item}</b></div><div><span>PO 號碼</span><b class="mono">${c.po}</b></div><div><span>數量</span><b class="mono">${c.qty}</b></div><div><span>單價</span><b class="mono">${c.price}</b></div><div><span>金額</span><b class="mono">${c.amt}</b></div><div><span>稅別</span><b>${c.tax}</b></div></div>
+   <div><span class="label">查核動作（括號內為花費時間）</span><div class="acts" style="margin-top:6px">${acts.map(a=>`<button type="button" data-act="${a.id}" ${c.seen[a.id]!==undefined||c.dec?"disabled":""}>${a.label}<small>${a.min} 分</small></button>`).join("")}</div></div>
+   <div class="log">${Object.keys(c.seen).map(id=>{const a=acts.find(x=>x.id===id);return `<div><b>${a.who}</b><br>${c.seen[id]}</div>`}).join("")||`<p class="note" style="margin:0">還沒查任何資料。你可以直接判定，也可以先查核。</p>`}</div>
+   ${c.dec?`<p class="note" style="margin:0">已判定：<b>${DEC[c.dec]}</b>。結果會在全部判定後揭曉。</p>`:`<div><span class="label">你的判定</span><div class="decide" style="margin-top:6px">${Object.entries(DEC).map(([k,v],i)=>`<button type="button" data-dec="${k}" class="${i?"alt":""}">${v}</button>`).join("")}</div></div>`}`;
+}
+function doAct(id){const c=G.cases[G.cur],a=actCfg(ACTS.find(x=>x.id===id));let cl=c.clues[id]??DEF[id],extra=0;
+  if(typeof cl==="object"){extra=cl.x||0;cl=cl.t}
+  c.seen[id]=cl+(extra?`（等了 ${extra} 分鐘）`:"");G.min+=a.min+extra;if(a.call)G.calls++;renderGame()}
+function doDec(d){const c=G.cases[G.cur];c.dec=d;G.min+=3;const nx=G.cases.findIndex(x=>!x.dec);if(nx>=0)G.cur=nx;else{G.done=true;renderAI()}renderGame()}
+function renderAI(){
+  const C=G.cases,right=C.filter(c=>c.dec===c.ans).length,loss=C.reduce((s,c)=>s+(((c.dec==="pay"&&c.ans!=="pay")||(c.dec==="partial"&&["hold","reject"].includes(c.ans))||(c.dec==="pay"&&c.ans==="partial"))?(c.risk||0):0),0);
+  const aiSec=C.reduce((s,c)=>s+c.aiSec,0),played=G.done;
+  const causes={};C.forEach(c=>{if(c.cause){const k=c.cause.split("（")[0];causes[k]=(causes[k]||0)+1}});
+  const mx=Math.max(1,...Object.values(causes));
+  document.getElementById("aiout").innerHTML=`
+   <div class="score">
+    <div><span class="label">你（2008 年人工）</span>${played?`<dl><dt>花費時間</dt><dd>${Math.floor(G.min/60)} 小時 ${G.min%60} 分</dd><dt>電話</dt><dd>${G.calls} 通</dd><dt>判定正確</dt><dd>${right} / ${C.length}</dd><dt>錯付風險金額</dt><dd>NT$ ${fmt(loss)}</dd></dl>`:`<p class="note">尚未完成第二步。</p>`}</div>
+    <div class="ai2"><span class="label">AI 協助</span><dl><dt>花費時間</dt><dd>${aiSec} 秒＋人工確認約 ${C.filter(c=>c.ai!=="pay").length*2} 分</dd><dt>電話</dt><dd>0 通（自動通知相關部門）</dd><dt>判定</dt><dd>${C.length} / ${C.length} 有依據</dd><dt>錯付風險金額</dt><dd>NT$ 0</dd></dl></div>
+   </div>
+   <div class="panel" style="margin-top:12px"><div class="tablebox"><table><thead><tr><th>發票</th><th>正確處理</th>${played?"<th>你的判定</th>":""}<th>AI 處理</th><th>問題出在哪個環節</th><th class="wrap">AI 怎麼判斷</th></tr></thead><tbody>${C.map(c=>`<tr><td>${c.vendor}<br><span class="note mono">${c.no}</span></td><td>${DEC[c.ans]}</td>${played?`<td><span class="pill ${c.dec===c.ans?"p-ok":"p-bad"}">${DEC[c.dec]}</span></td>`:""}<td><span class="pill p-ai">${DEC[c.ai]}</span> <span class="note mono">${c.aiSec} 秒</span></td><td>${c.cause||"無問題"}</td><td class="wrap">${c.aiWhy}${c.dec&&c.dec!==c.ans&&c.riskTxt?`<br><span style="color:var(--bad)">若照你的判定：${c.riskTxt}</span>`:""}</td></tr>`).join("")}</tbody></table></div></div>
+   <div class="panel cause" style="margin-top:12px"><h2>這一批的問題，出在哪個環節</h2><p class="note" style="margin:0">多數例外不是 AP 的錯，而是採購、物料、品保、關務或供應商的單據沒跟上。AP 卻得一個一個打電話追。</p>
+    ${Object.entries(causes).map(([k,v])=>`<div class="r"><span>${k}</span><div class="b" style="width:${v/mx*100}%"></div><span class="num">${v}</span></div>`).join("")}</div>
+   <p class="note">人工時間依實際動作累計，AI 時間為示意。AI 協助層的前提是各廠系統已整合、單據可數位讀取；這正是當年花三年打底的部分。</p>
+   <div class="panel airun" data-live><span class="eyebrow">本版未提供即時 AI · 現場判讀</span><h2 style="font-size:1.05rem;margin-top:2px">上面的 AI 結果是預先寫好的情境示範</h2><p class="note" style="margin-top:4px">把這 6 張發票和各部門的回覆一次交給 AI，它會現場逐張判定並說明理由。本版未提供即時 AI，約需 30–60 秒。</p><button class="btn ai-btn" id="airunBtn" type="button" style="margin-top:8px">讓 AI 現場判讀這一批</button><div id="airunOut" aria-live="polite"></div></div>`;
+}
+document.addEventListener("click",e=>{
+  const m=e.target.closest("[data-mode]");if(m){G.mode=m.dataset.mode;buildBatch();renderModes();renderGame();document.getElementById("aiout").innerHTML=`<p class="note">完成第二步的 6 張判定後，這裡會顯示 AI 處理同一批發票的結果與對照。<button class="btn" id="skip" type="button" style="margin-left:8px">先看 AI 結果</button></p>`;return}
+  const q=e.target.closest("[data-g]");if(q){G.cur=+q.dataset.g;renderGame();return}
+  const a=e.target.closest("[data-act]");if(a){doAct(a.dataset.act);return}
+  const d=e.target.closest("[data-dec]");if(d){doDec(d.dataset.dec);if(G.done)document.getElementById("aisec").scrollIntoView({behavior:window.matchMedia?.("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});return}
+  if(e.target.id==="restart"){buildBatch();renderGame();document.getElementById("aiout").innerHTML=`<p class="note">完成第二步的 6 張判定後，這裡會顯示 AI 處理同一批發票的結果與對照。<button class="btn" id="skip" type="button" style="margin-left:8px">先看 AI 結果</button></p>`;return}
+  if(e.target.id==="skip"){renderAI()}
+});
+buildBatch();renderModes();renderGame();
+
+/* ===== 04 對帳與銀行作業 ===== */
+const u2=n=>(+n).toLocaleString("zh-TW",{minimumFractionDigits:2,maximumFractionDigits:2});
+const STMT=[
+ {no:"AS-24-07650",sup:20.00,our:0,cat:"手續費短收",cls:"warn",ai:"7 月已付 USD 12,400.00，費用條件 SHA，供應商端被中轉行扣了 20 元，所以帳上留尾差。依合約各自負擔手續費，回覆供應商不補付，並附匯款水單。"},
+ {no:"AS-24-07781",sup:82000,our:0,cat:"付款在途",cls:"ok",ai:"8/28 已由 OBU 帳戶匯出，供應商 8/31 結帳時尚未入帳。屬時間差，附上匯款水單即可，不需調整。"},
+ {no:"AS-24-07902",sup:17250,our:17250,cat:"相符",cls:"ok",ai:"雙方一致。原因入庫資料延遲回傳而暫扣，現已回傳，排入 9/10 付款批次。"},
+ {no:"AS-24-08110",sup:5512.5,our:5512.5,cat:"相符",cls:"ok",ai:"雙方一致，已排入 9/10 付款批次。"},
+ {no:"AS-24-08236",sup:1207.5,our:1207.5,cat:"相符",cls:"ok",ai:"雙方一致，已排入 9/10 付款批次。"},
+ {no:"AS-24-08301",sup:3690,our:0,cat:"我方未收到發票",cls:"bad",ai:"我方查無此發票。比對 PO 與收料：8/29 已收 LDO 32,087 pcs，但發票寄到了採購個人信箱，未進 AP 收件流程。已轉入擷取流程，比對通過後列入下一批付款。"},
+ {no:"CM-24-0112",sup:0,our:-410,cat:"對方未列折讓",cls:"warn",ai:"我方已登錄的價格保護折讓 USD 410，供應商尚未入帳。附上原廠業務的折讓同意郵件，請對方在 9 月對帳單列入。"},
+];
+const PB=[
+ {id:"dram",v:"韓系 DRAM 原廠",ent:"台灣主體",acct:"OBU 美元戶",cur:"USD",amt:426600,inv:"KR-24Q3-02210、02388（已扣遲交罰款 5,400）",swift:"BANKKRSEXXX",ac:"****-**-7731",fee:"SHA"},
+ {id:"soc",v:"美系 SoC 晶片原廠",ent:"台灣主體",acct:"OBU 美元戶",cur:"USD",amt:380000,inv:"US-5509930",swift:"BANKUS33XXX",ac:"****4410",fee:"SHA"},
+ {id:"apex",v:"Apex Semiconductor (SG)",ent:"台灣主體",acct:"OBU 美元戶",cur:"USD",amt:23970,inv:"AS-24-07902、08110、08236",swift:"BANKSGSGXXX",ac:"***-***-552-1",fee:"SHA",swiftErr:1},
+ {id:"tj",v:"台鉅電子",ent:"台灣主體",acct:"DBU 台幣戶",cur:"TWD",amt:98400,inv:"TJ-20485521（允收部分）",swift:"台灣○○銀行 竹科分行",ac:"****-***-3307",fee:"—"},
+ {id:"ts",v:"東昇機構件",ent:"台灣主體",acct:"DBU 台幣戶",cur:"TWD",amt:920000,inv:"TS-20484102",swift:"台灣○○銀行 新莊分行",ac:"****-***-9918",fee:"—",bankChange:1},
+ {id:"dg",v:"東莞匯聯包裝",ent:"深圳廠",acct:"深圳廠人民幣戶",cur:"RMB",amt:111192,inv:"44031987",swift:"○○銀行 東莞分行",ac:"****8862",fee:"—"},
+];
+const HELD=[{v:"Kinwa Connector Ltd. (HK)",why:"交易條件不符（發票 FOB 香港 vs PO DAP 深圳），等供應商重開"},{v:"台鉅電子・特採部分",why:"特採 200,000 pcs 待品保簽核與議價"}];
+const BFX={USD:32.40,TWD:1,RMB:4.50},PFX=32.15;
+let B={verified:false,appr:[],sent:false};
+const twd=p=>p.amt*BFX[p.cur];
+function batch(){return PB.filter(p=>!p.bankChange||B.verified)}
+function levels(){const tot=batch().filter(p=>p.ent==="台灣主體").reduce((s,p)=>s+twd(p),0),big=batch().some(p=>twd(p)>10e6);
+  const L=[{k:"clerk",n:"AP 經辦",d:"建立付款清冊"},{k:"mgr",n:"財務經理",d:"單筆 ≤ NT$100 萬"}];
+  if(tot>1e6)L.push({k:"cfo",n:"財務長",d:"批次 > NT$100 萬"});
+  if(big)L.push({k:"ceo",n:"總經理",d:"單筆 > NT$1,000 萬"});return L}
+function renderBank(){
+  const g=id=>document.getElementById(id);
+  // ① statement
+  const sT=STMT.reduce((s,r)=>s+r.sup,0),oT=STMT.reduce((s,r)=>s+r.our,0);
+  g("stmt").innerHTML=`<thead><tr><th>單據</th><th class="num">供應商對帳單</th><th class="num">我方應付帳</th><th class="num">差異</th><th>差異類型</th><th class="wrap">AI 判讀與處理</th></tr></thead><tbody>${STMT.map(r=>`<tr><td class="mono">${r.no}</td><td class="num">${r.sup?u2(r.sup):"—"}</td><td class="num">${r.our?u2(r.our):"—"}</td><td class="num">${r.sup-r.our?u2(r.sup-r.our):"0"}</td><td><span class="pill p-${r.cls}">${r.cat}</span></td><td class="wrap">${r.ai}</td></tr>`).join("")}</tbody><tfoot><tr><td>合計 (USD)</td><td class="num">${u2(sT)}</td><td class="num">${u2(oT)}</td><td class="num">${u2(sT-oT)}</td><td colspan="2"></td></tr></tfoot>`;
+  const part=c=>STMT.filter(r=>r.cat===c).reduce((s,r)=>s+(r.sup-r.our),0);
+  g("bridge").innerHTML=`<span class="label" style="flex-basis:100%">餘額調節</span><span>供應商餘額 <b>${u2(sT)}</b></span><span class="eq">−</span><span>付款在途 <b>${u2(part("付款在途"))}</b></span><span class="eq">−</span><span>我方未收發票 <b>${u2(part("我方未收到發票"))}</b></span><span class="eq">−</span><span>手續費短收 <b>${u2(part("手續費短收"))}</b></span><span class="eq">−</span><span>對方未列折讓 <b>${u2(part("對方未列折讓"))}</b></span><span class="eq">=</span><span>我方應付餘額 <b>${u2(oT)}</b></span>`;
+  // ② batch
+  const bt=batch();
+  g("pbatch").innerHTML=`<thead><tr><th>付款主體</th><th>付款帳戶</th><th>受款人</th><th>沖銷發票</th><th>幣別</th><th class="num">金額</th><th class="num">TWD 約當</th><th>狀態</th></tr></thead><tbody>${PB.map(p=>{const inB=bt.includes(p);return `<tr><td>${p.ent}</td><td>${p.acct}</td><td>${p.v}</td><td class="wrap">${p.inv}</td><td>${p.cur}</td><td class="num">${p.cur==="TWD"?fmt(p.amt):u2(p.amt)}</td><td class="num">${fmt(twd(p))}</td><td>${inB?`<span class="pill p-ok">列入批次</span>`:`<span class="pill p-bad">AI 攔下</span>`}</td></tr>`}).join("")}${HELD.map(h=>`<tr class="ic"><td colspan="3">${h.v}</td><td colspan="4" class="wrap">${h.why}</td><td><span class="pill p-warn">暫扣</span></td></tr>`).join("")}</tbody><tfoot><tr><td colspan="6">本批合計（台灣主體＋深圳廠，TWD 約當）</td><td class="num">${fmt(bt.reduce((s,p)=>s+twd(p),0))}</td><td></td></tr></tfoot>`;
+  g("pbnotes").innerHTML=`<div><b>AI 判讀 · 東昇機構件：受款帳戶 3 天前變更</b><br>供應商主檔的銀行帳戶在 9/07 依一封 email 申請變更，變更後第一筆付款就是 NT$920,000，且新帳戶戶名與統一編號登記名稱不一致。這是典型的商業電子郵件詐騙手法。建議依主檔原有電話（不是 email 裡的電話）回撥供應商財務主管確認後再付。
+    <br><label style="display:inline-flex;gap:6px;margin-top:6px;align-items:center"><input type="checkbox" id="verify" ${B.verified?"checked":""} ${B.appr.length?"disabled":""}> 已依主檔電話回撥，確認變更屬實</label></div>
+    <div><b>AI 判讀 · 資金與費用</b><br>本批 OBU 美元付款約 USD ${u2(bt.filter(p=>p.cur==="USD").reduce((s,p)=>s+p.amt,0))}，9/10 OBU 帳戶需留足餘額；費用條件依合約採 SHA（各自負擔）。台灣主體對境外供應商以 OBU 付款，貨物未在台灣通關，不涉及營業稅。</div>`;
+  const L=levels();
+  g("appr").innerHTML=L.map((l,i)=>{const done=B.appr.includes(l.k),can=!done&&B.appr.length===i;return `${i?'<span class="arrow">→</span>':""}<button type="button" data-appr="${l.k}" class="${done?"done":""}" ${can?"":"disabled"}>${done?"✓ ":""}${l.n}<small>${l.d}</small></button>`}).join("")+(B.appr.length===L.length?`<span class="pill p-ok" style="margin-left:8px">簽核完成</span>`:"");
+  // ③ bank
+  const allOK=B.appr.length===L.length;
+  if(!allOK){g("bankout").innerHTML=`<p class="note">完成步驟 ② 的全部簽核後，這裡會產生銀行付款檔。</p>`}
+  else{
+    const tw=bt.filter(p=>p.ent==="台灣主體"),obu=tw.filter(p=>p.cur==="USD"),dbu=tw.filter(p=>p.cur==="TWD"),cn=bt.filter(p=>p.ent!=="台灣主體");
+    const file=(title,rows)=>`<p class="sub2">${title}</p><pre class="raw">${rows.join("\n")}</pre>`;
+    g("bankout").innerHTML=
+      file("OBU 美元匯款檔（台灣主體）",["付款帳號|受款人|SWIFT|受款帳號|幣別|金額|費用|附言",...obu.map(p=>`OBU-****-0021|${p.v}|${p.swift}|${p.ac}|USD|${p.amt.toFixed(2)}|${p.fee}|INV ${p.inv.split("（")[0]}`)])+
+      file("DBU 台幣整批匯款檔（台灣主體）",["付款帳號|受款銀行|受款帳號|受款人|金額|附言",...dbu.map(p=>`DBU-****-0087|${p.swift}|${p.ac}|${p.v}|${p.amt}|${p.inv.split("（")[0]}`)])+
+      file("人民幣付款（深圳廠，由大陸主體在當地銀行執行）",["付款帳號|受款銀行|受款帳號|受款人|金額|附言",...cn.map(p=>`CNY-****-1150|${p.swift}|${p.ac}|${p.v}|${p.amt.toFixed(2)}|${p.inv}`)])+
+      (B.sent?`<p class="sub2">銀行回覆</p><div class="checks">${bt.map(p=>`<div class="chk"><span class="dot d-${p.swiftErr?"fail":"pass"}"></span><span class="n">${p.v}</span><span class="m">${p.swiftErr?"退匯：受款銀行 SWIFT 代碼無效。AI 比對發現主檔 SWIFT 少一碼分行代碼，與發票上印的不同；已更正並排入隔日重送，退匯手續費 USD 25 記入手續費。":`成功・${p.cur} ${p.cur==="TWD"?fmt(p.amt):u2(p.amt)}${p.cur==="USD"?`・成交匯率 ${PFX}`:""}`}</span></div>`).join("")}</div>`
+       :`<button class="btn ai-btn" id="send" type="button" style="margin-top:10px">加密傳送銀行</button>`);
+  }
+  // ④ recon
+  if(!B.sent){g("recon").innerHTML=`<p class="note">銀行回覆後，這裡會顯示自動沖銷傳票、銀行對帳與集團內部往來沖銷。</p>`;return}
+  const ok=bt.filter(p=>!p.swiftErr&&p.ent==="台灣主體"),usd=ok.filter(p=>p.cur==="USD"),tws=ok.filter(p=>p.cur==="TWD");
+  const book=usd.reduce((s,p)=>s+p.amt*BFX.USD,0)+tws.reduce((s,p)=>s+p.amt,0),paidUSD=usd.reduce((s,p)=>s+p.amt*PFX,0),fees=usd.length*15*PFX+tws.length*30+25*PFX,paid=paidUSD+tws.reduce((s,p)=>s+p.amt,0);
+  const fxg=book-paid;
+  g("recon").innerHTML=`<p class="sub2">自動沖銷傳票（台灣主體，TWD）</p>
+   <div class="jv"><span class="h">科目</span><span class="h n">借</span><span class="h n">貸</span>
+    <span>應付帳款（立帳匯率 ${BFX.USD}）</span><span class="n">${fmt(book)}</span><span></span>
+    <span>手續費（電匯費、退匯費）</span><span class="n">${fmt(fees)}</span><span></span>
+    <span>　銀行存款（OBU＋DBU）</span><span></span><span class="n">${fmt(paid+fees)}</span>
+    <span>　${fxg>=0?"兌換利益":"兌換損失"}（付款匯率 ${PFX}）</span><span></span><span class="n">${fmt(Math.abs(fxg))}</span></div>
+   <p class="note">立帳時以發票日匯率 ${BFX.USD} 入帳，付款日成交 ${PFX}，差額自動認列兌換損益；Apex 退匯部分不沖帳，應付帳款維持未付，重送成功後再沖。</p>
+   <p class="sub2">銀行對帳單自動調節</p>
+   <div class="checks">
+    ${usd.map(p=>`<div class="chk"><span class="dot d-pass"></span><span class="n">USD −${u2(p.amt)}</span><span class="m">對到付款 ${p.v}，沖銷完成</span></div>`).join("")}
+    <div class="chk"><span class="dot d-pass"></span><span class="n">USD −${u2(usd.length*15)}</span><span class="m">電匯手續費 ${usd.length} 筆，各 USD 15，自動入手續費科目</span></div>
+    <div class="chk"><span class="dot d-warn"></span><span class="n">USD −23,970.00 / +23,945.00</span><span class="m">Apex 匯出後退回，扣退匯費 USD 25；兩筆配對為同一筆退匯，不列為未達帳</span></div>
+    ${tws.map(p=>`<div class="chk"><span class="dot d-pass"></span><span class="n">TWD −${fmt(p.amt+30)}</span><span class="m">${p.v} ${fmt(p.amt)}＋跨行手續費 30</span></div>`).join("")}
+   </div>
+   <p class="sub2">集團內部往來沖銷（9 月，USD）</p>
+   <div class="tablebox"><table style="min-width:620px"><thead><tr><th>往來對象</th><th class="num">台灣應收（內部轉撥）</th><th class="num">台灣應付（代墊費用等）</th><th class="num">淨額</th><th>處理</th></tr></thead><tbody>
+    <tr><td>深圳廠</td><td class="num">1,248,000.00</td><td class="num">86,500.00</td><td class="num">1,161,500.00</td><td>深圳廠購匯後匯淨額</td></tr>
+    <tr><td>鄭州廠</td><td class="num">612,400.00</td><td class="num">0.00</td><td class="num">612,400.00</td><td>鄭州廠購匯後匯淨額</td></tr>
+    <tr><td>昆山廠</td><td class="num">312,000.00</td><td class="num">41,200.00</td><td class="num">270,800.00</td><td>昆山廠購匯後匯淨額</td></tr>
+   </tbody></table></div>
+   <p class="note">雙方互相抵銷後只匯淨額，3 筆取代原本上百筆逐筆匯款，手續費與對帳工作大幅減少。AI 在月底前比對兩邊帳上的內部往來明細，對不上的單據（例如一邊已開轉撥、另一邊尚未入庫）先列出來處理，月底才不會卡帳。</p>`;
+}
+document.addEventListener("click",e=>{
+  const a=e.target.closest("[data-appr]");if(a){B.appr.push(a.dataset.appr);renderBank();return}
+  if(e.target.id==="send"){B.sent=true;renderBank()}
+});
+document.addEventListener("change",e=>{if(e.target.id==="verify"){B.verified=e.target.checked;B.appr=[];B.sent=false;renderBank()}});
+renderBank();
+
+/* tabs */
+const TABS=["play","ingest","match","pay","bank"];
+function showTab(t){TABS.forEach(x=>{document.getElementById("tab-"+x).hidden=x!==t;document.getElementById("t-"+x).setAttribute("aria-selected",x===t)})}
+TABS.forEach(t=>document.getElementById("t-"+t).addEventListener("click",()=>showTab(t)));
+if(TABS.includes(location.hash.slice(1)))showTab(location.hash.slice(1));
+</script>
+<script>
+/* ===== 真 AI：使用檢視者自己的 Claude；不可用時隱藏 ===== */
+const aiSample=window.claude?.use?window.claude.use("sample").catch(()=>null):Promise.resolve(null);
+const escH=s=>String(s??"").replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+const HIDE=["not_granted","sampling_disabled","not_declared","capability_disabled","capability_removed"];
+function aiErr(e,el){el.innerHTML=`<p class="note">${HIDE.includes(e.code)?"目前無法使用 AI（本版未提供即時 AI）。":e.code==="rate_limited"?"使用次數暫時達上限，請稍後再試。":e.code==="image_rejected"?"這張圖片無法讀取，請換一張 JPG 或 PNG。":e.code==="cancelled"?"":"這次沒有取得完整結果，請再按一次。"}</p>`}
+aiSample.then(async s=>{
+  if(!s){const h=document.getElementById("mineHint");h.textContent="本版未提供即時 AI。";document.getElementById("mineBtn").disabled=true;return}
+  const lim=await s.limits().catch(()=>null);if(lim?.images)document.getElementById("mineImgLab").hidden=false;
+});
+/* 第三步：AI 現場重跑整批 */
+document.addEventListener("click",async e=>{
+  if(e.target.id!=="airunBtn")return;
+  const btn=e.target,out=document.getElementById("airunOut"),s=await aiSample;
+  if(!s){out.innerHTML='<p class="note">本版未提供即時 AI。</p>';return}
+  btn.disabled=true;out.innerHTML='<p class="note">AI 判讀中，約需 30–60 秒……</p>';
+  const acts=ACTS.filter(a=>!a.only||a.only.includes(G.mode));
+  const cases=G.cases.map((c,i)=>{const info=acts.map(a=>{let cl=c.clues[a.id]??DEF[a.id];if(typeof cl==="object")cl=cl.t;return `  - ${a.who}：${cl}`}).join("\n");
+    return `#${i+1} 發票 ${c.no}｜供應商 ${c.vendor}｜形式 ${c.form}｜日期 ${c.date}｜品項 ${c.item}｜PO ${c.po}｜數量 ${c.qty}｜單價 ${c.price}｜金額 ${c.amt}｜稅別 ${c.tax}\n各系統與部門資訊：\n${info}`}).join("\n\n");
+  const prompt=`你是台灣電子製造業的資深應付帳款（AP）主管。公司交易模式：${MODES[G.mode].name}（${MODES[G.mode].short}）。
+下面是本批 6 張待付款發票，以及調閱 ERP、收料單、報關單與詢問各部門得到的資訊。請逐張判定處理方式，並注意同一批中是否有重複請款。
+
+判定只能是：pay（全額付款）、partial（部分付款）、hold（暫扣待查）、reject（退件）。
+內控原則：系統沒有收料或採購單價未更正前不可付款；重複請款與稅別開錯應退件；只收到部分或有退貨時只付允收部分。
+
+${cases}
+
+只回覆 JSON 陣列，每張一個物件，依序：
+[{"no":"發票號碼","decision":"pay|partial|hold|reject","reason":"40 字內判定理由，繁體中文","dept":"問題來源單位（採購／物料倉庫／品保／關務／供應商／無）"}]`;
+  try{
+    const r=await s.json(prompt);const arr=Array.isArray(r)?r:[];
+    const right=arr.filter((x,i)=>G.cases[i]&&x.decision===G.cases[i].ans).length;
+    out.innerHTML=`<p style="margin-top:8px"><b>AI 現場判讀與答案一致：${right} / ${G.cases.length}</b></p><div class="tablebox" style="margin-top:6px"><table style="min-width:640px"><thead><tr><th>發票</th><th>AI 判定</th><th>參考答案</th><th>問題來源</th><th>AI 理由</th></tr></thead><tbody>${G.cases.map((c,i)=>{const x=arr[i]||{};return `<tr><td class="mono">${escH(c.no)}</td><td><span class="pill ${x.decision===c.ans?"p-ok":"p-warn"}">${escH(DEC[x.decision]||x.decision||"—")}</span></td><td>${DEC[c.ans]}</td><td>${escH(x.dept)}</td><td class="wrap">${escH(x.reason)}</td></tr>`}).join("")}</tbody></table></div><p class="note" style="margin-top:6px">AI 每次的用詞可能不同；若與參考答案不一致，通常是內控寬嚴的判斷差異，正好可以討論。</p>`;
+  }catch(err){aiErr(err,out)}finally{btn.disabled=false}
+});
+/* 01：擷取你自己的發票 */
+document.getElementById("mineBtn").addEventListener("click",async()=>{
+  const btn=document.getElementById("mineBtn"),out=document.getElementById("mineOut"),s=await aiSample;if(!s)return;
+  const txt=document.getElementById("mineTxt").value.trim(),img=document.getElementById("mineImg").files[0];
+  if(!txt&&!img){out.innerHTML='<p class="note">請先貼上發票內容或選擇一張照片。</p>';return}
+  btn.disabled=true;out.innerHTML='<p class="note">AI 擷取中……</p>';
+  const prompt=`你是應付帳款系統的發票擷取引擎。請從${img?"附上的發票圖片":""}${img&&txt?"與":""}${txt?"下面的文字":""}擷取欄位，對應到標準格式。看不到的欄位填空字串，不要猜測。
+${txt?"\n發票內容：\n"+txt.slice(0,6000)+"\n":""}
+只回覆一個 JSON 物件：
+{"fields":[{"name":"發票號碼|發票日期|供應商|PO 號碼|料號或品名|數量|單位|單價|幣別|未稅金額|稅額|總額|交易條件|付款條件","value":"擷取值","confidence":0到1的數字,"note":"如何取得或換算，15 字內"}],"issues":["需要人工注意的地方，例如欄位缺漏、單位需換算、金額驗算不符、PO 號碼格式可疑；繁體中文，最多 4 點"]}`;
+  try{
+    const r=await s.json(prompt,img?{images:img}:{});
+    const F=Array.isArray(r?.fields)?r.fields:[],I=Array.isArray(r?.issues)?r.issues:[];
+    out.innerHTML=`<table class="map2"><tbody>${F.map(f=>{const c=Math.max(0,Math.min(1,+f.confidence||0));return `<tr><td>${escH(f.name)}</td><td><b>${escH(f.value)||"—"}</b> ${f.value?`<span class="conf ${c>=0.95?"c-hi":"c-mid"}">${c.toFixed(2)}</span>`:""}<span class="note" style="display:block">${escH(f.note)}</span></td></tr>`}).join("")}</tbody></table>${I.length?`<div class="ainotes" style="padding:10px 0 0"><div><b>需要注意</b><br>${I.map(escH).join("<br>")}</div></div>`:""}`;
+  }catch(err){aiErr(err,out)}finally{btn.disabled=false}
+});
+</script>
+
+</body>
+</html>

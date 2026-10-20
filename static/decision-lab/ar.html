@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>AR 應收收款模擬器</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+TC:wght@700&display=swap">
+<style>
+/* Layout: executive briefing — six-gate collection flow, thesis, one-quarter event game with you-vs-agents scoreboard, remittance-advice AI console, agent details */
+:root{
+  --bg:#f3f5f7; --panel:#ffffff; --ink:#18222d; --muted:#5b6876; --line:#d9dfe6;
+  --accent:#1f5f8b; --accent-soft:#e3eef6; --inv:#8a4b2a; --inv-soft:#f6e9e1; --ai:#5a4a9e; --ai-soft:#ece9f7;
+  --ok:#2f7d4f; --ok-soft:#e2f2e8; --warn:#a86a0c; --warn-soft:#fbefd9; --bad:#b33a3a; --bad-soft:#f8e1e1;
+  --f-display:"Noto Serif TC","Songti TC",serif; --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11161c; --panel:#18202a; --ink:#e4e9ef; --muted:#93a1b0; --line:#2b3644;
+  --accent:#6fb0dc; --accent-soft:#1c3346; --inv:#e0a07c; --inv-soft:#3a2619; --ai:#b3a5ef; --ai-soft:#2a2545;
+  --ok:#6cc792; --ok-soft:#1a3326; --warn:#e3a94a; --warn-soft:#3a2d16; --bad:#ec7f7f; --bad-soft:#3d1f22; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161c; --panel:#18202a; --ink:#e4e9ef; --muted:#93a1b0; --line:#2b3644;
+  --accent:#6fb0dc; --accent-soft:#1c3346; --inv:#e0a07c; --inv-soft:#3a2619; --ai:#b3a5ef; --ai-soft:#2a2545;
+  --ok:#6cc792; --ok-soft:#1a3326; --warn:#e3a94a; --warn-soft:#3a2d16; --bad:#ec7f7f; --bad-soft:#3d1f22; color-scheme:dark}
+*{box-sizing:border-box}
+html{font-size:106.25%}
+@media (max-width:480px){html{font-size:100%}}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1rem;line-height:1.65}
+.wrap{max-width:1040px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:24px}
+h1{font-family:var(--f-display);font-size:clamp(1.7rem,4.6vw,2.4rem);line-height:1.25;margin:4px 0 0;text-wrap:balance}
+h2{font-family:var(--f-display);font-size:1.25rem;margin:0;text-wrap:balance}
+h3{font-size:1rem;margin:0}
+p{margin:0}
+.lead{color:var(--muted);max-width:66ch;margin-top:10px}
+.eyebrow{font-size:.78rem;letter-spacing:.12em;color:var(--ai);font-weight:500}
+.label{font-size:.72rem;letter-spacing:.08em;color:var(--muted)}
+.mono,.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.note{color:var(--muted);font-size:.84rem}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px}
+a{color:var(--accent)}
+.opener{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.opener div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 14px;display:flex;flex-direction:column;gap:2px}
+.opener b{font-size:1rem}.opener span{color:var(--muted);font-size:.84rem}
+.opener a{text-decoration:none}
+.thesis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.thesis div{padding:12px 14px;border-left:3px solid var(--inv);background:var(--panel);border-radius:0 6px 6px 0}
+.thesis p{color:var(--muted);font-size:.88rem;margin-top:2px}
+.sec{display:flex;flex-direction:column;gap:10px}
+.tablebox{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:680px}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap;font-size:.88rem}
+th{font-weight:500;color:var(--muted);font-size:.78rem}
+td.num,th.num{text-align:right}
+.score{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.score>div{padding:12px 16px;border-radius:8px;border:1px solid var(--line);background:var(--panel)}
+.score>div.ag{border-color:var(--ai);background:var(--ai-soft)}
+.score dl{display:grid;grid-template-columns:auto 1fr;gap:2px 14px;margin:6px 0 0}
+.score dt{color:var(--muted);font-size:.86rem}.score dd{margin:0;font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.weeks{display:flex;gap:6px;flex-wrap:wrap}
+.weeks span{font-family:var(--f-mono);font-size:.78rem;padding:2px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.weeks span.on{border-color:var(--inv);color:var(--inv);background:var(--inv-soft);font-weight:500}
+.weeks span.done{color:var(--ok);border-color:var(--ok)}
+.event{padding:18px;display:flex;flex-direction:column;gap:12px}
+.event .what{border-left:3px solid var(--inv);padding-left:12px}
+.lag{font-size:.86rem;color:var(--bad)}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.opts button{all:unset;cursor:pointer;border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:var(--bg);display:flex;flex-direction:column;gap:2px}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.opts button:disabled{cursor:default}
+.opts button.pick{border-color:var(--accent);background:var(--accent-soft)}
+.opts small{color:var(--muted);font-size:.8rem}
+.res{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.res>div{border-radius:6px;padding:10px 14px}
+.r-me{background:var(--bg);border:1px solid var(--line)}
+.r-ag{background:var(--ai-soft);border:1px solid var(--ai)}
+.r-ag b{color:var(--ai)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.chip{font-family:var(--f-mono);font-size:.76rem;padding:1px 7px;border-radius:3px;background:var(--panel);border:1px solid var(--line)}
+.c-bad{color:var(--bad);border-color:var(--bad)}.c-warn{color:var(--warn);border-color:var(--warn)}.c-ok{color:var(--ok);border-color:var(--ok)}
+.btn{font:inherit;cursor:pointer;border-radius:5px;padding:8px 16px;border:1px solid var(--accent);background:var(--accent);color:var(--panel);font-weight:500;align-self:flex-start}
+.btn.ai{border-color:var(--ai);background:var(--ai)}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.6;cursor:default}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chg{background:var(--ai-soft);color:var(--ai);font-weight:500;border-radius:3px;padding:0 4px}
+.strat{font-size:.74rem;padding:1px 7px;border-radius:999px;font-weight:500}
+.s-jit{background:var(--ok-soft);color:var(--ok)}.s-jic{background:var(--warn-soft);color:var(--warn)}
+.console{padding:18px;background:var(--ai-soft);border-color:var(--ai);display:flex;flex-direction:column;gap:10px}
+.console textarea{font:inherit;width:100%;min-height:70px;padding:8px;border:1px solid var(--line);border-radius:4px;background:var(--panel);color:var(--ink)}
+.console textarea:focus-visible{outline:2px solid var(--ai)}
+.ex{display:flex;flex-wrap:wrap;gap:6px}
+.ex button{font:inherit;font-size:.82rem;cursor:pointer;border:1px solid var(--ai);background:var(--panel);color:var(--ai);border-radius:999px;padding:2px 10px}
+.agents{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.agents div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+.agents p{font-size:.84rem;color:var(--muted)}
+details{border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:12px 16px}
+details summary{cursor:pointer;font-weight:700}
+details summary:focus-visible{outline:2px solid var(--accent)}
+details>div{margin-top:12px;display:flex;flex-direction:column;gap:10px}
+.bar{height:8px;border-radius:2px;background:var(--line);overflow:hidden;width:120px;display:inline-block;vertical-align:middle;margin-right:6px}
+.bar i{display:block;height:100%}
+@media (max-width:820px){.opener,.thesis,.opts,.res,.score,.agents{grid-template-columns:1fr}}
+.flow{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.flow div{background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:6px;padding:10px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.flow p{font-size:.8rem;color:var(--muted)}
+.callout{padding:14px 16px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 6px 6px 0;font-size:.9rem}
+.cases{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cases button{all:unset;cursor:pointer;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.cases button[aria-checked="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.cases button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.cases span{font-size:.82rem;color:var(--muted)}
+.credit{padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.cctl{display:flex;flex-direction:column;gap:12px}
+.cctl fieldset{border:1px solid var(--line);border-radius:6px;padding:8px 12px;margin:0}
+.cctl legend{font-size:.8rem;color:var(--muted);padding:0 4px}
+.cctl label{display:flex;gap:6px;align-items:baseline;font-size:.88rem;margin:3px 0}
+.cctl small{color:var(--muted)}
+.cres{display:flex;flex-direction:column;gap:8px}
+.verdict{padding:12px 14px;border-radius:6px}
+.v-ok{background:var(--ok-soft)}.v-warn{background:var(--warn-soft)}.v-bad{background:var(--bad-soft)}
+.expo{display:flex;height:22px;border-radius:4px;overflow:hidden;border:1px solid var(--line)}
+.expo i{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:.78rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:middle}
+.mrow{display:grid;grid-template-columns:1fr auto;gap:2px 12px;font-size:.9rem}
+.mrow span:nth-child(even){font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.spark{width:120px;height:28px;display:block}
+@media (max-width:820px){.flow{grid-template-columns:repeat(2,1fr)}.cases,.credit{grid-template-columns:1fr}}
+</style><style>
+[data-live] textarea,[data-live] label,[data-live] button,[data-live] input,[data-live] select,[data-live] .ex,[data-live] [aria-live],[data-live] .note{display:none!important}
+[data-live]::after{content:"這一區需要連接 AI 模型即時分析，網站版不開放操作。本頁其他區塊為規則試算或情境示範，可以完整操作。";display:block;margin-top:8px;padding:8px 12px;border:1px dashed var(--line,#ccc);border-radius:6px;font-size:.9rem;color:var(--muted,#666)}
+</style>
+</head>
+<body>
+<div style="background:#fbefd9;color:#6b4407;font:14px/1.5 system-ui,sans-serif;padding:8px max(16px,env(safe-area-inset-left,0px));text-align:center">網站版・測試版 2026-10-20：「規則試算」依公式即時計算；「情境示範」為預設結果或重播；標示「本版未提供即時 AI」的區塊需要連接 AI 模型，網站版不開放操作。</div>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">AI LAB · 現金循環系列 03 · 應收天數</span>
+    <h1>AR 應收收款模擬器</h1>
+    <p class="lead">出貨不等於收到錢。從出貨到款項入帳，中間要經過開票、上傳客戶系統、對帳、客戶驗收、付款排程、沖帳，任何一關卡住，錢就晚一個月回來。大客戶付款條件長、還會扣款，一不留意就從「晚收」變成「收不到」。這個模擬器讓你當一季的應收主管，再看 AI agents 怎麼把錢早點帶回來。</p>
+    <div class="opener">
+      <div><b>5 分鐘</b><span>一季、6 個狀況，每個做一個決定</span></div>
+      <div><b>情境示範</b><span>AI agents 的處理結果為預設情境，可與人工流程對照</span></div>
+      <div><a href="index.html"><b>← 現金循環總覽</b></a><span>AR 影響的是應收天數，現金循環的最後一段</span></div>
+    </div>
+    <p class="note modeline" style="margin-top:12px;padding:8px 12px;border:1px dashed var(--line);border-radius:6px">本頁說明（網站版）：<b>情境示範</b>是依實務整理的預設結果或重播；<b>規則試算</b>是依公式即時計算；標示「本版未提供即時 AI」的區塊需要連接 AI 模型，網站版不開放操作。</p>
+  </header>
+
+  <section class="sec" aria-label="收款關卡">
+    <div><span class="label">錢會卡在哪一關</span><h2>從出貨到入帳的六道關卡</h2></div>
+    <div class="flow" id="flow"></div>
+  </section>
+
+  <section class="thesis" aria-label="核心觀點">
+    <div><b>錢常卡在小事</b><p>PO 號碼打錯、發票格式不符客戶系統、少一張簽收單，客戶的系統就不會排付款，而且通常不會主動通知你。</p></div>
+    <div><b>扣款沒人追，就是損失</b><p>大客戶付款時常直接扣掉品質索賠、價格追溯或罰款。沒有在申訴期限內查證，合理的錢也要不回來。</p></div>
+    <div><b>信用風險要看趨勢</b><p>客戶付款越拖越晚、新聞出現裁員，等業務察覺時，應收餘額往往已經很大。</p></div>
+  </section>
+
+  <section class="sec" aria-label="一季遊戲">
+    <div><span class="label">你的一季</span><h2>6 個狀況，你怎麼處理？</h2>
+    <p class="note" style="margin-top:4px">情境：台灣主體接單，大陸工廠出貨，客戶多為海外品牌與雲端服務商，月營收約 3 億元。金額以新台幣萬元計。</p></div>
+    <div class="weeks" id="weeks"></div>
+    <div class="score" id="score"></div>
+    <details class="fair" style="border:1px solid var(--line);border-radius:8px;padding:10px 14px;background:var(--panel)"><summary style="cursor:pointer;font-weight:500">示範假設與比較限制</summary><div style="margin-top:8px;font-size:.9rem;display:flex;flex-direction:column;gap:6px"><p>畫面上「AI agents」的結果是預設示範，並假設系統已經整合、資料可即時取得，所以它常比人工更早知道問題。這呈現的是流程整合加上 AI 的潛力，不是實測省下的金額或時間。</p><p>比較合理的看法是分三層：</p><ul style="margin:0;padding-left:1.1em"><li><b>分散資料、人工追查</b>：看見資訊延遲的代價。</li><li><b>系統整合與既定規則</b>：一般自動化就能改善的部分，例如即時入庫回傳、到期提醒。</li><li><b>AI 輔助判讀與提案</b>：非結構資料、例外狀況與跨部門解釋的增益。</li></ul><p>很多改善在第二層就能拿到，不一定要等 AI；第三層的價值，在於處理規則寫不完的例外。</p></div></details>
+    <article class="panel event" id="event"></article>
+  </section>
+
+  <section class="sec" aria-label="信用關卡">
+    <div><span class="label">出貨前的信用關卡</span><h2>這筆單，Credit Control 會放行嗎？</h2>
+    <p class="note" style="margin-top:4px">有制度的公司，出貨前要先有核准的信用額度與交易條件。額度不夠時，可以用應收帳款保險、應收帳款買斷（factoring）、信用狀或擔保品補上缺口。否則一次倒帳，前面的辛苦全部白做。選一個案例，組合你的條件。</p></div>
+    <div class="cases" id="cases" role="radiogroup" aria-label="案例"></div>
+    <div class="panel credit">
+      <div class="cctl" id="cctl"></div>
+      <div class="cres" id="cres"></div>
+    </div>
+    <div class="panel console" data-live>
+      <div><span class="eyebrow">本版未提供即時 AI · 信用審查意見</span><h3 style="margin-top:2px">請 AI 依目前的組合寫一份信用審查意見</h3>
+      <p class="note" style="margin-top:4px" id="crHint">AI 會扮演 Credit Control 主管，說明是否放行、建議的額度與條件，以及出貨後要監控的訊號。本版未提供即時 AI。</p></div>
+      <button class="btn ai" id="crBtn" type="button">產生審查意見</button>
+      <div id="crOut" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="sec" aria-label="收款責任">
+    <div><span class="label">收款是誰的責任</span><h2>業務、Credit Control、AR 會計，各管一段</h2>
+    <p class="note" style="margin-top:4px">很多公司的應收管不好，是因為業務不覺得收款是自己的事，後勤沖帳錯了也沒有人對帳，客戶自然養不成準時付款的習慣。</p></div>
+    <div class="panel tablebox"><table id="raci"></table></div>
+    <div><h3>客戶付款習慣看板</h3><p class="note" style="margin-top:2px">AI 每週把每位客戶近 6 個月的逾期天數趨勢、原因與負責業務推送出去；逾期率納入業務績效，問題出在內部的就交給內部處理。</p></div>
+    <div class="panel tablebox"><table id="habit"></table></div>
+  </section>
+
+  <section class="panel console" data-live aria-label="付款通知判讀">
+    <div><span class="eyebrow">本版未提供即時 AI · 付款通知判讀</span><h2 style="margin-top:2px">貼上客戶的付款通知，讓 AI 找出扣款並擬回覆信</h2>
+      <p class="note" style="margin-top:4px" id="conHint">AI 會逐筆比對發票與實付金額、分類扣款原因、判斷哪些值得爭議，再擬一封措辭得體的英文回覆信。本版未提供即時 AI；請勿貼上機密資料。</p></div>
+    <label for="conTxt" class="note">付款通知（Remittance Advice）</label>
+    <textarea id="conTxt" style="min-height:150px;font-family:var(--f-mono);font-size:.82rem">REMITTANCE ADVICE  Payment date: 2026-09-30  Payment ref: PAY-883120
+Payee: Taiwan HQ   Currency: USD
+Invoice      Invoice Amt     Paid Amt     Deduction  Reason Code
+TW260712     412,500.00     412,500.00       0.00
+TW260718     268,000.00     259,960.00   8,040.00   QC-CLM
+TW260725     355,200.00     344,544.00  10,656.00   PRC-ADJ
+TW260801     198,750.00     196,750.00   2,000.00   LATE-DLV
+TW260809     240,000.00           0.00 240,000.00   HOLD-PO
+Total      1,474,450.00   1,213,754.00 260,696.00</textarea>
+    <button class="btn ai" id="conBtn" type="button">交給 AI 判讀</button>
+    <div id="conOut" aria-live="polite"></div>
+  </section>
+
+  <details>
+    <summary>六個 AI agents 各自負責什麼</summary>
+    <div class="agents" id="agents"></div>
+    <p class="note">原則：agents 可以自動檢查、上傳、比對、提醒與擬稿；但調整客戶信用額度、停止出貨、接受或爭議扣款、對客戶發出正式催收，仍由人核准。</p>
+  </details>
+
+  <p class="callout">應收管理不是只有催收。真正讓錢早回來的，是出貨當天就把發票開對、上傳對、對帳對；再把扣款與信用風險放在 AI 的眼皮底下。業務專心照顧客戶，財務不再月底才發現問題。</p>
+
+  <p class="note">本頁客戶、金額與情境皆為虛構示範，僅供教學與研究用途，與作者任職或服務的任何公司無關。應收天數影響以月營收 3 億元、一季 90 天估算。</p>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+const FLOW=[["出貨","大陸廠出貨或客戶從 Hub 倉拉料"],["開票","依 PO、價格與實際出貨量開立發票"],["上傳客戶系統","客戶入口網站或 EDI，格式不符會被拒收"],["客戶驗收對帳","簽收單、Hub 拉料報表、價格確認"],["付款排程","依付款條件排入客戶的付款批次，可能被扣款"],["入帳沖帳","款項入帳，依付款通知逐筆沖銷"]];
+$("flow").innerHTML=FLOW.map((f,i)=>`<div><span class="label">${i+1}</span><b>${f[0]}</b><p>${f[1]}</p></div>`).join("");
+const DAILY=1000;
+const EV=[
+ {title:"發票被客戶入口網站拒收",amt:4800,what:"一張 USD 148 萬的發票，因 PO 行號與客戶系統不符被自動拒收。拒收通知寄到業務的信箱，沒有人注意到。",
+  lag:"人工：到了付款日沒收到錢，才開始查。",
+  opts:[{t:"照常等付款日",d:"付款日沒到錢再查",cd:4800*45,L:0},{t:"付款日過後一週再查",d:"每月固定檢查逾期",cd:4800*30,L:0},{t:"每張發票都上入口網站確認",d:"50 個客戶入口網站，每週要 2 人天",cd:4800*7,L:0}],
+  ag:{who:"開票 agent",how:"上傳前先比對客戶 PO 與出貨通知，送出後每天檢查入口網站狀態，拒收當天就更正重送。",cd:4800*1,L:0}},
+ {title:"Hub 倉已拉料，還沒開票",amt:3600,what:"客戶從 Hub 倉陸續拉料，依合約拉料後才能開票。拉料報表要月底才整理對帳。",
+  lag:"人工：月底對帳時，月初拉的料已經放了三週。",
+  opts:[{t:"月底統一對帳開票",d:"維持現行做法",cd:3600*15,L:0},{t:"改成每週對帳",d:"多花人力，仍有幾天落差",cd:3600*5,L:0},{t:"要求客戶改成出貨即開票",d:"客戶不同意，關係受影響",cd:3600*15,L:0,rel:1}],
+  ag:{who:"Hub 對帳 agent",how:"每天讀取 Hub 倉拉料資料，和客戶的拉料報表自動對帳，拉料當天即開票上傳。",cd:0,L:0}},
+ {title:"客戶付款時扣了 3.2%",amt:960,what:"客戶付款少了 960 萬元，付款通知只寫了扣款代碼：品質索賠與價格調整。初步看來約四成有依據，六成可能有誤。",
+  lag:"人工：沖帳時才發現，申訴期限只有 60 天。",
+  opts:[{t:"全部接受",d:"維持客戶關係",cd:0,L:576},{t:"全部提出爭議",d:"一律退回要求說明",cd:960*60,L:0,rel:1},{t:"逐筆人工查證",d:"要調出貨、品質與價格紀錄",cd:576*45,L:100}],
+  ag:{who:"收款沖帳 agent",how:"讀取付款通知逐筆比對，對照品質判退紀錄與價格協議，三天內完成分類：有依據的入帳，有誤的附證據提出爭議。",cd:576*10,L:0}},
+ {title:"客戶出現財務警訊",amt:2400,what:"一家中型客戶最近三個月付款越來越晚，新聞報導裁員。目前應收餘額 2,400 萬元，業務認為只是短期周轉。",
+  lag:"人工：通常要等到第一次跳票，財務才知道。",
+  opts:[{t:"相信業務，照常出貨",d:"保住訂單",cd:0,L:1500},{t:"立即停止出貨",d:"保住現金，客戶關係破裂",cd:0,L:300,rel:1},{t:"改為預付或信用狀才出貨",d:"既有餘額仍有風險",cd:0,L:400}],
+  ag:{who:"信用 agent",how:"六週前就發現付款天數連續拉長，結合新聞與信用保險資訊，逐步調降信用額度並建議投保，跳票時曝險已大幅縮小。",cd:0,L:150}},
+ {title:"季度降價追溯，客戶整筆不付",amt:12000,what:"業務和客戶談定本季降價 5%，追溯到已出貨的部分，需要開立折讓單 600 萬元。在收到折讓單之前，客戶把 1.2 億元的款項全部暫停付款。",
+  lag:"人工：業務談完沒有通知財務，客戶付款日沒付才發現。",
+  opts:[{t:"等業務通知再開折讓",d:"按照流程走",cd:12000*40,L:0},{t:"財務主動向業務確認",d:"每月固定問一次",cd:12000*15,L:0},{t:"客戶催了再開折讓",d:"被動處理",cd:12000*25,L:0,rel:1}],
+  ag:{who:"合約 agent",how:"從合約系統讀到已簽核的價格協議，當天計算追溯金額、開立折讓單送客戶，其餘款項照原付款日入帳。",cd:12000*3,L:0}},
+ {title:"款項進來了，卻對不到發票",amt:2000,what:"客戶付了 2,000 萬元，但付到香港公司的帳戶，付款附言也沒有發票號碼，帳上一直掛在「未明款項」。集團其實已經收到錢，但台灣主體的應收沒有沖銷、這筆錢也要等集團內部調撥才能動用。",
+  lag:"人工：月底銀行對帳才發現。",
+  opts:[{t:"月底銀行對帳時處理",d:"維持現行做法",cd:2000*25,L:0},{t:"請客戶補付款明細",d:"等客戶回覆",cd:2000*12,L:0},{t:"依金額自行比對入帳",d:"較快，但可能沖錯帳",cd:2000*8,L:0}],
+  ag:{who:"收款沖帳 agent",how:"每天讀取集團各主體的銀行入帳，依金額組合與客戶付款習慣比對，自動找出對應發票並啟動集團內部轉帳。",cd:2000*1,L:0}},
+];
+let S={i:0,picks:[]};
+const wan=n=>Math.round(n).toLocaleString("zh-TW")+" 萬";
+function tot(list){return list.reduce((a,r)=>({cd:a.cd+r.cd,L:a.L+r.L,rel:a.rel+(r.rel||0)}),{cd:0,L:0,rel:0})}
+const dso=cd=>cd/(90*DAILY);
+function renderScore(){
+  const me=tot(S.picks.map((p,i)=>EV[i].opts[p])),ag=tot(S.picks.map((p,i)=>EV[i].ag));
+  const card=(t,r,cls,showRel)=>`<div class="${cls}"><span class="label">${t}</span><dl><dt>應收天數增加</dt><dd>${dso(r.cd).toFixed(1)} 天</dd><dt>平均晚入帳的應收</dt><dd>${wan(r.cd/90)}</dd><dt>扣款與壞帳損失</dt><dd>${wan(r.L)}</dd>${showRel?`<dt>客戶關係受損</dt><dd>${r.rel} 次</dd>`:""}</dl></div>`;
+  $("score").innerHTML=card("你（人工應收）",me,"",true)+card("AI agents（預設情境結果）",ag,"ag",false);
+  $("weeks").innerHTML=EV.map((e,i)=>`<span class="${i<S.picks.length?"done":i===S.i?"on":""}">狀況 ${i+1}</span>`).join("");
+}
+function chips(x,amt){const days=amt?Math.round(x.cd/amt):0;return `<div class="chips"><span class="chip ${x.cd/90>=500?"c-bad":x.cd?"c-warn":"c-ok"}">平均晚入帳 ${wan(x.cd/90)}</span><span class="chip ${x.L>=500?"c-bad":x.L?"c-warn":"c-ok"}">損失 ${wan(x.L)}</span>${x.rel?'<span class="chip c-bad">客戶關係受損</span>':""}</div>`}
+function renderEvent(){
+  if(S.i>=EV.length){const me=tot(S.picks.map((p,i)=>EV[i].opts[p])),ag=tot(S.picks.map((p,i)=>EV[i].ag));
+    $("event").innerHTML=`<h2>一季結束</h2><p>你的一季：應收天數增加 ${dso(me.cd).toFixed(1)} 天，損失 ${wan(me.L)}。AI agents：應收天數增加 ${dso(ag.cd).toFixed(1)} 天，損失 ${wan(ag.L)}。</p>
+     <p class="note">這六件事都不是催收技巧的問題，而是資訊沒有在對的時間送到對的人手上。AI agents 做的是每天把每一張發票、每一筆入帳、每一個客戶的付款習慣都看一遍，人只處理需要判斷與溝通的事。</p>
+     <button class="btn ghost" id="again" type="button">重新玩一次</button>`;return}
+  const e=EV[S.i],picked=S.picks.length>S.i;
+  $("event").innerHTML=`<span class="label">狀況 ${S.i+1}・金額 ${wan(e.amt)}</span><h2>${e.title}</h2><p class="what">${e.what}</p><p class="lag">${e.lag}</p>
+   <div class="opts">${e.opts.map((o,k)=>`<button type="button" data-opt="${k}" ${picked?"disabled":""} class="${picked&&S.picks[S.i]===k?"pick":""}"><b>${o.t}</b><small>${o.d}</small></button>`).join("")}</div>
+   ${picked?`<div class="res"><div class="r-me"><b>你的結果</b>${chips(e.opts[S.picks[S.i]],e.amt)}</div><div class="r-ag"><b>${e.ag.who}</b><p style="margin-top:4px;font-size:.9rem">${e.ag.how}</p>${chips(e.ag,e.amt)}</div></div>
+     <button class="btn" id="next" type="button">${S.i===EV.length-1?"看一季總結":"下一個狀況"}</button>`:""}`;
+}
+function render(){renderScore();renderEvent()}
+document.addEventListener("click",e=>{
+  const o=e.target.closest("[data-opt]");if(o&&S.picks.length===S.i){S.picks.push(+o.dataset.opt);render();return}
+  if(e.target.id==="next"){S.i++;render();return}
+  if(e.target.id==="again"){S={i:0,picks:[]};render()}
+});
+render();
+
+const AG=[["開票 agent","出貨後依 PO 與價格開票，上傳前先檢查客戶系統規格，每天追蹤入口網站狀態"],["Hub 對帳 agent","每天比對 Hub 倉拉料資料與客戶報表，拉料即開票"],["收款沖帳 agent","讀取付款通知與各主體銀行入帳，自動沖帳、分類扣款"],["信用 agent","監看客戶付款天數趨勢、新聞與信用保險資訊，建議信用額度"],["合約 agent","讀取價格協議、返利與罰則條款，主動開立折讓或提出異議"],["催收 agent","依逾期天數與客戶重要性，排定提醒時點並擬好催收信"]];
+$("agents").innerHTML=AG.map(a=>`<div><b>${a[0]}</b><p>${a[1]}</p></div>`).join("");
+
+const samp=window.claude?.use?window.claude.use("sample").catch(()=>null):Promise.resolve(null);
+samp.then(s=>{if(!s){$("conHint").textContent="本版未提供即時 AI。";$("conBtn").disabled=true}});
+const A=x=>Array.isArray(x)?x:[];
+$("conBtn").addEventListener("click",async()=>{
+  const s=await samp,btn=$("conBtn"),out=$("conOut"),txt=$("conTxt").value.trim().slice(0,6000);
+  if(!s||!txt)return;btn.disabled=true;out.innerHTML='<p class="note">AI 判讀中，約需 30–60 秒……</p>';
+  const prompt=`你是台灣電子製造公司的應收帳款主管，負責海外品牌客戶的收款與扣款處理。請分析下面的客戶付款通知：逐筆找出短付或未付、判斷扣款代碼的可能意義、建議處理方式（接受入帳、要求佐證、提出爭議、內部查證），並列出需要調閱的內部資料。不要捏造付款通知中沒有的事實；代碼意義屬推測時請註明「可能」。分析用繁體中文（台灣用語）。
+
+接著擬一封給客戶應付帳款部門的英文回覆信：語氣禮貌、專業、措辭完整，確認已收款項，針對每筆扣款與未付款項請對方提供佐證或說明，並提出明確的回覆期限。不要使用威脅性語言。
+
+付款通知：
+${txt}
+
+只回覆一個 JSON 物件：
+{"summary":"一句話結論（40 字內）","items":[{"invoice":"發票號","issue":"問題，20 字內","code":"扣款代碼與可能意義","action":"建議處理","check":"需調閱的內部資料"}],"email_subject":"英文信主旨","email_body":"英文信內文，以 \\n 分段"}`;
+  try{const d=await s.json(prompt);
+    out.innerHTML=`<h3 style="margin-top:4px">${esc(d.summary)}</h3>
+     <div class="tablebox" style="background:var(--panel);border-radius:6px;margin-top:8px"><table style="min-width:640px"><thead><tr><th>發票</th><th>問題</th><th>扣款代碼</th><th>建議處理</th><th>需調閱</th></tr></thead><tbody>${A(d.items).map(r=>`<tr><td class="mono">${esc(r.invoice)}</td><td>${esc(r.issue)}</td><td>${esc(r.code)}</td><td>${esc(r.action)}</td><td>${esc(r.check)}</td></tr>`).join("")}</tbody></table></div>
+     <p style="margin-top:10px"><b>回覆信草稿</b><button class="btn ghost" id="copyMail" type="button" style="margin-left:8px;padding:2px 10px">複製</button></p>
+     <pre id="mail" style="white-space:pre-wrap;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px;font-family:var(--f-body);font-size:.88rem;margin:6px 0 0">Subject: ${esc(d.email_subject)}\n\n${esc(d.email_body)}</pre>`;
+  }catch(e){
+    const HIDE=["not_granted","sampling_disabled","not_declared","capability_disabled","capability_removed"];
+    out.innerHTML=`<p class="note">${HIDE.includes(e.code)?"目前無法使用 AI（本版未提供即時 AI）。":e.code==="rate_limited"?"使用次數暫時達上限，請稍後再試。":e.code==="cancelled"?"":"這次沒有取得完整結果，請再按一次。"}</p>`;
+  }finally{btn.disabled=false}
+});
+document.addEventListener("click",async e=>{
+  if(e.target.id!=="copyMail")return;const t=$("mail").textContent;
+  try{await navigator.clipboard.writeText(t);e.target.textContent="已複製"}catch(_){const r=document.createRange();r.selectNodeContents($("mail"));const sel=getSelection();sel.removeAllRanges();sel.addRange(r);e.target.textContent="已選取，請按複製"}
+});
+</script>
+<script>
+/* ===== 信用關卡 ===== */
+const CASES=[
+ {k:"new",name:"新客戶首單",sub:"AI 伺服器新創，首單 9,720 萬元，要求月結 90 天",E:9720,cap:1000,insCap:6000,coll:0,factCap:5000,terms:"oa90",
+  hist:"無交易紀錄，成立 3 年，剛完成新一輪募資。",agent:"信用 agent：依公開資訊估算，募資後的現金約可支撐 18 個月；首單金額已超過其上一年度營收的三成，建議投保並搭配應收帳款買斷。"},
+ {k:"big",name:"大客戶提高額度",sub:"品牌客戶新專案，額度從 2 億提高到 3.5 億元",E:35000,cap:25000,insCap:30000,coll:0,factCap:20000,terms:"oa90",
+  hist:"合作 8 年，近 6 個月平均晚付天數從 6 天增加到 11 天。",agent:"信用 agent：晚付原因多為客戶內部驗收流程延遲，非財務問題；但新額度集中度過高，建議提高保額並將部分應收帳款買斷。"},
+ {k:"dist",name:"經銷商額度不足",sub:"區域藥品經銷商，要求出貨 1,500 萬元",E:1500,cap:300,insCap:600,coll:800,factCap:0,terms:"oa60",
+  hist:"合作 5 年，近 3 個月付款天數從 45 天拉長到 72 天。經銷商可提供 800 萬元的不動產擔保或銀行保證。",agent:"信用 agent：付款變慢與其下游醫院付款延後同步，屬產業性；建議要求擔保品、縮短付款條件，並分批出貨。"},
+];
+const TERMS={prepay:{n:"預付 30%＋月結 60 天",f:0.7,d:42,acc:"低"},lc:{n:"即期信用狀",f:0,d:15,acc:"中"},oa60:{n:"月結 60 天",f:1,d:60,acc:"高"},oa90:{n:"月結 90 天",f:1,d:90,acc:"最高"}};
+let C={k:"new",terms:"oa90",ins:false,fac:false,col:false};
+function credit(){
+  const c=CASES.find(x=>x.k===C.k),t=TERMS[C.terms],expo=c.E*t.f;
+  const insBase=C.ins?Math.min(expo,c.insCap):0,premium=insBase*0.0025;
+  const canFac=C.ins&&c.factCap>0&&(C.terms==="oa60"||C.terms==="oa90");
+  const factored=canFac&&C.fac?Math.min(insBase,c.factCap):0,fee=factored*(C.terms==="oa90"?0.012:0.008);
+  const covered=(insBase-factored)*0.9;
+  const col=C.col&&c.coll?Math.min(c.coll,Math.max(0,expo-factored-covered)):0;
+  const unc=Math.max(0,expo-factored-covered-col);
+  const days=c.E?((c.E-factored)*t.d+factored*5)/c.E:0;
+  const v=unc<=c.cap?["v-ok","Credit Control 放行"]:unc<=c.cap*2?["v-warn","附條件放行，需財務長核准"]:["v-bad","不予放行"];
+  return{c,t,expo,covered,premium,canFac,factored,fee,col,unc,days,v,lcBank:C.terms==="lc"?c.E:0,pre:C.terms==="prepay"?c.E*0.3:0};
+}
+const wn=n=>Math.round(n).toLocaleString("zh-TW")+" 萬";
+function renderCredit(){
+  const r=credit(),c=r.c;
+  $("cases").innerHTML=CASES.map(x=>`<button type="button" role="radio" aria-checked="${x.k===C.k}" data-case="${x.k}"><b>${x.name}</b><span>${x.sub}</span></button>`).join("");
+  $("cctl").innerHTML=`<p class="note">${c.hist}</p>
+   <fieldset><legend>付款條件</legend>${Object.entries(TERMS).map(([k,t])=>`<label for="t-${k}"><input type="radio" name="terms" id="t-${k}" value="${k}" ${C.terms===k?"checked":""}> ${t.n} <small>客戶接受度：${t.acc}</small></label>`).join("")}</fieldset>
+   <fieldset><legend>風險轉移工具</legend>
+    <label for="c-ins"><input type="checkbox" id="c-ins" ${C.ins?"checked":""} ${C.terms==="lc"?"disabled":""}> 應收帳款保險 <small>保險公司核定上限 ${wn(c.insCap)}，理賠 90%，保費約 0.25%</small></label>
+    <label for="c-fac"><input type="checkbox" id="c-fac" ${C.fac&&r.canFac?"checked":""} ${r.canFac?"":"disabled"}> 應收帳款買斷（無追索權） <small>${c.factCap?`銀行額度 ${wn(c.factCap)}，需先投保，約 5 天收到現金`:"此案例不適用"}</small></label>
+    <label for="c-col"><input type="checkbox" id="c-col" ${C.col?"checked":""} ${c.coll?"":"disabled"}> 擔保品或銀行保證 <small>${c.coll?`可提供 ${wn(c.coll)}`:"此案例不適用"}</small></label>
+   </fieldset>`;
+  const E=c.E||1,seg=[["--ok",r.lcBank,"信用狀（銀行承擔）"],["--accent",r.pre,"預付已收"],["--ai",r.factored,"已買斷（風險轉給銀行）"],["--warn",r.covered,"保險保障（未買斷部分）"],["--inv",r.col,"擔保品"],["--bad",r.unc,"無保障曝險"]];
+  $("cres").innerHTML=`<div class="verdict ${r.v[0]}"><span class="label">判定</span><br><b style="font-size:1.1rem">${r.v[1]}</b><br><span class="note">無保障曝險 ${wn(r.unc)}；此客戶可承擔上限 ${wn(c.cap)}</span></div>
+   <div class="expo" aria-hidden="true">${seg.map(s=>`<i style="width:${s[1]/E*100}%;background:var(${s[0]})"></i>`).join("")}</div>
+   <div class="legend">${seg.map(s=>`<span><i style="background:var(${s[0]})"></i>${s[2]} ${wn(s[1])}</span>`).join("")}</div>
+   <div class="mrow"><span>出貨金額</span><span>${wn(c.E)}</span><span>保費＋買斷手續費</span><span>${wn(r.premium+r.fee)}</span><span>平均收現天數</span><span>${r.days.toFixed(0)} 天</span><span>客戶接受度</span><span>${r.t.acc}</span></div>
+   <p class="note">${c.agent}</p><p class="note">本案例假設：買斷須先投保；信用狀視為由開狀銀行承擔客戶信用風險，但實務上仍有單據不符與開狀銀行風險；保險核定上限與費率為示範數字，實際承作條件以保險公司與銀行審核為準。</p>`;
+}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-case]");if(b){C={k:b.dataset.case,terms:CASES.find(x=>x.k===b.dataset.case).terms,ins:false,fac:false,col:false};renderCredit()}});
+document.addEventListener("change",e=>{
+  if(e.target.name==="terms"){C.terms=e.target.value;if(C.terms==="lc"){C.ins=false;C.fac=false}renderCredit();document.getElementById("t-"+C.terms).focus()}
+  else if(e.target.id==="c-ins"){C.ins=e.target.checked;if(!C.ins)C.fac=false;renderCredit();$("c-ins").focus()}
+  else if(e.target.id==="c-fac"){C.fac=e.target.checked;renderCredit();$("c-fac").focus()}
+  else if(e.target.id==="c-col"){C.col=e.target.checked;renderCredit();$("c-col").focus()}
+});
+renderCredit();
+
+/* ===== 責任分工與付款習慣 ===== */
+const RACI=[["新客戶徵信與額度申請","提出申請、提供資料","審核核准","—","蒐集財報、新聞與付款紀錄"],["出貨放行","確認訂單","超過額度即擋單","—","即時檢查額度餘額"],["開票與上傳客戶系統","—","—","主責","檢查格式、追蹤狀態"],["催收與取得付款承諾","主責","監督逾期","提供對帳資料","排定提醒、擬催收信"],["收款沖帳與對帳","—","—","主責","自動比對、找出沖錯帳"],["扣款爭議","與客戶溝通","核准接受或爭議","查證資料","分類扣款、整理證據"]];
+$("raci").innerHTML=`<thead><tr><th>工作</th><th>業務</th><th>Credit Control</th><th>AR 會計</th><th>AI agents</th></tr></thead><tbody>${RACI.map(r=>`<tr><td><b>${r[0]}</b></td>${r.slice(1).map((x,i)=>`<td style="white-space:normal${x==="主責"?";font-weight:700;color:var(--accent)":""}">${x}</td>`).join("")}</tr>`).join("")}</tbody>`;
+const HAB=[["美系品牌客戶 X","業務 A",[2,3,2,1,2,2],"ok","穩定準時。"],["雲端服務商 Y","業務 B",[5,8,12,15,19,24],"bad","持續變慢。建議業務本週拜訪，並請 Credit Control 檢視額度。"],["歐系工控客戶 Z","業務 C",[30,28,31,29,30,32],"warn","長期固定晚付約 30 天。原因是我方發票常被客戶入口網站拒收，屬內部問題，交 AR 會計改善。"],["國內代理商 W","業務 B",[0,0,35,0,0,0],"warn","8 月單次異常：客戶其實已付款，被誤沖到另一張發票，已更正。"],["新創客戶 V","業務 A",[0,0,0,4,10,9],"warn","首年客戶開始延遲，提醒業務取得明確付款承諾。"]];
+const spark=(a,cls)=>{const mx=Math.max(35,...a),pts=a.map((v,i)=>`${4+i*22},${24-v/mx*20}`).join(" ");return `<svg class="spark" viewBox="0 0 120 28" aria-hidden="true"><line x1="4" y1="24" x2="114" y2="24" style="stroke:var(--line)"/><polyline points="${pts}" style="fill:none;stroke:var(--${cls==="ok"?"ok":cls==="bad"?"bad":"warn"});stroke-width:2"/></svg>`};
+$("habit").innerHTML=`<thead><tr><th>客戶</th><th>負責業務</th><th>近 6 個月逾期天數</th><th class="num">本月</th><th>AI 判讀</th></tr></thead><tbody>${HAB.map(h=>`<tr><td><b>${h[0]}</b></td><td>${h[1]}</td><td>${spark(h[2],h[3])}</td><td class="num">${h[2][5]} 天</td><td style="white-space:normal">${h[4]}</td></tr>`).join("")}</tbody>`;
+
+/* ===== 真 AI：信用審查意見 ===== */
+samp.then(s=>{if(!s){$("crHint").textContent="本版未提供即時 AI。";$("crBtn").disabled=true}});
+$("crBtn").addEventListener("click",async()=>{
+  const s=await samp;if(!s)return;const btn=$("crBtn"),out=$("crOut"),r=credit(),c=r.c;
+  btn.disabled=true;out.innerHTML='<p class="note">AI 審查中，約需 30–60 秒……</p>';
+  const prompt=`你是大型製造公司財務部 Credit Control 主管。請依下列資料寫一份精簡的信用審查意見，用繁體中文（台灣用語），語氣專業、審慎。不要捏造資料中沒有的事實。
+
+案例：${c.name}（${c.sub}）
+客戶背景：${c.hist}
+信用 agent 觀察：${c.agent}
+本次出貨金額：${Math.round(c.E)} 萬元；付款條件：${r.t.n}
+風險工具：應收帳款保險 ${C.ins?"有（保障 "+Math.round(r.covered)+" 萬元）":"無"}；應收帳款買斷 ${r.factored?"有（"+Math.round(r.factored)+" 萬元）":"無"}；擔保品 ${r.col?Math.round(r.col)+" 萬元":"無"}
+無保障曝險：${Math.round(r.unc)} 萬元；公司對此客戶可承擔上限：${c.cap} 萬元；平均收現天數：${r.days.toFixed(0)} 天；保費與手續費：${Math.round(r.premium+r.fee)} 萬元
+
+只回覆一個 JSON 物件：
+{"decision":"放行|附條件放行|不予放行","reason":"2 句內理由","conditions":["放行條件，最多 4 項"],"monitor":["出貨後要監控的訊號，最多 3 項"],"sales_note":"給業務的一句話：他在收款上要負責的事"}`;
+  try{const d=await s.json(prompt);const L=x=>Array.isArray(x)?x:[];
+    out.innerHTML=`<div class="verdict ${d.decision==="放行"?"v-ok":d.decision==="不予放行"?"v-bad":"v-warn"}"><b>${esc(d.decision)}</b><p style="margin-top:4px">${esc(d.reason)}</p></div>
+     <div class="res" style="margin-top:8px"><div class="r-me" style="background:var(--panel)"><b>放行條件</b><ul style="margin:4px 0 0;padding-left:1.1em">${L(d.conditions).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div><div class="r-me" style="background:var(--panel)"><b>出貨後監控</b><ul style="margin:4px 0 0;padding-left:1.1em">${L(d.monitor).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></div>
+     ${d.sales_note?`<p class="note" style="margin-top:8px">給業務：${esc(d.sales_note)}</p>`:""}`;
+  }catch(e){const HIDE=["not_granted","sampling_disabled","not_declared","capability_disabled","capability_removed"];out.innerHTML=`<p class="note">${HIDE.includes(e.code)?"目前無法使用 AI（本版未提供即時 AI）。":e.code==="rate_limited"?"使用次數暫時達上限，請稍後再試。":e.code==="cancelled"?"":"這次沒有取得完整結果，請再按一次。"}</p>`}
+  finally{btn.disabled=false}
+});
+</script>
+
+</body>
+</html>

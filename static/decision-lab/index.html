@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>現金循環實驗室</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+TC:wght@700&display=swap">
+<style>
+/* Layout: one-column briefing for executives — question, live cash timeline, calculator, improvement levers, AI diagnosis, public case, module doors, author */
+:root{
+  --bg:#f3f5f7; --panel:#ffffff; --ink:#18222d; --muted:#5b6876; --line:#d9dfe6;
+  --accent:#1f5f8b; --accent-soft:#e3eef6; --inv:#8a4b2a; --inv-soft:#f6e9e1; --ar:#2f6f6a; --ar-soft:#e0f0ee; --ai:#5a4a9e; --ai-soft:#ece9f7;
+  --ok:#2f7d4f; --ok-soft:#e2f2e8; --warn:#a86a0c; --warn-soft:#fbefd9;
+  --f-display:"Noto Serif TC","Songti TC",serif; --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11161c; --panel:#18202a; --ink:#e4e9ef; --muted:#93a1b0; --line:#2b3644;
+  --accent:#6fb0dc; --accent-soft:#1c3346; --inv:#e0a07c; --inv-soft:#3a2619; --ar:#79c7bf; --ar-soft:#173431; --ai:#b3a5ef; --ai-soft:#2a2545;
+  --ok:#6cc792; --ok-soft:#1a3326; --warn:#e3a94a; --warn-soft:#3a2d16; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161c; --panel:#18202a; --ink:#e4e9ef; --muted:#93a1b0; --line:#2b3644;
+  --accent:#6fb0dc; --accent-soft:#1c3346; --inv:#e0a07c; --inv-soft:#3a2619; --ar:#79c7bf; --ar-soft:#173431; --ai:#b3a5ef; --ai-soft:#2a2545;
+  --ok:#6cc792; --ok-soft:#1a3326; --warn:#e3a94a; --warn-soft:#3a2d16; color-scheme:dark}
+*{box-sizing:border-box}
+html{font-size:106.25%}
+@media (max-width:480px){html{font-size:100%}}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1rem;line-height:1.65}
+.wrap{max-width:980px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:26px}
+h1{font-family:var(--f-display);font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.25;margin:4px 0 0;text-wrap:balance}
+h2{font-family:var(--f-display);font-size:1.3rem;margin:0;text-wrap:balance}
+h3{font-size:1rem;margin:0}
+p{margin:0}
+.lead{color:var(--muted);max-width:62ch;margin-top:10px;font-size:1.02rem}
+.eyebrow{font-size:.78rem;letter-spacing:.12em;color:var(--ai);font-weight:500}
+.label{font-size:.72rem;letter-spacing:.08em;color:var(--muted)}
+.mono,.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px}
+.note{color:var(--muted);font-size:.84rem}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.kpi{padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.kpi .v{font-family:var(--f-mono);font-size:1.6rem;font-variant-numeric:tabular-nums;line-height:1.3}
+.kpi .h{font-size:.8rem;color:var(--muted)}
+.tl{padding:18px 18px 14px;display:flex;flex-direction:column;gap:8px}
+.track{position:relative;height:30px}
+.seg{position:absolute;top:0;height:30px;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-size:.8rem;white-space:nowrap;overflow:hidden;font-weight:500;transition:left .4s,width .4s}
+.s-inv{background:var(--inv-soft);color:var(--inv);border:1px solid var(--inv)}
+.s-ar{background:var(--ar-soft);color:var(--ar);border:1px solid var(--ar)}
+.s-ap{background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent)}
+.s-ccc{background:var(--warn-soft);color:var(--warn);border:1px dashed var(--warn)}
+.axis{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:.72rem;color:var(--muted)}
+.formula{font-family:var(--f-mono);font-size:.9rem}
+.calc{padding:18px;display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+.fld{display:flex;flex-direction:column;gap:3px}
+.fld label{font-size:.82rem;color:var(--muted)}
+.fld input,.fld select{font:inherit;font-family:var(--f-mono);padding:6px 8px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink);width:100%}
+.fld select{font-family:var(--f-body)}
+.fld input:focus-visible,.fld select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.days{display:flex;flex-direction:column;gap:8px}
+.drow{display:grid;grid-template-columns:96px 1fr 70px;gap:10px;align-items:center}
+.dbar{height:10px;border-radius:2px}
+.lev{padding:18px;display:flex;flex-direction:column;gap:14px}
+.lrow{display:grid;grid-template-columns:200px 1fr 150px;gap:14px;align-items:center}
+.lrow input{width:100%}
+.lrow .tag{font-size:.75rem;padding:1px 7px;border-radius:3px;margin-left:6px}
+.release{display:flex;flex-wrap:wrap;gap:6px 28px;align-items:baseline;padding-top:10px;border-top:1px solid var(--line)}
+.release .v{font-family:var(--f-mono);font-size:1.5rem;color:var(--ok)}
+.ai{padding:18px;background:var(--ai-soft);border-color:var(--ai);display:flex;flex-direction:column;gap:12px}
+.btn{font:inherit;cursor:pointer;border-radius:5px;padding:8px 16px;border:1px solid var(--ai);background:var(--ai);color:var(--panel);font-weight:500;align-self:flex-start}
+.btn:disabled{opacity:.6;cursor:default}
+.btn:focus-visible{outline:2px solid var(--ai);outline-offset:2px}
+.btn.ghost{background:transparent;color:var(--ai)}
+.prio{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.prio div{background:var(--panel);border-radius:6px;padding:12px 14px;border:1px solid var(--line)}
+.prio ul{margin:6px 0 0;padding-left:1.1em;font-size:.88rem}
+.case{padding:18px;display:grid;grid-template-columns:auto 1fr;gap:18px 24px;align-items:center}
+.big{font-family:var(--f-mono);font-size:2.2rem;line-height:1.1;color:var(--accent)}
+.mods{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.mod{padding:16px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:inherit}
+a.mod:hover{border-color:var(--accent)}
+a.mod:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mod .k{font-family:var(--f-mono);font-size:.8rem;color:var(--muted)}
+.pill{font-size:.75rem;padding:1px 8px;border-radius:999px;font-weight:500;align-self:flex-start}
+.p-ok{background:var(--ok-soft);color:var(--ok)}.p-warn{background:var(--warn-soft);color:var(--warn)}
+.about{padding:18px;display:flex;flex-direction:column;gap:8px}
+.pano{display:flex;flex-direction:column;gap:8px}
+.band{display:flex;flex-direction:column;gap:2px;padding:12px 16px;border-radius:8px;border:1px solid var(--ai);background:var(--ai-soft);text-decoration:none;color:inherit}
+a.band:hover{box-shadow:inset 0 0 0 1px var(--ai)}
+.band.base{border-color:var(--line);background:var(--panel);align-items:center;text-align:center}
+.cols{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:8px}
+.col{border:1px solid var(--line);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:8px;background:var(--panel);min-width:0}
+.col .ch{font-weight:700;padding-bottom:4px;border-bottom:3px solid var(--line)}
+.col .ch em{font-style:normal;font-family:var(--f-mono);color:var(--muted);float:right}
+.c-inv .ch{border-color:var(--inv)}.c-ar .ch{border-color:var(--ar)}.c-ap .ch{border-color:var(--accent)}
+.pmod{display:flex;flex-direction:column;gap:1px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);text-decoration:none;color:inherit}
+a.pmod:hover{border-color:var(--accent)}
+a.pmod:focus-visible,a.band:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.pmod .k,.band .k{font-family:var(--f-mono);font-size:.76rem;color:var(--muted)}
+.pmod.plan{border-style:dashed;opacity:.8}
+@media (max-width:760px){.cols{grid-template-columns:1fr}}
+.cta{display:flex;flex-direction:column;gap:4px;padding:16px 18px;border-radius:8px;border:1px solid var(--ai);background:var(--ai-soft);text-decoration:none;color:inherit}
+.cta b{font-size:1.1rem}
+.cta:hover{box-shadow:inset 0 0 0 1px var(--ai)}
+.cta:focus-visible{outline:2px solid var(--ai);outline-offset:2px}
+.pains{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.pains button{font:inherit;font-size:.86rem;cursor:pointer;border:1px solid var(--ai);background:var(--panel);color:var(--ai);border-radius:999px;padding:3px 12px}
+.pains button[aria-checked="true"]{background:var(--ai);color:var(--panel)}
+.pains button:focus-visible{outline:2px solid var(--ai);outline-offset:2px}
+.stale{opacity:.45}
+.btn.ghost{background:transparent;color:var(--ai)}
+.principle{margin-top:14px;padding:14px 16px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 6px 6px 0}
+a{color:var(--accent)}
+@media (max-width:760px){.kpis,.calc,.prio,.mods{grid-template-columns:1fr}.lrow{grid-template-columns:1fr}.case{grid-template-columns:1fr}.fields{grid-template-columns:1fr 1fr}}
+@media (prefers-reduced-motion:reduce){.seg{transition:none}}
+</style><style>
+[data-live] textarea,[data-live] label,[data-live] button,[data-live] input,[data-live] select,[data-live] .ex,[data-live] [aria-live],[data-live] .note{display:none!important}
+[data-live]::after{content:"這一區需要連接 AI 模型即時分析，網站版不開放操作。本頁其他區塊為規則試算或情境示範，可以完整操作。";display:block;margin-top:8px;padding:8px 12px;border:1px dashed var(--line,#ccc);border-radius:6px;font-size:.9rem;color:var(--muted,#666)}
+</style>
+</head>
+<body>
+<div style="background:#fbefd9;color:#6b4407;font:14px/1.5 system-ui,sans-serif;padding:8px max(16px,env(safe-area-inset-left,0px));text-align:center">網站版・測試版 2026-10-20：「規則試算」依公式即時計算；「情境示範」為預設結果或重播；標示「本版未提供即時 AI」的區塊需要連接 AI 模型，網站版不開放操作。</div>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">AI LAB · 經營決策實驗・訂單、庫存與現金（測試版）</span>
+    <h1>把經營判斷，變成可以持續運作的 AI 工作流程</h1>
+    <p class="lead">從現金循環、採購、生產到應收管理，透過互動案例，探索 AI 如何協助企業查證資訊、協調例外與推進執行，以及哪些決定仍應由人負責。每個案例都來自電子、化工與生技產業 30 年的實務，你可以只玩 3 分鐘，也可以展開看判斷依據、假設與導入條件。</p>
+  </header>
+
+  <a class="cta" href="case-boss.html"><span class="eyebrow">開始一個經營情境 · 3 分鐘</span><b>當一次老闆：大客戶突然延後拉貨，還要求延長帳期</b><span class="note">看 AI agents 自己查採購單、應收與合約，提出方案、等你核准、執行後依回饋調整，現金與天數即時變化 →</span></a>
+
+  <section aria-label="試算說明"><h2>先算一算：你的現金，卡在哪裡？</h2><p class="note" style="margin-top:4px;max-width:66ch">從付錢給供應商，到收回客戶的貨款，中間有多少天，公司的錢就被卡住多少天，這就是現金轉換循環（CCC）。輸入貴公司的數字，看出錢卡在存貨、應收還是應付。</p></section>
+
+  <section class="kpis" aria-label="結論">
+    <div class="panel kpi"><span class="label">現金轉換循環</span><span class="v" id="k1"></span><span class="h">CCC = 存貨天數 + 應收天數 − 應付天數</span></div>
+    <div class="panel kpi"><span class="label">被卡住的營運資金</span><span class="v" id="k2"></span><span class="h">存貨 + 應收 − 應付</span></div>
+    <div class="panel kpi"><span class="label">每改善 1 天，約可釋放</span><span class="v" id="k3" style="font-size:1.05rem"></span><span class="h">應收以每日營收計；存貨與應付以每日成本計</span></div>
+  </section>
+
+  <section class="panel tl" aria-label="現金循環時間軸">
+    <span class="label">一筆生意的現金時間軸（天）</span>
+    <div class="track"><div class="seg s-inv" id="sInv"></div><div class="seg s-ar" id="sAr"></div></div>
+    <div class="track"><div class="seg s-ap" id="sAp"></div><div class="seg s-ccc" id="sCcc"></div></div>
+    <div class="axis" id="axis"></div>
+    <p class="note">上排：進料後放在倉庫的天數，加上出貨後等客戶付款的天數。下排：供應商給的付款期限，期限之後到收回貨款前的這段，就是公司自己要墊的錢。</p>
+  </section>
+
+  <section class="panel calc" aria-label="試算">
+    <div>
+      <h2>輸入貴公司的數字</h2>
+      <p class="note" style="margin:4px 0 12px">單位：新台幣萬元。年營收與年營業成本請用同一年度的數字；存貨、應收、應付建議用該期間的平均餘額，只有期末餘額時視為快速估算，可能受季節性影響。已預先填入一家中型電子製造業的示範數字。</p>
+      <div class="fields">
+        <div class="fld" style="grid-column:1/-1"><label for="ind">產業</label><select id="ind"><option>電子製造／EMS</option><option>電子零組件</option><option>化工材料</option><option>生技醫療</option><option>貿易流通</option><option>其他製造業</option></select></div>
+        <div class="fld"><label for="rev">年營收</label><input id="rev" type="number" min="0" value="500000"></div>
+        <div class="fld"><label for="cogs">年營業成本</label><input id="cogs" type="number" min="0" value="425000"></div>
+        <div class="fld"><label for="inv">存貨</label><input id="inv" type="number" min="0" value="70000"></div>
+        <div class="fld"><label for="ar">應收帳款</label><input id="ar" type="number" min="0" value="82000"></div>
+        <div class="fld"><label for="ap">應付帳款</label><input id="ap" type="number" min="0" value="58000"></div>
+        <div class="fld"><label for="terms">供應商合約付款天數（平均）</label><input id="terms" type="number" min="0" value="60"></div>
+        <div class="fld"><label for="rate">資金成本（年利率 %）</label><input id="rate" type="number" min="0" step="0.1" value="2.5"></div>
+      </div>
+    </div>
+    <div class="days">
+      <h2>三個天數</h2>
+      <div class="drow"><span>存貨天數</span><div class="dbar" id="bInv" style="background:var(--inv)"></div><span class="num" id="dInv"></span></div>
+      <div class="drow"><span>應收天數</span><div class="dbar" id="bAr" style="background:var(--ar)"></div><span class="num" id="dAr"></span></div>
+      <div class="drow"><span>應付天數</span><div class="dbar" id="bAp" style="background:var(--accent)"></div><span class="num" id="dAp"></span></div>
+      <p class="note" id="biggest" style="margin-top:6px"></p>
+    </div>
+  </section>
+
+  <section class="panel lev" aria-label="改善槓桿">
+    <div><h2>如果改善這三件事</h2><p class="note" style="margin-top:4px">拉動滑桿，看能放出多少現金。每一項對應一個 AI 實驗模組。</p></div>
+    <div class="lrow"><label for="lInv">存貨少放幾天<span class="tag" style="background:var(--inv-soft);color:var(--inv)">MRP／庫存</span></label><input id="lInv" type="range" min="0" max="30" value="10"><span class="num" id="vInv"></span></div>
+    <div class="lrow"><label for="lAr">應收早收幾天<span class="tag" style="background:var(--ar-soft);color:var(--ar)">AR</span></label><input id="lAr" type="range" min="0" max="30" value="7"><span class="num" id="vAr"></span></div>
+    <div class="lrow"><label for="lAp">付款不再提早幾天（合約範圍內）<span class="tag" style="background:var(--accent-soft);color:var(--accent)">AP</span></label><input id="lAp" type="range" min="0" max="15" value="3"><span class="num" id="vAp"></span></div>
+    <p class="note" id="levNote">滑桿上限會隨你的數字調整：存貨與應收的改善不會超過目前天數；應付的改善只到合約付款天數為止。應付天數的改善，指的是準時付款而不提早、不付錯、不重複付，不是拖欠供應商。</p>
+    <div class="release"><span>可釋放現金</span><span class="v" id="rel"></span><span>每年省下利息</span><span class="v" id="int"></span><span class="note" id="cccAfter"></span></div>
+  </section>
+
+  <section class="panel ai" aria-label="初步排查建議">
+    <div><span class="eyebrow">初步排查建議</span><h2 style="margin-top:2px">找出值得先追查的環節</h2>
+      <p class="note" style="margin-top:4px">只依彙總數字與你最困擾的問題，找出值得先追查的環節，並列出還缺哪些資料才能判斷。這不等於已完成公司診斷。</p></div>
+    <div><span class="label">你最困擾的是</span><div class="pains" id="pains" role="radiogroup" aria-label="最困擾的問題"></div></div>
+    <p class="note" id="aiHint">網站版的初步排查建議依規則產生（規則試算），你填的數字只在本頁計算，不會傳送出去。</p>
+    <button class="btn" id="askAI" type="button">產生初步排查建議</button>
+    <div id="aiOut" aria-live="polite"></div>
+  </section>
+
+  <section class="panel case" aria-label="案例">
+    <div><span class="label">教學案例・全球最大 EMS 廠</span><div class="big">≈ 220 億</div><span class="note">每 1 天的營收規模</span></div>
+    <div>
+      <h3>為什麼大型 EMS 廠把 CCC 當成核心功課</h3>
+      <p style="margin-top:6px">鴻海 2025 年全年營收首度突破新台幣 8 兆元，換算每一天約 220 億元。依公開財報整理，2026 年第 2 季存貨約 49 天、應收約 45 天，光這兩段就是約 94 天的營業週期。毛利率只有個位數的產業，現金能不能轉得快，往往比多接一張訂單更重要。</p>
+      <p style="margin-top:8px">規模放大了數字，但道理對每家公司都一樣。以貴公司目前的規模估算：<span id="perDay2"></span></p>
+      <p class="note" style="margin-top:6px">資料來源：營收引自<a href="https://statementdog.com/news/15479" target="_blank" rel="noopener">財報狗新聞（2026 年 1 月）</a>，一天的規模以全年營收 ÷ 365 估算；週轉天數引自<a href="https://statementdog.com/analysis/2317/turnover-days" target="_blank" rel="noopener">財報狗・鴻海（2317）營運週轉天數</a>，2026 年第 2 季單季數據：存貨週轉天數 48.96 天、應收帳款收現天數 45.45 天，兩者相加即營運週轉天數 94.41 天。計算公式以該網站定義為準；本頁計算機採用期末餘額換算，兩者口徑可能略有不同。查閱日期：2026-10-20。</p>
+    </div>
+  </section>
+
+  <section aria-label="系列全景">
+    <h2>系列全景：錢卡在哪一段，就從哪個模組看起</h2>
+    <p class="note" style="margin:4px 0 12px">每個模組都可以親手操作：先體驗人工時代的辛苦，再看 AI agents 如何處理同一批工作。最上方的供需兩端情報，是三段能不能順暢運作的源頭。</p>
+    <div class="pano">
+      <a class="band" href="sop.html"><span class="k">04 · 源頭</span><b>供需情報與 S&amp;OP</b><span class="note">客戶端（CRM）與供應商端的情報，在產銷協調會議匯合，決定預測、備料與交易條件</span></a>
+      <div class="cols">
+        <div class="col c-inv"><span class="ch">存貨天數 <em>＋</em></span>
+          <a class="pmod" href="mrp.html"><span class="k">02</span><b>MRP 動態物控</b><span class="note">AI agents 即時更新交期、安全庫存、損耗率</span></a>
+          <a class="pmod" href="sourcing.html"><span class="k">02B</span><b>關鍵料源策略</b><span class="note">長約、預付、第二來源與現金的取捨</span></a>
+          <a class="pmod" href="production.html"><span class="k">02C</span><b>生管指揮中心</b><span class="note">從微生管到遠遠生管，急單能不能接</span></a>
+          <span class="pmod plan"><span class="k">規劃中</span><b>倉儲與物流</b><span class="note">呆滯料預警、在途庫存與交貨條件</span></span>
+        </div>
+        <div class="col c-ar"><span class="ch">應收天數 <em>−</em></span>
+          <a class="pmod" href="ar.html"><span class="k">03</span><b>AR 應收收款</b><span class="note">發票、扣款、信用關卡與收款責任</span></a>
+        </div>
+        <div class="col c-ap"><span class="ch">應付天數</span>
+          <a class="pmod" href="ap.html"><span class="k">01</span><b>AP 四單比對</b><span class="note">發票擷取、比對、對帳與銀行付款</span></a>
+        </div>
+      </div>
+      <div class="band base"><b>AI agents 全天候監控・人負責取捨與承擔</b></div>
+    </div>
+    <p class="principle">管理流程上很多工作可以交給 AI agents，但人的責任、不同部門之間的分權分責，仍然要劃分清楚。不能把所有責任丟給 AI，就什麼都不管了。</p>
+  </section>
+
+  <section class="panel about" aria-label="作者">
+    <span class="label">關於這個實驗室</span>
+    <p>Sinclair Huang 在台灣電子、化工與生技產業累積約 30 年經驗，2008 年起參與大型 EMS 廠應付帳款四單比對系統的建置，歷時約三年完成。這裡的每個情境都來自實務，AI 負責的是把當年要靠人力與時間累積的判斷，變成每家公司都用得起的能力。</p>
+    <p class="note">本頁示範數字、情境與案例皆為虛構或取自公開資料，僅供教學與研究用途，與作者任職或服務的任何公司無關。</p>
+    <p>如果想討論如何把現有系統、管理規則與 AI 接起來，可以帶一個具體流程來談，不必先提供機密資料。初步討論通常聚焦三件事：找出流程中最值得先改善的一個環節；分清楚是資料、流程，還是 AI 能力的問題；討論一個小範圍驗證的做法。</p>
+    <div class="bar2" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><a class="btn" href="mailto:research@sinclairhuang.org?subject=%E8%B7%A8%E9%83%A8%E9%96%80%E7%B6%93%E7%87%9F%E6%B1%BA%E7%AD%96%E8%A8%8E%E8%AB%96">討論一項跨部門經營決策</a><b class="mono" id="mailTxt">research@sinclairhuang.org</b><button class="btn ghost" id="copyMail" type="button">複製 Email</button><a class="btn ghost" href="https://sinclairhuang.org/advisory/" target="_blank" rel="noopener">了解顧問合作</a></div>
+    <p class="note">若按鈕沒有開啟郵件程式，請複製 Email 後自行寄信，主旨可寫「跨部門經營決策討論」。不需要填表。</p>
+    <p class="note">更多研究與合作：<a href="https://lab.sinclairhuang.org" target="_blank" rel="noopener">lab.sinclairhuang.org</a></p>
+  </section>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+const num=id=>Math.max(0,+$(id).value||0);
+const money=w=>w>=10000?(w/10000).toLocaleString("zh-TW",{maximumFractionDigits:2})+" 億":Math.round(w).toLocaleString("zh-TW")+" 萬";
+const IDS=["ind","rev","cogs","inv","ar","ap","terms","rate"];
+const key=()=>JSON.stringify(IDS.map(i=>$(i).value))+PAIN;
+function calc(){
+  const rev=num("rev"),cogs=num("cogs"),inv=num("inv"),ar=num("ar"),ap=num("ap"),terms=num("terms"),rate=num("rate")/100;
+  const dio=cogs>0?inv/cogs*365:null,dso=rev>0?ar/rev*365:null,dpo=cogs>0?ap/cogs*365:null;
+  const ok=dio!==null&&dso!==null;
+  return{rev,cogs,inv,ar,ap,terms,rate,dio,dso,dpo,ok,ccc:ok?dio+dso-dpo:null,dayRev:rev/365,dayCost:cogs/365};
+}
+function niceStep(x){const p=Math.pow(10,Math.floor(Math.log10(x)));const m=x/p;return(m<=1?1:m<=2?2:m<=5?5:10)*p}
+function setSlider(id,max,label){const el=$(id);const m=Math.max(0,Math.floor(max));el.max=String(Math.min(m,id==="lAp"?30:60));if(+el.value>+el.max)el.value=el.max;el.disabled=+el.max===0;return +el.value}
+function render(){
+  const c=calc();
+  if(!c.ok){
+    $("k1").textContent="暫無法計算";$("k2").textContent="NT$ "+money(c.inv+c.ar-c.ap);$("k3").textContent="暫無法計算";
+    ["sInv","sAr","sAp","sCcc"].forEach(i=>{$(i).style.width="0";$(i).textContent=""});$("axis").innerHTML="<span>請輸入大於 0 的年營收與年營業成本</span>";
+    ["Inv","Ar","Ap"].forEach(k=>{$("b"+k).style.width="0";$("d"+k).textContent="—"});$("biggest").textContent="年營收或年營業成本為 0 時，週轉天數沒有意義，請先填入這兩個數字。";
+    ["lInv","lAr","lAp"].forEach(i=>$(i).disabled=true);["vInv","vAr","vAp","rel","int"].forEach(i=>$(i).textContent="—");$("cccAfter").textContent="";
+    $("perDay2").textContent="請先填入年營收與年營業成本。";$("askAI").disabled=true;markStale();return}
+  $("askAI").disabled=BUSY;
+  $("k1").textContent=c.ccc.toFixed(0)+" 天";
+  $("k2").textContent="NT$ "+money(c.inv+c.ar-c.ap);
+  $("k3").textContent=`應收 ${money(c.dayRev)}｜存貨或應付 ${money(c.dayCost)}`;
+  $("perDay2").textContent=`應收提前一天，約釋放 NT$ ${money(c.dayRev)}；存貨少放一天，或在合約範圍內不提早付款一天，約釋放 NT$ ${money(c.dayCost)}。`;
+  const span=Math.max(c.dio+c.dso,c.dpo,1)*1.05,pct=d=>Math.min(100,d/span*100);
+  Object.assign($("sInv").style,{left:"0%",width:pct(c.dio)+"%"});$("sInv").textContent=`存貨 ${c.dio.toFixed(0)} 天`;
+  Object.assign($("sAr").style,{left:pct(c.dio)+"%",width:pct(c.dso)+"%"});$("sAr").textContent=`應收 ${c.dso.toFixed(0)} 天`;
+  Object.assign($("sAp").style,{left:"0%",width:pct(Math.min(c.dpo,c.dio+c.dso))+"%"});$("sAp").textContent=`應付 ${c.dpo.toFixed(0)} 天`;
+  const cs=Math.max(0,c.ccc);Object.assign($("sCcc").style,{left:pct(Math.min(c.dpo,c.dio+c.dso))+"%",width:pct(cs)+"%"});$("sCcc").textContent=cs?`自己墊錢 ${c.ccc.toFixed(0)} 天`:"";
+  const step=niceStep(span/8);let ax="";for(let d=0,n=0;d<=span&&n<12;d+=step,n++)ax+=`<span>${Math.round(d).toLocaleString()}</span>`;$("axis").innerHTML=ax;
+  const mx=Math.max(c.dio,c.dso,c.dpo,1);
+  [["Inv",c.dio],["Ar",c.dso],["Ap",c.dpo]].forEach(([k,v])=>{$("b"+k).style.width=(v/mx*100)+"%";$("d"+k).textContent=v.toFixed(1)+" 天"});
+  $("biggest").textContent=`存貨 ${money(c.inv)}、應收 ${money(c.ar)}。天數與金額都要看：天數反映週轉速度，金額反映卡住多少錢。`;
+  const room=Math.max(0,c.terms-c.dpo);
+  const li=setSlider("lInv",c.dio),la=setSlider("lAr",c.dso),lp=setSlider("lAp",room);
+  $("vInv").textContent=`${li} 天・${money(li*c.dayCost)}`;$("vAr").textContent=`${la} 天・${money(la*c.dayRev)}`;
+  $("vAp").textContent=room<1?"已達合約付款天數，沒有空間":`${lp} 天・${money(lp*c.dayCost)}`;
+  const rel=li*c.dayCost+la*c.dayRev+lp*c.dayCost;
+  $("rel").textContent="NT$ "+money(rel);$("int").textContent="NT$ "+money(rel*c.rate);
+  $("cccAfter").textContent=`CCC 從 ${c.ccc.toFixed(0)} 天降到 ${(c.ccc-li-la-lp).toFixed(0)} 天`;
+  markStale();
+}
+/* 初步排查 */
+const PAINS=["資金缺口","逾期收款","呆滯庫存","付款例外","尚不確定"];let PAIN="尚不確定",LASTKEY=null,BUSY=false,REQ=0;
+$("pains").innerHTML=PAINS.map(p=>`<button type="button" role="radio" aria-checked="${p===PAIN}" data-pain="${p}">${p}</button>`).join("");
+function markStale(){const o=$("aiOut");if(!LASTKEY||!o.firstElementChild)return;const st=key()!==LASTKEY;o.classList.toggle("stale",st);const b=$("staleBanner");if(st&&!b)o.insertAdjacentHTML("beforebegin",'<p class="note" id="staleBanner" style="color:var(--bad)">資料已變更，下方建議是依舊數字產生的，請重新產生。</p>');if(!st&&b)b.remove()}
+document.addEventListener("input",e=>{if(e.target.matches("input,select"))render()});
+document.addEventListener("click",async e=>{
+  const p=e.target.closest("[data-pain]");if(p){PAIN=p.dataset.pain;document.querySelectorAll("[data-pain]").forEach(x=>x.setAttribute("aria-checked",x===p?"true":"false"));markStale();return}
+  if(e.target.id==="copyMail"){try{await navigator.clipboard.writeText("research@sinclairhuang.org");e.target.textContent="已複製"}catch(_){const r=document.createRange();r.selectNodeContents($("mailTxt"));const sel=getSelection();sel.removeAllRanges();sel.addRange(r);e.target.textContent="已選取，請按複製"}}
+});
+render();
+let samplePromise=window.claude?.use?window.claude.use("sample").catch(()=>null):Promise.resolve(null);
+samplePromise.then(s=>{if(!s)$("aiHint").textContent="網站版的初步排查建議依規則產生（規則試算），你填的數字只在本頁計算，不會傳送出去。"});
+const AREA={存貨:"var(--inv)",應收:"var(--ar)",應付:"var(--accent)"};
+function show(d,demo,changed){
+  const p=Array.isArray(d.priorities)?d.priorities.slice(0,3):[];const L=x=>Array.isArray(x)?x:[];
+  $("aiOut").classList.remove("stale");$("staleBanner")?.remove();
+  $("aiOut").innerHTML=`${demo?'<span class="pill p-warn">規則試算（本版未提供即時 AI）</span>':""}${changed?'<p class="note" style="color:var(--bad)">分析期間你修改了數字，以下結果依分析開始時的數字產生。</p>':""}
+   <h3 style="margin-top:6px">${esc(d.headline)}</h3><p style="margin-top:4px">${esc(d.summary)}</p>
+   <div class="prio" style="margin-top:10px">${p.map((x,i)=>`<div style="border-top:3px solid ${AREA[x.area]||"var(--ai)"}"><span class="label">追查 ${i+1} · ${esc(x.area)}</span><h3 style="margin-top:2px">${esc(x.title)}</h3><p class="note" style="margin-top:4px">${esc(x.why)}</p><span class="label" style="display:block;margin-top:6px">先查</span><ul>${L(x.check).slice(0,3).map(a=>`<li>${esc(a)}</li>`).join("")}</ul><span class="label" style="display:block;margin-top:6px">還缺的資料</span><ul>${L(x.need_data).slice(0,3).map(a=>`<li>${esc(a)}</li>`).join("")}</ul></div>`).join("")}</div>
+   <p class="note" style="margin-top:10px">${esc(d.caution||"這是依彙總數字的初步排查，不等於公司診斷。")}</p>`;
+}
+function demo(c){
+  const A={存貨:{area:"存貨",title:"存貨裡有多少是不必要的",why:`存貨 ${money(c.inv)}，約 ${c.dio.toFixed(0)} 天。每少放一天約釋放 ${money(c.dayCost)}。`,check:["90 天以上未動用的料與成品","安全庫存參數最後一次更新時間","客戶取消或延後後仍在進的料"],need_data:["庫齡明細","安全庫存設定","未結採購單"]},
+    應收:{area:"應收",title:"應收裡有多少是逾期或爭議",why:`應收 ${money(c.ar)}，約 ${c.dso.toFixed(0)} 天。每提前一天約釋放 ${money(c.dayRev)}。`,check:["逾期帳齡與主要客戶","被扣款或拒付的發票","出貨到開票、開票到客戶驗收的時間"],need_data:["應收帳齡表","客戶付款條件","扣款與爭議紀錄"]},
+    應付:{area:"應付",title:"付款是否提早、重複或例外過多",why:`應付約 ${c.dpo.toFixed(0)} 天，合約平均 ${c.terms} 天。重點是付款紀律，不是拖延供應商。`,check:["實際付款日與合約付款日的差距","重複付款與退回付款","比對不過、需要人工處理的發票比例"],need_data:["付款明細","供應商合約條件","發票比對例外紀錄"]}};
+  const order={資金缺口:[c.ar>=c.inv?"應收":"存貨",c.ar>=c.inv?"存貨":"應收","應付"],逾期收款:["應收","存貨","應付"],呆滯庫存:["存貨","應收","應付"],付款例外:["應付","應收","存貨"],尚不確定:[c.ar>=c.inv?"應收":"存貨",c.ar>=c.inv?"存貨":"應收","應付"]}[PAIN];
+  return{headline:`值得先追查：${order[0]}`,summary:`依你選的「${PAIN}」與目前的金額，先追查${order[0]}。只看天數長短排序並不夠，還要看逾期、爭議、呆滯與合約空間。`,priorities:order.map(k=>A[k]),caution:"示範建議依規則產生，只依彙總數字與你選的困擾排序，不等於公司診斷。"};
+}
+$("askAI").addEventListener("click",async()=>{
+  const c=calc();if(!c.ok||BUSY)return;const snap=key(),pain=PAIN,ind=$("ind").value,my=++REQ,btn=$("askAI");BUSY=true;btn.disabled=true;LASTKEY=snap;$("aiOut").innerHTML='<p class="note">產生中，通常需要數十秒……</p>';$("staleBanner")?.remove();
+  const s=await samplePromise;
+  if(!s){show(demo(c),true,false);BUSY=false;btn.disabled=!calc().ok;return}
+  const prompt=`你是熟悉台灣製造業營運與財務的顧問，正在依一位企業主提供的彙總數字，做「初步排查」：找出值得先追查的環節，並說明還缺哪些資料才能判斷。這不是公司診斷。用繁體中文（台灣用語），語氣專業、審慎、精簡。
+
+資料（新台幣萬元，存貨、應收、應付可能是期末餘額）：
+產業：${ind}；年營收 ${c.rev}；年營業成本 ${c.cogs}；存貨 ${c.inv}；應收帳款 ${c.ar}；應付帳款 ${c.ap}；供應商合約付款天數平均 ${c.terms}；資金成本年利率 ${(c.rate*100).toFixed(1)}%
+計算：存貨 ${c.dio.toFixed(1)} 天、應收 ${c.dso.toFixed(1)} 天、應付 ${c.dpo.toFixed(1)} 天、CCC ${c.ccc.toFixed(1)} 天；應收每提前一天約 ${Math.round(c.dayRev)} 萬元，存貨或應付每一天約 ${Math.round(c.dayCost)} 萬元。
+企業主最困擾的是：${pain}
+
+要求：
+- 不要依產業名稱判斷天數偏高或偏低，也不要引用產業平均數字。
+- 排序要考慮他的困擾與金額，不只看天數長短。
+- 應付的建議只能是付款紀律（不提早、不重複、不付錯、在合約範圍內），不可建議拖欠供應商。
+- 每一項都要列出「先查什麼」與「還缺哪些資料」。
+
+只回覆一個 JSON 物件：
+{"headline":"一句話（25 字內）","summary":"2 句內","priorities":[{"area":"存貨|應收|應付","title":"15 字內","why":"1-2 句","check":["先查的事，最多 3 項"],"need_data":["還缺的資料，最多 3 項"]}],"caution":"一句提醒"}
+priorities 共 3 項，三個 area 各一。`;
+  try{const d=await s.json(prompt);if(my!==REQ)return;show(d,false,key()!==snap)}
+  catch(e){
+    if(["not_granted","sampling_disabled","not_declared","capability_disabled","capability_removed"].includes(e.code)){$("aiHint").textContent="未取得 AI 使用許可，改用規則產生示範建議。";show(demo(c),true,false)}
+    else if(e.code==="rate_limited"){$("aiOut").innerHTML='<p class="note">使用次數暫時達到上限，請稍後再試。</p>'}
+    else if(e.code!=="cancelled"){$("aiOut").innerHTML='<p class="note">這次沒有取得完整結果，請再按一次。</p>'}
+  }finally{if(my===REQ){BUSY=false;btn.disabled=!calc().ok}}
+});
+</script>
+
+</body>
+</html>

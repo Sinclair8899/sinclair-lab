@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>關鍵料源策略模擬器</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+TC:wght@700&display=swap">
+<style>
+/* Layout: executive briefing — thesis, sourcing-mix configurator with live cash/risk metrics, stress tests, AI review, NPI BOM risk scan */
+:root{
+  --bg:#f3f5f7; --panel:#ffffff; --ink:#18222d; --muted:#5b6876; --line:#d9dfe6;
+  --accent:#1f5f8b; --accent-soft:#e3eef6; --inv:#8a4b2a; --inv-soft:#f6e9e1; --ai:#5a4a9e; --ai-soft:#ece9f7;
+  --sa:#1f5f8b; --sb:#2f6f6a; --sc:#8a4b2a;
+  --ok:#2f7d4f; --ok-soft:#e2f2e8; --warn:#a86a0c; --warn-soft:#fbefd9; --bad:#b33a3a; --bad-soft:#f8e1e1;
+  --f-display:"Noto Serif TC","Songti TC",serif; --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11161c; --panel:#18202a; --ink:#e4e9ef; --muted:#93a1b0; --line:#2b3644;
+  --accent:#6fb0dc; --accent-soft:#1c3346; --inv:#e0a07c; --inv-soft:#3a2619; --ai:#b3a5ef; --ai-soft:#2a2545;
+  --sa:#6fb0dc; --sb:#79c7bf; --sc:#e0a07c;
+  --ok:#6cc792; --ok-soft:#1a3326; --warn:#e3a94a; --warn-soft:#3a2d16; --bad:#ec7f7f; --bad-soft:#3d1f22; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161c; --panel:#18202a; --ink:#e4e9ef; --muted:#93a1b0; --line:#2b3644;
+  --accent:#6fb0dc; --accent-soft:#1c3346; --inv:#e0a07c; --inv-soft:#3a2619; --ai:#b3a5ef; --ai-soft:#2a2545;
+  --sa:#6fb0dc; --sb:#79c7bf; --sc:#e0a07c;
+  --ok:#6cc792; --ok-soft:#1a3326; --warn:#e3a94a; --warn-soft:#3a2d16; --bad:#ec7f7f; --bad-soft:#3d1f22; color-scheme:dark}
+*{box-sizing:border-box}
+html{font-size:106.25%}
+@media (max-width:480px){html{font-size:100%}}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1rem;line-height:1.65}
+.wrap{max-width:1040px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:24px}
+h1{font-family:var(--f-display);font-size:clamp(1.7rem,4.6vw,2.4rem);line-height:1.25;margin:4px 0 0;text-wrap:balance}
+h2{font-family:var(--f-display);font-size:1.25rem;margin:0;text-wrap:balance}
+h3{font-size:1rem;margin:0}
+p{margin:0}
+.lead{color:var(--muted);max-width:66ch;margin-top:10px}
+.eyebrow{font-size:.78rem;letter-spacing:.12em;color:var(--ai);font-weight:500}
+.label{font-size:.72rem;letter-spacing:.08em;color:var(--muted)}
+.mono,.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.note{color:var(--muted);font-size:.84rem}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px}
+a{color:var(--accent)}
+.opener{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.opener div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 14px;display:flex;flex-direction:column;gap:2px}
+.opener span{color:var(--muted);font-size:.84rem}.opener a{text-decoration:none}
+.thesis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.thesis div{padding:12px 14px;border-left:3px solid var(--accent);background:var(--panel);border-radius:0 6px 6px 0}
+.thesis p{color:var(--muted);font-size:.88rem;margin-top:2px}
+.cfg{padding:18px;display:grid;grid-template-columns:1.1fr 1fr;gap:22px}
+.sup{display:flex;flex-direction:column;gap:12px}
+.srow{border:1px solid var(--line);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.srow .top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.srow input[type=range]{width:100%}
+.srow label.tg{display:flex;gap:6px;align-items:center;font-size:.86rem}
+.tagq{font-size:.72rem;padding:1px 7px;border-radius:999px;font-weight:500}
+.q-ok{background:var(--ok-soft);color:var(--ok)}.q-no{background:var(--warn-soft);color:var(--warn)}
+.mix{display:flex;height:22px;border-radius:4px;overflow:hidden;border:1px solid var(--line)}
+.mix i{display:block;height:100%}
+.mets{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.met{border:1px solid var(--line);border-radius:6px;padding:8px 12px}
+.met .v{font-family:var(--f-mono);font-size:1.2rem;font-variant-numeric:tabular-nums}
+.met .h{font-size:.76rem;color:var(--muted)}
+.tablebox{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:680px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:.88rem;vertical-align:top}
+th{font-weight:500;color:var(--muted);font-size:.78rem;white-space:nowrap}
+td.num,th.num{text-align:right;white-space:nowrap}
+.pill{font-size:.75rem;padding:1px 8px;border-radius:999px;font-weight:500;white-space:nowrap}
+.p-ok{background:var(--ok-soft);color:var(--ok)}.p-warn{background:var(--warn-soft);color:var(--warn)}.p-bad{background:var(--bad-soft);color:var(--bad)}
+.btn{font:inherit;cursor:pointer;border-radius:5px;padding:8px 16px;border:1px solid var(--ai);background:var(--ai);color:var(--panel);font-weight:500;align-self:flex-start}
+.btn:disabled{opacity:.6;cursor:default}
+.btn:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.aibox{padding:18px;background:var(--ai-soft);border-color:var(--ai);display:flex;flex-direction:column;gap:10px}
+.aibox textarea{font:inherit;font-family:var(--f-mono);font-size:.82rem;width:100%;min-height:110px;padding:8px;border:1px solid var(--line);border-radius:4px;background:var(--panel);color:var(--ink)}
+.sec{display:flex;flex-direction:column;gap:10px}
+.callout{padding:14px 16px;border-left:3px solid var(--inv);background:var(--inv-soft);border-radius:0 6px 6px 0;font-size:.9rem}
+@media (max-width:820px){.opener,.thesis,.cfg{grid-template-columns:1fr}}
+</style><style>
+[data-live] textarea,[data-live] label,[data-live] button,[data-live] input,[data-live] select,[data-live] .ex,[data-live] [aria-live],[data-live] .note{display:none!important}
+[data-live]::after{content:"這一區需要連接 AI 模型即時分析，網站版不開放操作。本頁其他區塊為規則試算或情境示範，可以完整操作。";display:block;margin-top:8px;padding:8px 12px;border:1px dashed var(--line,#ccc);border-radius:6px;font-size:.9rem;color:var(--muted,#666)}
+</style>
+</head>
+<body>
+<div style="background:#fbefd9;color:#6b4407;font:14px/1.5 system-ui,sans-serif;padding:8px max(16px,env(safe-area-inset-left,0px));text-align:center">網站版・測試版 2026-10-20：「規則試算」依公式即時計算；「情境示範」為預設結果或重播；標示「本版未提供即時 AI」的區塊需要連接 AI 模型，網站版不開放操作。</div>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">AI LAB · 現金循環系列 02B · 關鍵料源</span>
+    <h1>關鍵料源策略模擬器</h1>
+    <p class="lead">AI 伺服器帶動的搶料潮裡，關鍵晶片不是有錢就買得到：大廠先拿走產能，其他人要簽長約、付預付款排隊。採購真正長期的責任，是平時就養好多個合格料源，既不缺料、品質穩定，也能持續降本。這個模擬器讓你配置一顆關鍵料的料源組合，再用三種真實情境壓力測試。</p>
+    <div class="opener">
+      <div><b>3 分鐘</b><span>調整料源比例與合約條件，按下壓力測試</span></div>
+      <div><b>現金的代價</b><span>預付款與安全庫存都會卡住現金，影響應付與存貨天數</span></div>
+      <div><a href="index.html"><b>← 現金循環總覽</b></a><span>也可回到 <a href="mrp.html">MRP 動態物控</a></span></div>
+    </div>
+    <p class="note modeline" style="margin-top:12px;padding:8px 12px;border:1px dashed var(--line);border-radius:6px">本頁說明（網站版）：<b>情境示範</b>是依實務整理的預設結果或重播；<b>規則試算</b>是依公式即時計算；標示「本版未提供即時 AI」的區塊需要連接 AI 模型，網站版不開放操作。</p>
+  </header>
+
+  <section class="thesis" aria-label="核心觀點">
+    <div><b>搶料時代，供應安全有價格</b><p>長約換來配貨保障，預付款換來排隊順位。這些都是用現金和承諾換來的。</p></div>
+    <div><b>第二來源要在平時養</b><p>新料源從送樣、測試到客戶核可，常要數月以上；在藥廠，變更原料來源還需確效與法規變更。等缺料才找，一定來不及。</p></div>
+    <div><b>新產品是最好的時機</b><p>設計階段就避開單一來源料，量產後的議價空間與供應安全會完全不同。</p></div>
+  </section>
+
+  <section class="sec" aria-label="料源配置">
+    <div><span class="label">情境</span><h2>AI 伺服器電源控制晶片・每月需求 100,000 顆</h2>
+    <p class="note" style="margin-top:4px">調整各來源的採購比例，原廠 A 自動補足剩下的量。示範數字為虛構，用來呈現取捨關係。</p></div>
+    <div class="panel cfg">
+      <div class="sup" id="sup"></div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <span class="label">採購比例</span>
+        <div class="mix" id="mix" aria-hidden="true"></div>
+        <div class="mets" id="mets"></div>
+        <p class="note" id="mnote"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" aria-label="壓力測試">
+    <div><span class="label">壓力測試</span><h2>同一個組合，遇到三種真實情境</h2>
+    <p class="note" style="margin-top:4px">情境持續期間的缺口先由安全庫存吸收，不夠再向代理商買現貨（價格高 25%，有品質風險）；現貨也買不到時就停線。結果隨上方配置即時更新。</p></div>
+    <div class="panel tablebox"><table id="stress"></table></div>
+  </section>
+
+  <section class="panel aibox" data-live aria-label="AI 評估">
+    <div><span class="eyebrow">本版未提供即時 AI · 料源顧問</span><h2 style="margin-top:2px">請 AI 評估你的料源組合</h2>
+      <p class="note" style="margin-top:4px" id="aiHint">AI 會讀取目前的配置與壓力測試結果，指出最大的弱點、建議的調整，以及下一步該啟動哪些驗證或談判。本版未提供即時 AI。</p></div>
+    <button class="btn" id="aiBtn" type="button">開始評估</button>
+    <div id="aiOut" aria-live="polite"></div>
+  </section>
+
+  <section class="sec" aria-label="新產品料源風險">
+    <div><span class="label">新產品導入</span><h2>新產品 BOM 料源風險掃描</h2>
+    <p class="note" style="margin-top:4px">新產品在設計階段，AI 逐項掃描 BOM：來源家數、交期、配貨與停產公告、客戶指定料，先標出需要提早找第二來源的料。</p></div>
+    <div class="panel tablebox"><table id="bom"></table></div>
+    <div class="panel aibox" data-live>
+      <div><span class="eyebrow">本版未提供即時 AI · 掃描你自己的 BOM</span><h3 style="margin-top:2px">貼上 BOM 片段（品名、規格、供應商、交期，一行一項）</h3>
+      <p class="note" style="margin-top:4px">AI 只依你提供的內容判斷，不會上網查詢；請勿貼上機密資料。</p></div>
+      <textarea id="bomTxt">伺服器主控 MCU, 32-bit 480MHz, 單一供應商, 交期 26 週
+DrMOS 功率級 60A, 兩家供應商, 交期 16 週
+高分子電容 470µF 2V, 三家供應商, 交期 10 週
+PCIe Gen5 連接器, 客戶指定, 交期 12 週
+電流感測電阻 0.5mΩ, 兩家供應商, 交期 8 週</textarea>
+      <button class="btn" id="bomBtn" type="button">掃描料源風險</button>
+      <div id="bomOut" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <p class="callout">採購的價值不只在每一次議價省下多少，更在於讓公司在缺料時拿得到料、在漲價時有選擇、在客戶要新產品時已經有合格料源可用。AI 能做的，是全天候盯住供應商的產能、配貨、品質與財務訊號，讓採購把時間花在開發料源和談判上。</p>
+
+  <p class="note">本頁產品、供應商、價格與情境皆為虛構示範，僅供教學與研究用途，與作者任職或服務的任何公司無關。匯率以 1 USD = 32.4 TWD 計。</p>
+</div>
+
+<script>
+const NEED=100000,FX=32.4,$=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+const st={b:10,c:0,lta:false,qc:false};
+const SUP=[
+ {k:"a",name:"原廠 A（國際大廠）",price:4.00,desc:"主要來源。搶料時優先供貨給大客戶，未簽長約者配貨比例低。",color:"--sa"},
+ {k:"b",name:"原廠 B（已驗證第二來源）",price:4.24,desc:"價格高 6%，產能最多可供應 50%。",color:"--sb",max:50},
+ {k:"c",name:"新供應商 C（尚未驗證）",price:3.52,desc:"價格低 12%。須完成約 16 週驗證與客戶核可，驗證費用約 80 萬元。",color:"--sc",max:40},
+];
+const W=v=>Math.round(v).toLocaleString("zh-TW");
+const wan=t=>t>=10000?(t/10000).toLocaleString("zh-TW",{maximumFractionDigits:2})+" 億":W(t)+" 萬";
+function model(){
+  const a=100-st.b-st.c,sh={a:a/100,b:st.b/100,c:st.c/100};
+  const pa=st.lta?4.00*0.97:4.00,price=sh.a*pa+sh.b*4.24+sh.c*(st.qc?3.52:pa),pricePot=sh.a*pa+sh.b*4.24+sh.c*3.52;
+  const usable=st.qc||st.c===0;
+  const effA=usable?sh.a:sh.a+sh.c; // 未驗證 C 的量，暫由原廠 A 補位（成本與供應同一口徑）
+  const srcs=[effA>=0.15,sh.b>=0.15,sh.c>=0.15&&st.qc].filter(Boolean).length;
+  const ssw=srcs>=3?3:srcs===2?4:6;
+  const spendY=NEED*12*price*FX/1e4; // 萬元
+  const prepay=st.lta?0.2*6*NEED*effA*pa*FX/1e4:0;
+  const ssCash=ssw/52*spendY;
+  const qual=st.qc?80:0;
+  return{sh,effA,pa,price,pricePot,usable,srcs,ssw,spendY,prepay,ssCash,qual,save:(4.00-price)*NEED*12*FX/1e4,pot:(price-pricePot)*NEED*12*FX/1e4};
+}
+function stress(m){
+  const ss=m.ssw*NEED/4.33,day=NEED/22,spotMax=60000,res=[];
+  const run=(name,desc,months,fill,extraPrice)=>{
+    const supply=m.effA*fill.a+m.sh.b*fill.b+(m.usable?m.sh.c*fill.c:0);
+    const gap=Math.max(0,months*NEED*(1-supply)),afterSS=Math.max(0,gap-ss),spot=Math.min(afterSS,spotMax),stop=(afterSS-spot)/day;
+    const cost=spot*1.0*FX/1e4+(extraPrice||0);
+    res.push({name,desc,gap,afterSS,spot,stop,cost});
+  };
+  run("大廠搶料配貨","原廠 A 優先供貨給 AI 大客戶，持續 6 個月",6,{a:st.lta?0.9:0.5,b:0.8,c:1});
+  run("主要來源品質異常","原廠 A 製程異常，兩個月無法出貨",2,{a:0,b:1,c:1});
+  const unprot=(st.lta?0:m.effA*4.00)+m.sh.b*4.24+(m.usable?m.sh.c*3.52:0); // 未受長約保護的來源（含已驗證的 C）全部漲價
+  run("關鍵料漲價 20%","未簽長約的來源（含已驗證的 C）6 個月內全面漲價 20%；簽長約的 A 價格鎖定",0,{a:1,b:1,c:1},unprot*0.2*NEED*6*FX/1e4);
+  return res;
+}
+function render(){
+  const m=model();
+  $("sup").innerHTML=SUP.map(s=>{
+    const share=s.k==="a"?100-st.b-st.c:st[s.k];
+    let ctrl="";
+    if(s.k==="a")ctrl=`<label class="tg" for="lta"><input type="checkbox" id="lta" ${st.lta?"checked":""}> 簽長約：價格降 3%、配貨保障 90%，但須預付 6 個月用量的 20%</label>`;
+    if(s.k==="b")ctrl=`<input type="range" id="rb" min="0" max="${s.max}" step="5" value="${st.b}" aria-label="原廠 B 比例">`;
+    if(s.k==="c")ctrl=`<input type="range" id="rc" min="0" max="${s.max}" step="5" value="${st.c}" aria-label="新供應商 C 比例"><label class="tg" for="qc"><input type="checkbox" id="qc" ${st.qc?"checked":""}> 已投入驗證並取得客戶核可</label>`;
+    const q=s.k==="c"?(st.qc?'<span class="tagq q-ok">已驗證</span>':'<span class="tagq q-no">未驗證</span>'):'<span class="tagq q-ok">已驗證</span>';
+    return `<div class="srow" style="border-left:4px solid var(${s.color})"><div class="top"><b>${s.name} ${q}</b><span class="num">${share}%${s.k==="a"&&!m.usable?`＋補位 ${st.c}%`:s.k==="c"&&!m.usable?"（暫由 A 補位）":""}・USD ${(s.k==="a"?m.pa:s.price).toFixed(2)}</span></div><span class="note">${s.desc}</span>${ctrl}</div>`}).join("");
+  $("mix").innerHTML=[["a","--sa"],["b","--sb"],["c","--sc"]].map(([k,c])=>`<i style="width:${m.sh[k]*100}%;background:var(${c})"></i>`).join("");
+  $("mets").innerHTML=[
+    ["加權單價（目前可實現）","USD "+m.price.toFixed(3),`相較全買原廠 A：${m.save>=0?"每年省":"每年多花"} ${wan(Math.abs(m.save))}${m.pot>0?`；C 完成驗證後的潛在節省再多 ${wan(m.pot)}（未驗證前，C 的量由原廠 A 補位、以 A 價格計）`:""}`],
+    ["合格料源數",m.srcs+" 家",`建議安全庫存 ${m.ssw} 週`],
+    ["預付款占用現金","NT$ "+wan(m.prepay),st.lta?"長約預付：付款早於交貨，另列為預付款占用，不計入應付天數":"未簽長約"],
+    ["安全庫存占用現金","NT$ "+wan(m.ssCash),"影響存貨天數"],
+  ].map(x=>`<div class="met"><span class="label">${x[0]}</span><div class="v">${x[1]}</div><span class="h">${x[2]}</span></div>`).join("");
+  $("mnote").textContent=!m.usable?`注意：新供應商 C 尚未驗證，不能出貨。分配給 C 的 ${st.c}% 暫由原廠 A 補位，所以單價、預付款與壓力測試都以原廠 A 實際承擔 ${Math.round(m.effA*100)}% 的口徑計算。`:m.qual?`驗證投入約 ${m.qual} 萬元，一次性費用。`:"";
+  const S=stress(m);
+  $("stress").innerHTML=`<thead><tr><th>情境</th><th class="num">缺口</th><th class="num">安全庫存吸收後</th><th class="num">現貨補量</th><th class="num">停線</th><th class="num">額外成本</th><th>結果</th></tr></thead><tbody>${S.map(r=>{const st2=r.stop>0.05?["p-bad",`停線 ${r.stop.toFixed(1)} 天`]:r.cost>200?["p-warn","保住生產，代價高"]:r.cost>0?["p-warn","小幅影響"]:["p-ok","安全過關"];return `<tr><td><b>${r.name}</b><br><span class="note">${r.desc}</span></td><td class="num">${W(r.gap)} 顆</td><td class="num">${W(r.afterSS)} 顆</td><td class="num">${W(r.spot)} 顆</td><td class="num">${r.stop.toFixed(1)} 天</td><td class="num">NT$ ${wan(r.cost)}</td><td><span class="pill ${st2[0]}">${st2[1]}</span></td></tr>`}).join("")}</tbody>`;
+  window.__last={m,S};
+}
+document.addEventListener("input",e=>{
+  if(e.target.id==="rb"){st.b=+e.target.value;if(st.b+st.c>90)st.c=90-st.b;render();$("rb").focus()}
+  else if(e.target.id==="rc"){st.c=+e.target.value;if(st.b+st.c>90)st.b=90-st.c;render();$("rc").focus()}
+});
+document.addEventListener("change",e=>{if(e.target.id==="lta"){st.lta=e.target.checked;render()}if(e.target.id==="qc"){st.qc=e.target.checked;render()}});
+render();
+
+/* 新產品 BOM 示範 */
+const BOM=[
+ ["電源控制 IC","1 家","24 週","原廠配貨中","高","立即啟動第二來源送樣，同時談長約"],
+ ["MOSFET 功率元件","3 家","12 週","—","低","維持三家比例，每季比價"],
+ ["功率電感","2 家","14 週","—","中","第二家驗證已完成，分配 30% 量"],
+ ["MLCC 1210 47µF","2 家","20 週","高容值品項配貨中","中高","提高安全庫存，評估改用兩顆小容值替代"],
+ ["高速連接器","1 家","12 週","客戶指定料","中","與客戶確認可否核可替代品，提早送件"],
+ ["20 層 PCB","2 家","6 週","—","低","維持雙來源"],
+];
+const lv={"高":"p-bad","中高":"p-bad","中":"p-warn","低":"p-ok"};
+$("bom").innerHTML=`<thead><tr><th>零件</th><th>合格來源</th><th>交期</th><th>市場訊號</th><th>料源風險</th><th>AI 建議</th></tr></thead><tbody>${BOM.map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td class="num">${r[2]}</td><td>${r[3]}</td><td><span class="pill ${lv[r[4]]}">${r[4]}</span></td><td>${r[5]}</td></tr>`).join("")}</tbody>`;
+
+/* 真 AI */
+const samp=window.claude?.use?window.claude.use("sample").catch(()=>null):Promise.resolve(null);
+samp.then(s=>{if(!s){$("aiHint").textContent="本版未提供即時 AI。";$("aiBtn").disabled=true;$("bomBtn").disabled=true}});
+const HIDE=["not_granted","sampling_disabled","not_declared","capability_disabled","capability_removed"];
+const errMsg=e=>HIDE.includes(e.code)?"目前無法使用 AI（本版未提供即時 AI）。":e.code==="rate_limited"?"使用次數暫時達上限，請稍後再試。":e.code==="cancelled"?"":"這次沒有取得完整結果，請再按一次。";
+const A=x=>Array.isArray(x)?x:[];
+$("aiBtn").addEventListener("click",async()=>{
+  const s=await samp;if(!s)return;const btn=$("aiBtn"),out=$("aiOut"),{m,S}=window.__last;
+  btn.disabled=true;out.innerHTML='<p class="note">AI 評估中，約需 30–60 秒……</p>';
+  const prompt=`你是台灣電子製造業的資深策略採購主管，熟悉 AI 伺服器供應鏈搶料、長約（LTA）、預付排隊與第二來源驗證。請用繁體中文（台灣用語）評估以下料源組合，語氣專業、具體、精簡。
+
+料號：AI 伺服器電源控制晶片，每月需求 100,000 顆。
+配置：原廠 A ${Math.round(m.sh.a*100)}%（${st.lta?"已簽長約，價格降 3%，預付 6 個月用量 20%":"未簽長約"}）、原廠 B（已驗證第二來源，價高 6%）${Math.round(m.sh.b*100)}%、新供應商 C（價低 12%，${st.qc?"已完成驗證":"尚未驗證"}）${Math.round(m.sh.c*100)}%。
+加權單價 USD ${m.price.toFixed(3)}；合格料源 ${m.srcs} 家；安全庫存 ${m.ssw} 週；預付占用 NT$ ${Math.round(m.prepay)} 萬；安全庫存占用 NT$ ${Math.round(m.ssCash)} 萬。
+壓力測試：${S.map(r=>`${r.name}：缺口 ${Math.round(r.gap)} 顆、停線 ${r.stop.toFixed(1)} 天、額外成本 ${Math.round(r.cost)} 萬元`).join("；")}。
+
+要求：同時兼顧供應安全、品質、成本與現金占用；不要捏造市場數據。
+只回覆一個 JSON 物件：
+{"verdict":"一句話評語（30 字內）","weakness":"最大弱點，2 句內","changes":[{"what":"建議調整","why":"原因，30 字內"}],"next90":["未來 90 天該啟動的具體行動，最多 4 項"],"tradeoff":"這個建議要付出的代價，一句"}`;
+  try{const d=await s.json(prompt);
+    out.innerHTML=`<h3>${esc(d.verdict)}</h3><p style="margin-top:4px">${esc(d.weakness)}</p>
+     <div class="tablebox" style="background:var(--panel);border-radius:6px;margin-top:8px"><table style="min-width:480px"><thead><tr><th>建議調整</th><th>原因</th></tr></thead><tbody>${A(d.changes).map(c=>`<tr><td>${esc(c.what)}</td><td>${esc(c.why)}</td></tr>`).join("")}</tbody></table></div>
+     <p style="margin-top:8px"><b>未來 90 天</b></p><ul style="margin:2px 0 0;padding-left:1.1em">${A(d.next90).map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
+     ${d.tradeoff?`<p class="note" style="margin-top:6px">代價：${esc(d.tradeoff)}</p>`:""}`;
+  }catch(e){out.innerHTML=`<p class="note">${errMsg(e)}</p>`}finally{btn.disabled=false}
+});
+$("bomBtn").addEventListener("click",async()=>{
+  const s=await samp;if(!s)return;const btn=$("bomBtn"),out=$("bomOut"),txt=$("bomTxt").value.trim().slice(0,5000);
+  if(!txt)return;btn.disabled=true;out.innerHTML='<p class="note">AI 掃描中……</p>';
+  const prompt=`你是新產品導入（NPI）的料源風險分析師。請只依下列 BOM 片段的資訊（不要上網、不要捏造市場數據），逐項評估料源風險：考慮合格來源家數、交期長短、是否客戶指定、是否提到配貨或停產。用繁體中文（台灣用語）。
+
+${txt}
+
+只回覆 JSON 陣列，每項一個物件：
+[{"part":"零件名稱","risk":"高|中高|中|低","reason":"20 字內","action":"建議行動，25 字內"}]`;
+  try{const d=A(await s.json(prompt));
+    out.innerHTML=`<div class="tablebox" style="background:var(--panel);border-radius:6px"><table style="min-width:520px"><thead><tr><th>零件</th><th>風險</th><th>原因</th><th>建議行動</th></tr></thead><tbody>${d.map(r=>`<tr><td><b>${esc(r.part)}</b></td><td><span class="pill ${lv[r.risk]||"p-warn"}">${esc(r.risk)}</span></td><td>${esc(r.reason)}</td><td>${esc(r.action)}</td></tr>`).join("")}</tbody></table></div>`;
+  }catch(e){out.innerHTML=`<p class="note">${errMsg(e)}</p>`}finally{btn.disabled=false}
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>3 分鐘當老闆</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+TC:wght@700&display=swap">
+<style>
+/* Layout: agent sandbox — event and dashboard, boss constraints, live agent work log beside approvals, execution with feedback, unified KPI board */
+:root{
+  --bg:#f3f5f7; --panel:#ffffff; --ink:#18222d; --muted:#5b6876; --line:#d9dfe6;
+  --accent:#1f5f8b; --accent-soft:#e3eef6; --inv:#8a4b2a; --inv-soft:#f6e9e1; --ai:#5a4a9e; --ai-soft:#ece9f7;
+  --ok:#2f7d4f; --ok-soft:#e2f2e8; --warn:#a86a0c; --warn-soft:#fbefd9; --bad:#b33a3a; --bad-soft:#f8e1e1;
+  --f-display:"Noto Serif TC","Songti TC",serif; --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11161c; --panel:#18202a; --ink:#e4e9ef; --muted:#93a1b0; --line:#2b3644;
+  --accent:#6fb0dc; --accent-soft:#1c3346; --inv:#e0a07c; --inv-soft:#3a2619; --ai:#b3a5ef; --ai-soft:#2a2545;
+  --ok:#6cc792; --ok-soft:#1a3326; --warn:#e3a94a; --warn-soft:#3a2d16; --bad:#ec7f7f; --bad-soft:#3d1f22; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161c; --panel:#18202a; --ink:#e4e9ef; --muted:#93a1b0; --line:#2b3644;
+  --accent:#6fb0dc; --accent-soft:#1c3346; --inv:#e0a07c; --inv-soft:#3a2619; --ai:#b3a5ef; --ai-soft:#2a2545;
+  --ok:#6cc792; --ok-soft:#1a3326; --warn:#e3a94a; --warn-soft:#3a2d16; --bad:#ec7f7f; --bad-soft:#3d1f22; color-scheme:dark}
+*{box-sizing:border-box}
+html{font-size:106.25%}
+@media (max-width:480px){html{font-size:100%}}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1rem;line-height:1.65}
+.wrap{max-width:1240px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:24px}
+h1{font-family:var(--f-display);font-size:clamp(1.7rem,4.6vw,2.4rem);line-height:1.25;margin:4px 0 0;text-wrap:balance}
+h2{font-family:var(--f-display);font-size:1.25rem;margin:0;text-wrap:balance}
+h3{font-size:1rem;margin:0}
+p{margin:0}
+.lead{color:var(--muted);max-width:66ch;margin-top:10px}
+.eyebrow{font-size:.78rem;letter-spacing:.12em;color:var(--ai);font-weight:500}
+.label{font-size:.72rem;letter-spacing:.08em;color:var(--muted)}
+.mono,.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.note{color:var(--muted);font-size:.84rem}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px}
+a{color:var(--accent)}
+.opener{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.opener div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 14px;display:flex;flex-direction:column;gap:2px}
+.opener b{font-size:1rem}.opener span{color:var(--muted);font-size:.84rem}
+.opener a{text-decoration:none}
+.thesis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.thesis div{padding:12px 14px;border-left:3px solid var(--inv);background:var(--panel);border-radius:0 6px 6px 0}
+.thesis p{color:var(--muted);font-size:.88rem;margin-top:2px}
+.sec{display:flex;flex-direction:column;gap:10px}
+.tablebox{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:680px}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap;font-size:.88rem}
+th{font-weight:500;color:var(--muted);font-size:.78rem}
+td.num,th.num{text-align:right}
+.score{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.score>div{padding:12px 16px;border-radius:8px;border:1px solid var(--line);background:var(--panel)}
+.score>div.ag{border-color:var(--ai);background:var(--ai-soft)}
+.score dl{display:grid;grid-template-columns:auto 1fr;gap:2px 14px;margin:6px 0 0}
+.score dt{color:var(--muted);font-size:.86rem}.score dd{margin:0;font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.weeks{display:flex;gap:6px;flex-wrap:wrap}
+.weeks span{font-family:var(--f-mono);font-size:.78rem;padding:2px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.weeks span.on{border-color:var(--inv);color:var(--inv);background:var(--inv-soft);font-weight:500}
+.weeks span.done{color:var(--ok);border-color:var(--ok)}
+.event{padding:18px;display:flex;flex-direction:column;gap:12px}
+.event .what{border-left:3px solid var(--inv);padding-left:12px}
+.lag{font-size:.86rem;color:var(--bad)}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.opts button{all:unset;cursor:pointer;border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:var(--bg);display:flex;flex-direction:column;gap:2px}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.opts button:disabled{cursor:default}
+.opts button.pick{border-color:var(--accent);background:var(--accent-soft)}
+.opts small{color:var(--muted);font-size:.8rem}
+.res{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.res>div{border-radius:6px;padding:10px 14px}
+.r-me{background:var(--bg);border:1px solid var(--line)}
+.r-ag{background:var(--ai-soft);border:1px solid var(--ai)}
+.r-ag b{color:var(--ai)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.chip{font-family:var(--f-mono);font-size:.76rem;padding:1px 7px;border-radius:3px;background:var(--panel);border:1px solid var(--line)}
+.c-bad{color:var(--bad);border-color:var(--bad)}.c-warn{color:var(--warn);border-color:var(--warn)}.c-ok{color:var(--ok);border-color:var(--ok)}
+.btn{font:inherit;cursor:pointer;border-radius:5px;padding:8px 16px;border:1px solid var(--accent);background:var(--accent);color:var(--panel);font-weight:500;align-self:flex-start}
+.btn.ai{border-color:var(--ai);background:var(--ai)}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.6;cursor:default}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chg{background:var(--ai-soft);color:var(--ai);font-weight:500;border-radius:3px;padding:0 4px}
+.strat{font-size:.74rem;padding:1px 7px;border-radius:999px;font-weight:500}
+.s-jit{background:var(--ok-soft);color:var(--ok)}.s-jic{background:var(--warn-soft);color:var(--warn)}
+.console{padding:18px;background:var(--ai-soft);border-color:var(--ai);display:flex;flex-direction:column;gap:10px}
+.console textarea{font:inherit;width:100%;min-height:70px;padding:8px;border:1px solid var(--line);border-radius:4px;background:var(--panel);color:var(--ink)}
+.console textarea:focus-visible{outline:2px solid var(--ai)}
+.ex{display:flex;flex-wrap:wrap;gap:6px}
+.ex button{font:inherit;font-size:.82rem;cursor:pointer;border:1px solid var(--ai);background:var(--panel);color:var(--ai);border-radius:999px;padding:2px 10px}
+.agents{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.agents div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+.agents p{font-size:.84rem;color:var(--muted)}
+details{border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:12px 16px}
+details summary{cursor:pointer;font-weight:700}
+details summary:focus-visible{outline:2px solid var(--accent)}
+details>div{margin-top:12px;display:flex;flex-direction:column;gap:10px}
+.bar{height:8px;border-radius:2px;background:var(--line);overflow:hidden;width:120px;display:inline-block;vertical-align:middle;margin-right:6px}
+.bar i{display:block;height:100%}
+@media (max-width:820px){.opener,.thesis,.opts,.res,.score,.agents{grid-template-columns:1fr}}
+.quote{border-left:3px solid var(--ai);padding:8px 14px;color:var(--muted);font-size:.92rem;max-width:70ch}
+.quote cite{display:block;font-style:normal;font-size:.8rem;margin-top:4px}
+.step{display:flex;flex-direction:column;gap:10px}
+.step>.hd{display:flex;align-items:baseline;gap:10px}
+.step>.hd .n{font-family:var(--f-mono);font-size:.8rem;color:var(--panel);background:var(--accent);border-radius:999px;padding:1px 9px}
+.mail{padding:14px 16px;font-size:.92rem;white-space:pre-wrap;line-height:1.7}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.kp{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:1px}
+.kp .v{font-family:var(--f-mono);font-size:1.25rem;font-variant-numeric:tabular-nums}
+.kp .d{font-size:.76rem;color:var(--muted)}
+.kp.bad{border-color:var(--bad)}.kp.bad .v{color:var(--bad)}
+.kp.good .v{color:var(--ok)}
+.risks{display:flex;flex-wrap:wrap;gap:6px}
+.cons{padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:6px 20px}
+.cons label{display:flex;gap:8px;align-items:baseline;font-size:.92rem}
+.cons .thr{grid-column:1/-1;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.work{display:grid;grid-template-columns:1.1fr 1fr;gap:12px;align-items:start}
+.log{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;max-height:520px;overflow:auto;min-width:0}
+.lg{display:grid;grid-template-columns:52px 1fr;gap:8px;font-size:.86rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+.lg:last-child{border-bottom:0}
+.lg .t{font-size:.72rem;font-weight:500;border-radius:3px;padding:1px 0;text-align:center;align-self:start}
+.t-q{background:var(--accent-soft);color:var(--accent)}.t-p{background:var(--ai-soft);color:var(--ai)}.t-x{background:var(--ok-soft);color:var(--ok)}.t-f{background:var(--warn-soft);color:var(--warn)}.t-k{background:var(--inv-soft);color:var(--inv)}
+.lg code{font-family:var(--f-mono);font-size:.78rem;color:var(--muted)}
+.apps{display:flex;flex-direction:column;gap:8px;min-width:0}
+.ap{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.ap.need{border-color:var(--warn)}
+.ap .row{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.ap .acts{display:flex;gap:6px}
+.ap .acts button{font:inherit;font-size:.84rem;cursor:pointer;border-radius:4px;padding:3px 12px;border:1px solid var(--ok);background:var(--ok);color:var(--panel)}
+.ap .acts button.no{border-color:var(--bad);background:transparent;color:var(--bad)}
+.ap .acts button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sumbox{background:var(--ai-soft);border:1px solid var(--ai);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.sumbox ul{margin:2px 0 0;padding-left:1.1em}
+.tasks{display:flex;flex-direction:column;gap:4px}
+.tasks div{display:grid;grid-template-columns:90px 1fr 80px;gap:8px;font-size:.86rem;padding:6px 10px;background:var(--panel);border:1px solid var(--line);border-radius:6px}
+.bar2{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.spin{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--ai);animation:pulse 1s infinite alternate;margin-right:6px}
+@keyframes pulse{from{opacity:.3}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+@media (max-width:820px){.kpis{grid-template-columns:1fr 1fr}.work,.cons{grid-template-columns:1fr}.tasks div{grid-template-columns:1fr}}
+.cashwrap{display:grid;grid-template-columns:1.2fr 1fr;gap:12px;align-items:start}
+.chart{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.chart svg{width:100%;height:auto;display:block}
+.chart text{font-family:var(--f-mono);font-size:10px;fill:var(--muted)}
+.brk{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.brk table{min-width:0}
+.brk td{white-space:normal}
+.two2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.box ul{margin:0;padding-left:1.1em;font-size:.88rem}
+.grp{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.grp.need{border-color:var(--warn)}
+.grp .row{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline}
+.grp details{border:0;padding:0;background:transparent}
+.grp details summary{font-weight:500;font-size:.86rem;color:var(--accent)}
+.grp .it{border-top:1px dashed var(--line);padding:6px 0;display:flex;flex-direction:column;gap:2px;font-size:.88rem}
+.gacts{display:flex;gap:6px;flex-wrap:wrap}
+.gacts button,.it button,.sign{font:inherit;font-size:.84rem;cursor:pointer;border-radius:4px;padding:3px 12px;border:1px solid var(--ok);background:var(--ok);color:var(--panel)}
+.gacts button.no,.it button.no{border-color:var(--bad);background:transparent;color:var(--bad)}
+.gacts button:focus-visible,.it button:focus-visible,.sign:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sign{border-color:var(--accent);background:var(--accent)}
+.sign:disabled{opacity:.5;cursor:default}
+.dv{margin-top:6px;border:0;background:transparent;padding:0}
+.dv summary{font-size:.86rem;font-weight:500;color:var(--ai)}
+.dv p{font-size:.88rem;margin-top:4px;color:var(--ink);border-left:3px solid var(--ai);padding-left:10px}
+.contact{border-top:1px solid var(--line);padding-top:8px;display:flex;flex-direction:column;gap:4px}
+.ex button[aria-checked="true"]{background:var(--ai);color:var(--panel)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:20px;align-items:start}
+.mainc{display:flex;flex-direction:column;gap:24px;min-width:0}
+.guide{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;max-height:calc(100vh - 24px);overflow:auto}
+.gst{border-left:3px solid var(--line);padding:2px 0 2px 10px;display:flex;flex-direction:column;gap:3px;opacity:.55;transition:opacity .3s,border-color .3s}
+.gst.on{opacity:1;border-color:var(--accent)}.gst.done{opacity:1;border-color:var(--ok)}
+.gst b{font-size:.9rem}.gst .s{font-size:.8rem;color:var(--muted)}
+.gst ul{margin:0;padding-left:1em;font-size:.82rem}
+.gr{display:flex;justify-content:space-between;gap:6px;font-size:.82rem}
+.gr .num{font-family:var(--f-mono)}
+.up{color:var(--ok)}.dn{color:var(--bad)}
+.gbtn{font:inherit;font-size:.84rem;cursor:pointer;border-radius:4px;padding:4px 10px;border:1px solid var(--accent);background:var(--accent);color:var(--panel)}
+.gbtn:disabled{opacity:.45;cursor:default}
+.kp .v{transition:color .3s}
+.kp.fl-up{animation:flu 1s}.kp.fl-dn{animation:fld 1s}
+@keyframes flu{0%{background:var(--ok-soft)}100%{background:var(--panel)}}
+@keyframes fld{0%{background:var(--bad-soft)}100%{background:var(--panel)}}
+.bars{position:relative;height:170px;display:flex;align-items:flex-end;gap:5px;padding:0 0 18px 0}
+.bc{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;position:relative}
+.bc .b{width:100%;border-radius:3px 3px 0 0;background:var(--accent);transition:height .7s cubic-bezier(.2,.8,.2,1),background .4s}
+.bc .b.min{background:var(--warn)}.bc .b.low{background:var(--bad)}
+.bc span{position:absolute;bottom:-17px;font-family:var(--f-mono);font-size:.66rem;color:var(--muted)}
+.safe{position:absolute;left:0;right:0;border-top:1px dashed var(--bad);pointer-events:none}
+.safe span{position:absolute;right:0;top:-15px;font-size:.68rem;color:var(--bad);font-family:var(--f-mono)}
+.lg{animation:slin .35s ease-out}
+@keyframes slin{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+.cmp td,.cmp th{white-space:normal;font-size:.84rem}
+.cmp tr.me td{background:var(--accent-soft);font-weight:500}
+.lens{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.lens div{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:.88rem}
+.judge{display:flex;flex-direction:column;gap:6px}
+.judge div{display:grid;grid-template-columns:26px 1fr;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:.88rem}
+.judge .ic{font-weight:700;text-align:center}
+@media (max-width:1060px){.layout{grid-template-columns:1fr}.guide{position:static;max-height:none}}
+@media (max-width:820px){.lens{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.bc .b,.gst{transition:none}.kp.fl-up,.kp.fl-dn,.lg{animation:none}}
+.talk{border:2px solid var(--accent);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;background:var(--accent-soft)}
+.result{background:var(--panel);border:2px solid var(--accent);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+@media (max-width:820px){.cashwrap,.two2{grid-template-columns:1fr}}
+</style><style>
+[data-live] textarea,[data-live] label,[data-live] button,[data-live] input,[data-live] select,[data-live] .ex,[data-live] [aria-live],[data-live] .note{display:none!important}
+[data-live]::after{content:"這一區需要連接 AI 模型即時分析，網站版不開放操作。本頁其他區塊為規則試算或情境示範，可以完整操作。";display:block;margin-top:8px;padding:8px 12px;border:1px dashed var(--line,#ccc);border-radius:6px;font-size:.9rem;color:var(--muted,#666)}
+</style>
+</head>
+<body>
+<div style="background:#fbefd9;color:#6b4407;font:14px/1.5 system-ui,sans-serif;padding:8px max(16px,env(safe-area-inset-left,0px));text-align:center">網站版・測試版 2026-10-20：「規則試算」依公式即時計算；「情境示範」為預設結果或重播；標示「本版未提供即時 AI」的區塊需要連接 AI 模型，網站版不開放操作。</div>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">AI LAB · 現金循環系列 · 經營情境（測試版）</span>
+    <h1>客戶延後拉貨，又要求延長帳期。你會先保現金、保供應，還是保客戶關係？</h1>
+    <p class="lead">3 分鐘的經營情境：AI agents 查證資料、提出方案，由你核准；最後看結果，以及這是不是較好的做法。</p>
+    <div class="bar2" style="margin-top:12px"><button class="btn ai" id="go" type="button">開始體驗</button><button class="btn ghost" id="toMethod" type="button">先看方法與假設</button></div>
+  </header>
+
+  <div class="layout"><div class="mainc">
+
+  <section class="step" aria-label="事件與現況">
+    <div class="hd"><span class="n">1</span><h2>狀況：客戶 Y 的來信</h2></div>
+    <div class="panel mail" id="mail"></div>
+  </section>
+
+  <section class="step" aria-label="經營約束">
+    <div class="hd"><span class="n">2</span><h2>你的經營約束</h2></div>
+    <p class="note">硬性約束（不准加班、不得損害前三大客戶）AI 不得違反；偏好（現金優先、長交期料）影響方案排序。核准後若修改約束，受影響的行動會失效，需要重新核准。</p>
+    <div class="panel cons" id="cons">
+      <label for="c1"><input type="checkbox" id="c1"> 硬性：不准加班</label>
+      <label for="c2"><input type="checkbox" id="c2" checked> 硬性：不得損害前三大客戶關係</label>
+      <label for="c3"><input type="checkbox" id="c3" checked> 偏好：現金優先於毛利</label>
+      <label for="c4"><input type="checkbox" id="c4"> 偏好：未取得客戶承諾，不備長交期料</label>
+      <div class="thr"><label for="thr">單筆超過多少金額須由你核准</label><input id="thr" type="range" min="100" max="1000" step="100" value="300"><b class="num" id="thrv"></b></div>
+    </div>
+  </section>
+
+  <section class="step" id="stepAI" aria-label="交給 AI agents">
+    <div class="hd"><span class="n">3</span><h2>交給 AI agents 查證與提案</h2></div>
+    <div class="bar2"><button class="btn ai" id="run1" type="button">開始</button><span class="note" id="modeTxt"></span></div>
+    <div class="work">
+      <div><span class="label">工作紀錄</span><div class="log" id="log"><p class="note">按下「開始」後，這裡會逐條顯示 AI 查了什麼、發現什麼、提出什麼。</p></div></div>
+      <div class="apps"><span class="label">你要做的三組決定</span><div id="apps"><p class="note">尚無提案。</p></div>
+        <details class="dv"><summary>設計者觀點：先定授權，再談自動化</summary><p>導入 AI agents 的第一個前提，不是模型多聰明，而是授權界線清楚：哪些金額以下可以自己做、哪些對外承諾一定要人核准，以及約束改變時，已核准的事要不要重新確認。這裡的每一項行動，都保存核准當時的條件；條件一變，就必須重新核准。</p></details>
+        <div id="sum1"></div></div>
+    </div>
+  </section>
+
+  <section class="step" aria-label="執行與追蹤">
+    <div class="hd"><span class="n">4</span><h2>依你的核准執行，並追蹤結果</h2></div>
+    <div class="bar2"><button class="btn ai" id="run2" type="button" disabled>依核准結果執行</button><span class="note" id="run2Txt">先完成第 3 步，並核准或否決待決行動。</span></div>
+    <div id="cond"></div>
+    <div id="sum2"></div>
+    <div id="result"></div>
+    <div><span class="label">追蹤任務</span><div class="tasks" id="tasks"><p class="note">執行後，AI 建立的追蹤任務會列在這裡。</p></div></div>
+  </section>
+
+  <section class="step" id="dashSec" aria-label="經營儀表板">
+    <div class="hd"><span class="n">↳</span><h2>結果：經營儀表板</h2></div>
+    <div><p class="note" style="margin-top:2px">「事件前」是原本的計畫；「若照單全收」是接受 90 天帳期、採購照常進料的結果；「目前」隨核准與執行即時更新。第 1 週是下月 1 日，也就是客戶新付款條件的適用起點；付款條件只影響之後開立的發票，既有應收不變。CCC 為簡化的營運指標推估，13 週現金流為逐週預測，兩者期間與計算基礎不同，請分開解讀。</p></div>
+    <div class="kpis" id="kpis"></div>
+    <div class="cashwrap">
+      <div class="chart"><span class="label">13 週現金流（目前）</span><div id="chart"></div></div>
+      <div class="brk"><span class="label">現金變化來源（相對於「事件發生、尚未處理」）</span><div id="brk"></div>
+        <details class="dv"><summary>設計者觀點：承諾不等於現金</summary><p>客戶同意買回專用料，是付款承諾，不是已經收到的錢（本模型假設客戶確認後即完成交付與控制權移轉，因此存貨同步扣減；實務上要以交付或簽收為準）。這裡把承諾、預測收款與實際入帳分開，放進它們真正會發生的週次。否則很容易看起來問題解決了，資金缺口卻還在。</p></details></div>
+    </div>
+    <div class="two2">
+      <div class="box"><span class="label">財務門檻</span><div id="thrBox"></div></div>
+      <div class="box"><span class="label">未解事項</span><div id="openBox"></div></div>
+    </div>
+  </section>
+
+  <section class="step" id="debriefSec" aria-label="事後解析">
+    <div class="hd"><span class="n">5</span><h2>事後解析：這是較好的做法嗎？</h2></div>
+    <p class="note">經營決策很少有唯一的標準答案。這裡把你的方案和幾個參考方案放在同一個規則引擎下比較，看在不同目標下，哪一種較符合、為什麼。參考方案是預設的幾種做法，不是所有可能組合。</p>
+    <div class="bar2"><button class="btn" id="dbBtn" type="button" disabled>產生事後解析</button><span class="note" id="dbTxt">執行第 4 步後才會開放。</span></div>
+    <div id="debrief"></div>
+  </section>
+
+  <section class="panel contactbox" id="contactSec" aria-label="與你的公司對照">
+    <h2>這個案例，最接近你公司的哪一段？</h2>
+    <div style="display:flex;flex-direction:column;gap:8px"><h3>你的公司接到這樣的信，現在通常怎麼處理？</h3>
+      <div class="ex" id="prac" role="radiogroup" aria-label="現有做法"></div>
+      <p id="pracOut" class="note" aria-live="polite">選一個最接近的答案，我們會告訴你這個案例對你最有參考價值的地方。</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px"><h3>最想先改善的是哪一塊？（可複選）</h3><div class="ex" id="want"></div></div>
+    <div class="sumbox"><label class="label" for="mySum">你的摘要（可以直接修改，不需要任何公司資料）</label><textarea id="mySum" rows="4" style="font:inherit;font-size:.9rem;width:100%;padding:8px;border:1px solid var(--line);border-radius:4px;background:var(--panel);color:var(--ink)"></textarea><span class="note" id="sumNote"></span>
+      <div class="bar2"><button class="btn ghost" id="copySum" type="button">複製摘要</button><button class="btn ghost" id="regenSum" type="button" hidden>依目前選項重新產生</button></div></div>
+    <div class="talk"><span class="label">討論一項跨部門經營決策，與 Sinclair 聯絡</span>
+      <p>複製上面的摘要，寄到這個信箱即可，不需要填表：</p>
+      <div class="bar2"><a class="btn" href="mailto:research@sinclairhuang.org?subject=%E8%B7%A8%E9%83%A8%E9%96%80%E7%B6%93%E7%87%9F%E6%B1%BA%E7%AD%96%E8%A8%8E%E8%AB%96">寄信討論</a><b class="mono" id="mail2" style="font-size:1.05rem">research@sinclairhuang.org</b><button class="btn ghost" id="copyMail" type="button">複製信箱</button><a class="btn ghost" href="https://sinclairhuang.org/advisory/" target="_blank" rel="noopener">了解顧問合作</a></div><p class="note">若按鈕沒有開啟郵件程式，請複製信箱後自行寄信，主旨可寫「跨部門經營決策討論」。</p>
+    </div>
+    <div class="bar2"><a class="btn ghost" href="index.html">先看其他案例與研究</a><a class="btn ghost" href="https://lab.sinclairhuang.org" target="_blank" rel="noopener">lab.sinclairhuang.org</a></div>
+    <p class="note">初步討論通常聚焦三件事：找出流程中最值得先改善的一個環節；分清楚是資料、流程，還是 AI 能力的問題；討論一個小範圍驗證的做法。不必先提供機密資料，也不是正式診斷。</p>
+  </section>
+
+  <section class="step" id="methodSec" aria-label="方法與假設">
+    <details id="methodDet"><summary><b>方法與假設・為什麼我做這個案例</b></summary><div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
+    <p class="lead">公司有訂單、有獲利，為什麼現金還是這麼緊？這一次不是看 AI 給答案，而是看它做事：它自己查採購單、應收帳款與合約，找出部門之間的衝突，提出三組方案；超過授權的事停下來等你核准，核准後執行，遇到供應商或客戶的回覆再調整。每一步，13 週現金流與現金循環天數都會跟著變。</p>
+    <p class="lead" style="margin-top:6px">這不是要證明 AI 比你懂經營。你多半知道該怎麼做；這裡展示的是，如何把你的管理原則，轉成持續查證、可授權執行、可追蹤的工作方式。</p>
+    <p class="quote">十年前我在書店翻到一本原文書，裡面提到一個軟體，只要輸入公司的財報、競爭對手資料、新聞，它就能幫你擬定競爭策略，甚至預測對手的下一步。那時我就想：如果把資料餵得夠多、模型夠好，這種「預測」其實不是魔法，是工程。<cite>Sinclair Huang</cite></p>
+    <p class="note modeline" style="padding:8px 12px;border:1px dashed var(--line);border-radius:6px">本頁說明：公司資料與事件為虛構示範，財務模型為簡化版（13 週現金流以週為單位、營運收支以固定值估算）。網站版播放預先錄製的<b>情境示範</b>：各部門角色的處理過程為預設內容，只依你設定的約束切換少數分支，不會完整重新規劃；本版未提供即時 AI。所有現金與天數由本頁規則引擎計算，不由 AI 決定。</p>
+    <p class="note">方案比較的限制：事後解析只比較幾個預設參考方案，不是搜尋所有可行組合；客戶關係風險依付款方案類型給定，屬示範性判斷。真實評估需加入客戶重要性、議價能力、合約可執行性與談判回饋。</p>
+    </div></details>
+  </section>
+
+  </div><aside class="guide" id="guide" aria-label="流程指引"></aside></div>
+
+  <section class="sec" aria-label="導入前提">
+    <h2>要在你的公司做到這樣，需要什麼？</h2>
+    <div class="thesis">
+      <div><b>資料要接得上</b><p>採購單、在製品、應收帳款、合約條款與現金預測都要能被系統查詢。這一步通常比 AI 本身更花時間。</p></div>
+      <div><b>授權要先講清楚</b><p>哪些事 AI 可以自己做、哪些要誰核准，金額門檻與對外承諾的範圍，都要事先定義，並在條件改變時重新確認。</p></div>
+      <div><b>責任仍然在人</b><p>AI 負責查證、提案、執行與追蹤；做決定、對客戶與供應商承諾、承擔結果的，仍然是經營團隊。</p></div>
+    </div>
+    <p class="note"><a href="index.html">← 回到現金循環總覽</a>，或從各模組深入了解應付、存貨、應收與供需情報。本頁情境為虛構示範，僅供教學與研究用途，與作者任職或服務的任何公司無關。金額單位為新台幣萬元。</p>
+  </section>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+const wan=n=>{const a=Math.abs(n),sg=n<0?"−":"";return a>=10000?sg+(a/10000).toLocaleString("zh-TW",{maximumFractionDigits:2})+" 億":sg+Math.round(a).toLocaleString("zh-TW")+" 萬"};
+const sgn=n=>(n>0?"+":"")+wan(n);
+
+/* ===== 模擬公司資料 ===== */
+const MAIL=`寄件人：客戶 Y 採購經理
+主旨：第三季後段拉貨調整與付款條件
+
+您好：
+由於終端客戶延後部署，我們第 3 週到第 6 週的拉貨量需要減少約 40%，原訂數量順延到第 10 週以後，確切時間尚待確認。
+另外，公司政策調整，自下個月 1 日起開立的發票，付款條件將由月結 60 天改為月結 90 天，請於本月底前回覆。
+我們也正在評估導入第二家組裝廠，以分散供應風險。
+
+敬祝 商祺`;
+const PO=[
+ {id:"P01",part:"SoC 主晶片",sup:"美系原廠",amt:2400,wk:3,term:"NCNR",use:"共用（客戶 X 機種也用）"},
+ {id:"P02",part:"DRAM 記憶體",sup:"韓系原廠",amt:1600,wk:4,term:"可延後，收 2% 費用；原廠配貨中",use:"共用",fee:0.02},
+ {id:"P03",part:"PMIC 電源晶片",sup:"Apex",amt:380,wk:3,term:"可免費延後",use:"共用"},
+ {id:"P04",part:"Y 專用機殼",sup:"榮達精密",amt:900,wk:4,term:"NCNR（客製）",use:"Y 專用"},
+ {id:"P05",part:"Y 專用散熱模組",sup:"熱傳科技",amt:520,wk:5,term:"可免費延後",use:"Y 專用"},
+ {id:"P06",part:"連接器",sup:"Kinwa",amt:140,wk:5,term:"可免費延後",use:"共用"},
+ {id:"P07",part:"Y 專用 PCB",sup:"華通板材",amt:610,wk:3,term:"NCNR（已投產）",use:"Y 專用"},
+ {id:"P08",part:"MLCC 電容",sup:"台鉅電子",amt:90,wk:4,term:"可免費延後",use:"共用"},
+ {id:"P09",part:"電源模組",sup:"東昇電子",amt:450,wk:6,term:"可免費延後",use:"共用"},
+ {id:"P10",part:"包材",sup:"東莞匯聯",amt:60,wk:5,term:"可免費延後",use:"Y 專用"},
+ {id:"P11",part:"LDO 穩壓 IC",sup:"Apex",amt:70,wk:6,term:"可免費延後",use:"共用"},
+ {id:"P12",part:"Y 專用線材",sup:"惠州盛達",amt:180,wk:6,term:"可延後，收 1% 費用",use:"Y 專用",fee:0.01},
+];
+const PAYLAG=8; /* 到貨後約 8 週付款（月結 60 天） */
+const SO={customer:"Y",monthly_revenue:9000,affected:"第 3–6 週出貨減少 40%，約 7,200 萬營收順延至第 10 週以後（未確認）",wip:"Y 機種在製品 1,200 萬，可暫停於半成品",top3:true};
+const AR={customer:"Y",balance:18000,credit_limit:25000,aging:"全部未逾期",habit:"平均晚付 5 天，近 6 個月穩定",weekly_collection:2077,note:"改為月結 90 天時，第 10–13 週約 4 週的收款會順延到 13 週之後"};
+const CONTRACT={customer:"Y",payment_terms:"月結 60 天，合約效期至明年 12 月",clause_7:"客戶須承擔依其預測採購之專用料（NCNR）及在製品；拉貨延後超過 4 週時，供應商得要求客戶買回專用料或支付每月 1.5% 持有成本",change_terms:"付款條件變更須雙方書面簽署補充協議"};
+const OTHER={customer:"X",request:"客戶 X 希望第 3–4 週追加 2,000 台（營收約 3,600 萬，月結 60 天），可用 SoC 等共用料與 Y 釋出的產能",note:"全數吸收需一個週末加班（成本約 60 萬）；不加班可吸收約三分之二"};
+const B={inv:51000,ar:60000,ap:42500,rev:30000,cogs:25500,cash0:18000,ops:300,safe:8000};
+let ST,CON,QN=0,busy=false;
+function reset(){ST={acts:[],tasks:[],n:0,signed:false,groupsDecided:{}};QN=0}
+function readCons(){const v=CON?CON.v+1:1;CON={v,noOT:$("c1").checked,top3:$("c2").checked,cash:$("c3").checked,noLong:$("c4").checked,thr:+$("thr").value};$("thrv").textContent=wan(CON.thr)}
+
+/* ===== 由行動狀態導出生效的效果 ===== */
+function effects(acts,signed){
+  const E={def:{},half:{},claim:false,pull:null,terms:null,termsStatus:null,dram:false,decline:false};
+  acts.forEach(a=>{
+    if(a.type==="defer_po"&&a.status==="done"){E.def[a.target]=1;if(a.target==="P02")E.dram=true}
+    if(a.type==="defer_po"&&a.status==="partial")E.half[a.target]=1;
+    if(a.type==="claim_forecast_liability"&&a.status==="done")E.claim=true;
+    if(a.type==="pull_in_other_customer"&&a.status==="done")E.pull={ot:a.params.ot};
+    if(a.type==="reply_terms"&&["done","awaiting"].includes(a.status)){E.termsStatus=a.status;E.terms=a.target}
+  });
+  E.termsEffective=E.terms==="counter_75"?(E.claim&&signed):E.termsStatus==="done";
+  if(E.terms==="decline")E.decline=true;
+  return E;
+}
+/* ===== 13 週現金流 ===== */
+function cashflow(E,mode){
+  const w=Array(14).fill(0),parts={};const add=(k,wk,v)=>{if(wk>=1&&wk<=13){w[wk]+=v;parts[k]=(parts[k]||0)+v}};
+  for(let i=1;i<=13;i++)add("營運淨流入",i,B.ops);
+  PO.forEach(p=>{const pay=p.wk+PAYLAG;let amt=p.amt;
+    if(E.def[p.id]){amt=0;add("延後費用",pay,-p.amt*(p.fee||0))}
+    else if(E.half[p.id]){amt=p.amt/2;add("延後費用",pay,-p.amt*0.03)}
+    add("採購付款",pay,-amt)});
+  if(mode!=="pre"){add("客戶 Y 延後造成的收款減少",12,-831);add("客戶 Y 延後造成的收款減少",13,-831)}
+  const t=mode==="accept"?"accept":E.termsEffective?E.terms:null;
+  if(t==="accept")for(let i=10;i<=13;i++)add("付款條件變更",i,-2077);
+  if(t==="counter_75")for(let i=10;i<=11;i++)add("付款條件變更",i,-2077);
+  if(t==="accept_with_factoring")add("應收帳款買斷費",10,-108);
+  if(E.claim){add("客戶 Y 買回專用料（承諾分期）",6,755);add("客戶 Y 買回專用料（承諾分期）",10,755)}
+  if(E.pull){const f=E.pull.ot?1:2/3;add("客戶 X 追加收款",12,1800*f);add("客戶 X 追加收款",13,1800*f);if(E.pull.ot)add("週末加班成本",4,-60)}
+  let c=B.cash0;const series=[];for(let i=1;i<=13;i++){c+=w[i];series.push(c)}
+  const min=Math.min(...series);return{series,min,minWk:series.indexOf(min)+1,parts};
+}
+function metrics(E,mode){
+  const pre=mode==="pre";let inv=pre?B.inv:B.inv+PO.reduce((a,p)=>a+p.amt,0)+1200,rev=pre?B.rev:B.rev-3600,ar=pre?B.ar:B.ar-3600;
+  if(!pre){PO.forEach(p=>{if(E.def[p.id])inv-=p.amt;if(E.half[p.id])inv-=p.amt/2});if(E.claim)inv-=1510;if(E.pull){const f=E.pull.ot?1:2/3;inv-=1200*f;rev+=1800*f;ar+=1800*f}}
+  const t=mode==="accept"?"accept":E.termsEffective?E.terms:null;
+  const termAR=t==="accept"?9000:t==="counter_75"?4500:0;ar+=termAR;
+  const dio=inv/(B.cogs/30),dso=ar/(rev/30),dpo=B.ap/(B.cogs/30);
+  const cf=cashflow(E,mode);
+  return{dio,dso,dpo,ccc:dio+dso-dpo,cash:cf.min,minWk:cf.minWk,series:cf.series,parts:cf.parts,expo:AR.balance+termAR};
+}
+const NONE={def:{},half:{},claim:false,pull:null,terms:null,termsEffective:false};
+function fees(E){let f=0;PO.forEach(p=>{if(E.def[p.id])f+=p.amt*(p.fee||0);if(E.half[p.id])f+=p.amt*0.03});if(E.termsEffective&&E.terms==="accept_with_factoring")f+=108;if(E.pull&&E.pull.ot)f+=60;return f}
+function render(){
+  const E=effects(ST.acts,ST.signed),pre=metrics(NONE,"pre"),none=metrics(NONE,"none"),worst=metrics(NONE,"accept"),now=metrics(E,"now");
+  const K=[["CCC 現金循環","ccc",1],["存貨天數","dio",1],["應收天數","dso",1],["13 週最低現金","cash",0],["客戶 Y 信用曝險","expo",0]];
+  renderKPIs(now,pre,worst,E);
+  renderChart(now);
+  /* breakdown vs none */
+  const keys=[...new Set([...Object.keys(now.parts),...Object.keys(none.parts)])].filter(k=>k!=="營運淨流入");
+  const rows=keys.map(k=>[k,(now.parts[k]||0)-(none.parts[k]||0)]).filter(r=>Math.abs(r[1])>=1);
+  $("brk").innerHTML=`<table><tbody><tr><td>事件發生、尚未處理的最低現金</td><td class="num">${wan(none.cash)}</td></tr>${rows.map(r=>`<tr><td>${esc(r[0]==="採購付款"?"延後採購（付款移出 13 週）":r[0])}${r[0].includes("承諾")?' <span class="pill p-warn">預估</span>':""}</td><td class="num" style="color:var(${r[1]>=0?"--ok":"--bad"})">${sgn(r[1])}</td></tr>`).join("")}<tr><td><b>目前的最低現金</b>（第 ${now.minWk} 週）</td><td class="num"><b>${wan(now.cash)}</b></td></tr></tbody></table><p class="note" style="margin-top:4px">各來源為 13 週內的合計；最低點出現的週次不同，所以加總不一定等於最低現金的差額。延後到第 14 週以後付款的採購單，效果在 13 週之外，只反映在存貨天數。</p>`;
+  /* thresholds & open items */
+  $("thrBox").innerHTML=`<span class="pill ${now.cash<B.safe?"p-bad":"p-ok"}">13 週最低現金 ${wan(now.cash)}，安全水位 ${wan(B.safe)}</span><span class="pill ${now.expo>AR.credit_limit?"p-bad":"p-ok"}">客戶 Y 信用曝險 ${wan(now.expo)}，額度 ${wan(AR.credit_limit)}</span>${E.dram?'<span class="pill p-warn">DRAM 已延後，下季配貨可能被調降</span>':""}${E.decline?'<span class="pill p-warn">已婉拒前三大客戶的付款條件</span>':""}`;
+  const open=getOpenItems();
+  $("openBox").innerHTML=open.length?`<ul>${open.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:'<p class="note">尚未開始處理。</p>';
+  renderApps();renderCond(E);renderGuide(E,now,none);
+  if(ST.debriefShown)renderDebrief();
+}
+function getOpenItems(){
+  const E=effects(ST.acts,ST.signed),open=[];
+  if(ST.acts.length)open.push("客戶 Y 是延後還是可能轉單到第二家組裝廠：待業務確認（業務）");
+  ST.acts.filter(a=>a.status==="pending").forEach(a=>open.push(`${a.title}：待老闆核准`));
+  ST.acts.filter(a=>a.status==="stale").forEach(a=>open.push(`${a.title}：約束已變更，需重新核准`));
+  ST.acts.filter(a=>a.status==="partial").forEach(a=>open.push(`${a.title}：只完成一半，剩餘 ${wan(PO.find(p=>p.id===a.target).amt/2)} 待與供應商再談（採購）`));
+  ST.acts.filter(a=>a.status==="awaiting").forEach(a=>open.push(`${a.title}：客戶原則同意，${E.claim?"":"買回專用料條件尚未成立、"}${ST.signed?"":"補充協議尚未簽署"}，效果尚未生效（業務、法務）`));
+  if(E.claim)open.push("客戶 Y 買回專用料 1,510 萬：已承諾分兩期（第 6、10 週），尚未收款（財務）");
+  ST.acts.filter(a=>a.status==="failed").forEach(a=>open.push(`${a.title}：未成功`));
+  if(ST.acts.length)open.push("第 10 週以後客戶 Y 的拉貨計畫：未確認（業務、生管）");
+  return open;
+}
+/* ===== 儀表板動態 ===== */
+const KDEF=[["ccc","CCC 現金循環",1,-1],["dio","存貨天數",1,-1],["dso","應收天數",1,-1],["cash","13 週最低現金",0,1],["expo","客戶 Y 信用曝險",0,-1],["dpo","應付天數",1,0],["fee","費用合計",0,-1],["dec","你的經營決策",2,0]];
+const KP={};let kpBuilt=false;
+const RM=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+const raf=window.requestAnimationFrame?f=>window.requestAnimationFrame(f):f=>setTimeout(()=>f(performance.now()),16);
+function fmtK(k,v){return k==="dec"?Math.round(v)+" 組":KDEF.find(x=>x[0]===k)[2]===1?v.toFixed(0)+" 天":wan(v)}
+function tween(el,k,from,to){if(RM||from===to){el.textContent=fmtK(k,to);return}const t0=performance.now(),D=650;const step=t=>{const p=Math.min(1,(t-t0)/D),e=1-Math.pow(1-p,3);el.textContent=fmtK(k,from+(to-from)*e);if(p<1)raf(step)};raf(step)}
+function renderKPIs(now,pre,worst,E){
+  if(!kpBuilt){$("kpis").innerHTML=KDEF.map(([k,n])=>`<div class="kp" id="kp-${k}"><span class="label">${n}</span><span class="v" id="kv-${k}">—</span><span class="d" id="kd-${k}"></span></div>`).join("");kpBuilt=true}
+  const val={ccc:now.ccc,dio:now.dio,dso:now.dso,cash:now.cash,expo:now.expo,dpo:now.dpo,fee:fees(E),dec:Object.keys(ST.groupsDecided).length};
+  const d=v=>v;KDEF.forEach(([k,n,isDay,good])=>{
+    const el=$("kv-"+k),box=$("kp-"+k),from=KP[k]??val[k],to=val[k];KP[k]=to;tween(el,k,from,to);
+    if(good&&Math.abs(to-from)>(isDay?0.05:0.5)){box.classList.remove("fl-up","fl-dn");void box.offsetWidth;box.classList.add((to-from)*good>0?"fl-up":"fl-dn")}
+    const bad=k==="cash"?now.cash<B.safe:k==="expo"?now.expo>AR.credit_limit:false;box.classList.toggle("bad",bad);
+  });
+  const f=(k,v)=>fmtK(k,v);
+  ["ccc","dio","dso","cash","expo"].forEach(k=>$("kd-"+k).textContent=`事件前 ${f(k,pre[k])}・若照單全收 ${f(k,worst[k])}${k==="cash"?`・最低在第 ${now.minWk} 週`:""}`);
+  $("kd-dpo").textContent="維持合約條件，不拖延供應商";$("kd-fee").textContent="延後費、買斷費、加班費";
+  $("kd-dec").textContent=`核准 ${ST.acts.filter(a=>a.decided==="ok").length} 項・否決 ${ST.acts.filter(a=>a.decided==="no").length} 項需授權行動`;
+}
+const CMAX=26000;
+function renderChart(now){
+  if(!$("bars")){$("chart").innerHTML=`<div class="bars" id="bars" role="img" aria-label="13 週現金餘額">${Array.from({length:13},(_,i)=>`<div class="bc"><div class="b" id="cb${i}" style="height:0"></div><span>${i%2===0||i===12?"W"+(i+1):""}</span></div>`).join("")}<div class="safe" style="bottom:calc(18px + ${B.safe/CMAX*152}px)"><span>安全水位 ${wan(B.safe)}</span></div></div>`}
+  raf(()=>now.series.forEach((v,i)=>{const b=$("cb"+i);b.style.height=Math.max(2,Math.min(152,v/CMAX*152))+"px";b.className="b"+(v<B.safe?" low":i===now.minWk-1?" min":"");b.title=`第 ${i+1} 週 ${wan(v)}`}));
+}
+/* ===== 流程指引 ===== */
+function arrow(d,goodDir){if(Math.abs(d)<0.5)return'<span class="s">持平</span>';const g=d*goodDir>0;return `<span class="${g?"up":"dn"}">${d>0?"▲":"▼"} ${g?"變好":"變差"}</span>`}
+function renderGuide(E,now,none){
+  const started=ST.acts.length>0,decided=Object.keys(ST.groupsDecided).length>0,exec=ST.acts.some(a=>["done","partial","awaiting","failed"].includes(a.status));
+  const G=g=>{const its=ST.acts.filter(a=>a.group===g);if(!its.length)return"";const ok=its.filter(a=>["approved","done","partial","awaiting"].includes(a.status)).length,no=its.filter(a=>a.status==="denied").length,pe=its.filter(a=>["pending","stale"].includes(a.status)).length;return `<li>${GNAME[g][0]}：${its.length} 項${pe?`，<b style="color:var(--warn)">待決 ${pe}</b>`:""}${ok?`，採行 ${ok}`:""}${no?`，否決 ${no}`:""}</li>`};
+  $("guide").innerHTML=`<span class="label">流程指引</span>
+   <div class="gst done"><b>① 狀況發生</b><ul><li>客戶 Y 延後 40% 拉貨</li><li>帳期要求 60 → 90 天</li><li>評估第二家組裝廠</li></ul></div>
+   <div class="gst ${started?(decided?"done":"on"):"on"}"><b>② 選擇行動方案</b>${started?`<ul>${["supply","prod","cust"].map(G).join("")}</ul>`:'<span class="s">按「開始」，AI 查證後提出三組方案</span>'}</div>
+   <div class="gst ${exec?"done":decided?"on":""}"><b>③ 結果</b>
+    <div class="gr"><span>13 週最低現金</span><span class="num">${wan(now.cash)}</span></div><div class="gr"><span class="s">相對事件後未處理</span>${arrow(now.cash-none.cash,1)}</div>
+    <div class="gr"><span>CCC</span><span class="num">${now.ccc.toFixed(0)} 天</span></div><div class="gr"><span class="s">相對事件後未處理</span>${arrow(now.ccc-none.ccc,-1)}</div>
+    <div class="gr"><span>信用曝險</span><span class="num ${now.expo>AR.credit_limit?"dn":""}">${wan(now.expo)}</span></div>
+    <div class="gr"><span>未解事項</span><span class="num">${getOpenItems().length} 項</span></div></div>
+   <div class="gst ${ST.debriefShown?"done":exec?"on":""}"><b>④ 事後解析</b><span class="s">${exec?"這是較好的做法嗎？":"執行後開放"}</span><button class="gbtn" type="button" id="gDb" ${exec&&!busy?"":"disabled"}>看解析</button></div>`;
+  $("dbBtn").disabled=!exec||busy;$("dbTxt").textContent=exec?(ST.debriefShown?"解析會隨你的核准與執行結果更新。":"可以產生解析了。"):"執行第 4 步後才會開放，解析只評估已經做出的決定。";
+}
+/* ===== 事後解析 ===== */
+const DEFERRABLE=["P03","P06","P08","P09","P10","P11","P12"];
+function planActs(spec){const L=[];const A=(type,target,status,params={})=>L.push({type,target,status,params});
+  if(spec.defer){DEFERRABLE.forEach(id=>A("defer_po",id,"done"));A("defer_po","P05","partial")}
+  if(spec.dram)A("defer_po","P02","done");
+  if(spec.pull)A("pull_in_other_customer","X","done",{ot:!CON.noOT});
+  if(spec.claim)A("claim_forecast_liability","Y","done");
+  if(spec.terms)A("reply_terms",spec.terms,"done");
+  return L}
+function evalPlan(acts,signed){const E=effects(acts,signed),m=metrics(E,"now");const t=E.termsStatus?E.terms:null;
+  return{cash:m.cash,ccc:m.ccc,expo:m.expo,fee:fees(E),rel:t==="decline"?"高":t==="accept"||t==="accept_with_factoring"?"低":t==="counter_75"?"中低":"中（尚未回覆）",supply:E.dram?"DRAM 配額風險":"—",decline:t==="decline",ok:m.cash>=B.safe&&m.expo<=AR.credit_limit}}
+function planStatus(acts,signed){
+  const why=[];
+  if(acts.some(a=>["pending","stale"].includes(a.status)))why.push("還有待決的行動");
+  if(acts.some(a=>a.status==="approved"))why.push("有已核准但尚未執行的行動");
+  const t=acts.find(a=>a.type==="reply_terms"&&["done","awaiting"].includes(a.status));
+  if(!t)why.push("尚未回覆客戶的付款條件");
+  else if(t.status==="awaiting"&&!(t.target==="counter_75"&&signed&&acts.some(a=>a.type==="claim_forecast_liability"&&a.status==="done")))why.push("付款條件的附帶條件尚未成立");
+  return why;
+}
+function renderDebrief(){
+  const exec=ST.acts.some(a=>["done","partial","awaiting","failed"].includes(a.status));
+  if(!exec)return;ST.debriefShown=true;
+  const P=[
+   {k:"accept",n:"照單全收",d:"接受 90 天，採購照常",acts:planActs({terms:"accept"}),signed:false},
+   {k:"defer",n:"只調整採購",d:"延後可延後的採購，暫不回覆客戶",acts:planActs({defer:1}),signed:false},
+   {k:"exp",n:"平衡方案",d:"延後採購＋轉給 X＋要求買回＋75 天（假設條件成立）",acts:planActs({defer:1,pull:1,claim:1,terms:"counter_75"}),signed:true,forecast:true},
+   {k:"cash",n:"現金極大化",d:"連 DRAM 也延後，並婉拒延長帳期",acts:planActs({defer:1,dram:1,pull:1,claim:1,terms:"decline"}),signed:false},
+   {k:"me",n:"你的方案（目前）",d:"依你的核准與目前執行結果",acts:ST.acts,signed:ST.signed}];
+  const aw=ST.acts.find(a=>a.type==="reply_terms"&&a.status==="awaiting");
+  const claimDone=ST.acts.some(a=>a.type==="claim_forecast_liability"&&a.status==="done");
+  if(aw&&claimDone&&!ST.signed)P.push({k:"me2",n:"你的方案（若條件成立）",d:"假設補充協議如期簽署的預測",acts:ST.acts.map(a=>a===aw?{...a,status:"done"}:a),signed:true,forecast:true});
+  P.forEach(p=>{p.r=evalPlan(p.acts,p.signed);p.why=p.k==="defer"?["尚未回覆客戶的付款條件"]:p.k==="me"?planStatus(ST.acts,ST.signed):[];p.viol=p.r.decline&&CON.top3});
+  const eligible=p=>!p.why.length&&!p.viol;
+  const rows=P.map(p=>`<tr class="${p.k.startsWith("me")?"me":""}"><td><b>${p.n}</b>${p.forecast?' <span class="pill p-warn">預測</span>':""}<br><span class="note">${p.d}</span>${p.viol?'<br><span class="pill p-bad">違反你的硬性約束</span>':""}${p.why.length?`<br><span class="pill p-warn">決策尚未完成：${esc(p.why.join("、"))}</span>`:""}</td><td class="num ${p.r.cash<B.safe?"dn":""}">${wan(p.r.cash)}</td><td class="num">${p.r.ccc.toFixed(0)} 天</td><td class="num ${p.r.expo>AR.credit_limit?"dn":""}">${wan(p.r.expo)}</td><td class="num">${wan(p.r.fee)}</td><td>${p.r.rel}</td><td>${p.r.supply}</td></tr>`).join("");
+  const cand=P.filter(eligible);
+  const pick=(f,srt)=>cand.filter(f).sort(srt)[0];
+  const L=[["現金優先","信用曝險在額度內，13 週最低現金最高",p=>p.r.expo<=AR.credit_limit,(a,b)=>b.r.cash-a.r.cash,"cash"],
+           ["客戶關係優先","客戶關係風險（示範性判斷）在中低以下，現金與信用都在安全範圍，現金最高",p=>["低","中低"].includes(p.r.rel)&&p.r.ok,(a,b)=>b.r.cash-a.r.cash,"cash"],
+           ["營運效率優先","現金與信用在安全範圍，CCC 最短",p=>p.r.ok,(a,b)=>a.r.ccc-b.r.ccc,"ccc"]].map(([n,d,f,srt,key])=>{const w=pick(f,srt),me=P.find(p=>p.k==="me");const meOk=eligible(me)&&f(me);const tie=w&&meOk&&Math.abs(me.r[key]-w.r[key])<(key==="ccc"?0.5:5);return{n,d,w,tie,meOk,me}});
+  const meP=P.find(p=>p.k==="me");
+  /* 依狀態判讀 */
+  const J=[];const find=(t,g)=>ST.acts.find(a=>a.type===t&&(g==null||a.target===g));
+  const S={pending:"尚未決定，目前沒有計入效果。",stale:"約束改變後尚未重新核准，目前沒有計入效果。",approved:"已授權，尚待執行或外部確認，目前沒有計入效果。"};
+  J.push(["✓","不可取消的採購單（3,910 萬）沒有被硬延後，而是找出能轉用或依合約處理的方式。這是查過合約條款之後守住的界線。"]);
+  const d2=find("defer_po","P02");
+  if(!d2)J.push(["i","DRAM：AI 依原廠配貨狀況建議保留，沒有提出延後。這是 AI 的判斷，你沒有做這個決定；若你更重視短期現金，可以勾選「不備長交期料」重新規劃。"]);
+  else if(S[d2.status])J.push(["…","延後 DRAM："+S[d2.status]]);
+  else if(d2.status==="denied")J.push(["✓","你否決了延後 DRAM：用一點現金保住下季配額，是供應安全的取捨。"]);
+  else J.push(["△","你延後了 DRAM：13 週內多保住現金，但原廠正在配貨，下季配額可能被調降。若客戶 Y 只是延後，之後缺料的代價可能更大。"]);
+  const pl=find("pull_in_other_customer","X");
+  if(pl){if(S[pl.status])J.push(["…","轉給客戶 X："+S[pl.status]]);
+    else if(pl.status==="denied")J.push(["△","你否決了轉給客戶 X：2,400 萬的 SoC 會留在庫存，客戶 X 的追加需求也沒有接住。"]);
+    else J.push(["✓",`把不可取消的 SoC 轉給客戶 X${pl.params.ot?"":"（不加班，只吸收約三分之二）"}：同時降低庫存、補回收款。`])}
+  const cl=find("claim_forecast_liability","Y");
+  if(cl){if(S[cl.status])J.push(["…","要求買回專用料："+S[cl.status]]);
+    else if(cl.status==="denied")J.push(["△","你沒有要求買回專用料：1,510 萬的客製料會留在庫存；若付款條件選 75 天方案，前提也不會成立。"]);
+    else J.push(["✓","依合約第 7 條要求買回專用料 1,510 萬：這是合約本來就給的保障。它是分期承諾（第 6、10 週），不是已收到的現金。"])}
+  const tAll=ST.acts.filter(a=>a.type==="reply_terms"),tm=tAll.find(a=>a.status!=="denied"),now=metrics(effects(ST.acts,ST.signed),"now");
+  if(!tm){J.push(["△",tAll.length?"你否決了付款條件方案，目前尚未回覆客戶。客戶要求月底前答覆；拖延本身也是一種回答，可能加速轉單。":"尚未回覆付款條件。"])}
+  else if(S[tm.status])J.push(["…","付款條件："+S[tm.status]]);
+  else if(tm.target==="accept"){const bad=now.cash<B.safe||now.expo>AR.credit_limit;J.push([bad?"✗":"△",bad?`接受 90 天：在你目前的組合下，13 週最低現金 ${wan(now.cash)}${now.cash<B.safe?"，低於安全水位":""}；信用曝險 ${wan(now.expo)}${now.expo>AR.credit_limit?"，超過額度":""}。對前三大客戶讓步可以理解，但需要配套，例如買斷或以條件交換。`:`接受 90 天：在其他配套下，現金守在 ${wan(now.cash)}；但信用曝險升到 ${wan(now.expo)}，帳期一旦讓出，往後很難收回。`])}
+  else if(tm.target==="counter_75")J.push([tm.status==="awaiting"?"…":"✓",tm.status==="awaiting"?`以 75 天折衷並附條件：客戶已原則同意，但${claimDone?"":"買回條件尚未成立、"}${ST.signed?"":"補充協議尚未簽署"}，效果尚未計入。請把它當成進行中的談判，不是已達成的結果。`:"以 75 天折衷並附條件，條件已成立：兼顧關係與現金，應收天數會增加，這是刻意的取捨。"]);
+  else if(tm.target==="accept_with_factoring")J.push(["△",`接受 90 天並買斷應收：現金守在 ${wan(now.cash)}，代價是買斷費，等於把帳期成本轉給銀行；適合短期，不宜成為常態。`]);
+  else J.push(["△","婉拒延長帳期：現金最好，但對前三大客戶的關係風險最高，且客戶正在評估第二家組裝廠。"]);
+  ST.acts.filter(a=>a.status==="partial").forEach(a=>J.push(["✓",`${a.title}：供應商只同意一半，只計入已達成的部分，剩餘一半列為追蹤。`]));
+  ST.acts.filter(a=>a.status==="failed").forEach(a=>J.push(["△",`${a.title}：未成功，效果沒有計入。`]));
+  J.push(["！","最可能推翻整個方案的，不是帳期，而是客戶 Y 的真實意向。如果其實是轉單，延後採購應改為取消或轉用，買回專用料的談判也要提前。這件事一定要由業務親自確認。"]);
+  const IC={"✓":"--ok","✗":"--bad","△":"--warn","…":"--muted","i":"--accent","！":"--warn"};
+  const winners=new Set(L.map(l=>l.w&&l.w.k));
+  const free=(()=>{const c=P.filter(p=>!p.why.length);return c.filter(p=>p.r.expo<=AR.credit_limit).sort((a,b)=>b.r.cash-a.r.cash)[0]})();
+  $("debrief").innerHTML=`<div class="panel tablebox"><table class="cmp" style="min-width:740px"><thead><tr><th>方案</th><th class="num">13 週最低現金</th><th class="num">CCC</th><th class="num">信用曝險</th><th class="num">費用</th><th>客戶關係風險<br><span class="note">示範性判斷</span></th><th>供應風險</th></tr></thead><tbody>${rows}</tbody></table></div>
+   <p class="note">決策尚未完成或違反硬性約束的方案，保留在表中供比較，但不列入下方排名。標示「預測」的列，是假設附帶條件成立後的結果。</p>
+   <h3 style="margin-top:12px">${winners.size>1?"換個目標，較符合的參考方案就不同":"在你的約束下，三個目標都指向同一個參考方案"}</h3>
+   ${free&&L[0].w&&free.k!==L[0].w.k?`<p class="note">如果拿掉「不得損害前三大客戶關係」這條硬性約束，現金優先下較符合的會變成「${free.n}」，13 週最低現金多 ${wan(free.r.cash-L[0].w.r.cash)}，代價是客戶關係風險變高。約束本身，就是經營者的價值判斷。</p>`:""}
+   <div class="lens">${L.map(l=>`<div><span class="label">${l.n}</span><br><span class="note">本次參考方案中，較符合這個目標的是</span><br><b>${l.w?l.w.n:"沒有方案符合"}</b><p class="note" style="margin-top:4px">${l.d}</p>${!eligible(meP)?'<span class="pill p-warn">你的方案決策尚未完成，暫不排名</span>':l.tie?'<span class="pill p-ok">你的方案也達到這個水準</span>':'<span class="pill p-warn">你的方案在這個目標下不是較符合的</span>'}</div>`).join("")}</div>
+   <h3 style="margin-top:12px">你的關鍵判斷</h3>
+   <div class="judge">${J.map(j=>`<div><span class="ic" style="color:var(${IC[j[0]]})">${j[0]}</span><span>${esc(j[1])}</span></div>`).join("")}</div>
+   <p class="note">圖例：✓ 做得好、△ 值得再想、✗ 明顯有風險、… 尚未生效、i AI 的判斷、！ 最需要確認的事。</p>
+   <div class="sumbox" style="margin-top:12px"><span class="eyebrow">設計者總結</span><p>沒有放諸四海皆準的最佳方案。在你設定的約束下，好的方案至少要做到四件事：13 週現金守在安全水位以上、信用曝險在額度內、不傷害關鍵供應與客戶關係，並把還不確定的事交代給明確的負責人。${eligible(meP)?`你的方案目前 13 週最低現金 ${wan(meP.r.cash)}、CCC ${meP.r.ccc.toFixed(0)} 天。`:`你的方案還有「${esc(meP.why.join("、"))}」，先完成這些，比較才有意義。`}重要的不是追到某個數字，而是清楚自己用什麼換了什麼。</p>
+   <p class="note">這裡的比較採固定假設；真實評估還需加入客戶重要性、議價能力、合約可執行性與談判回饋。</p></div>`;
+  render2Guide();
+}
+function render2Guide(){const E=effects(ST.acts,ST.signed);renderGuide(E,metrics(E,"now"),metrics(NONE,"none"))}
+document.addEventListener("click",e=>{if(e.target.id==="dbBtn"||e.target.id==="gDb"){if(!ST.acts.some(a=>["done","partial","awaiting","failed"].includes(a.status)))return;renderDebrief();$("debriefSec").scrollIntoView({behavior:RM?"auto":"smooth",block:"start"})}});
+/* ===== 工作紀錄 ===== */
+const TAG={q:["查詢","t-q"],p:["提案","t-p"],x:["執行","t-x"],f:["回饋","t-f"],k:["任務","t-k"],n:["發現","t-p"]};
+function log(type,html){const el=$("log");if(el.dataset.started!=="1"){el.innerHTML="";el.dataset.started="1"}el.insertAdjacentHTML("beforeend",`<div class="lg"><span class="t ${TAG[type][1]}">${TAG[type][0]}</span><span>${html}</span></div>`);el.scrollTop=el.scrollHeight}
+
+/* ===== 提案、授權與執行 ===== */
+const TYPES={defer_po:"延後採購單",pull_in_other_customer:"共用料與產能轉給客戶 X",claim_forecast_liability:"依合約第 7 條要求客戶 Y 買回專用料",reply_terms:"回覆客戶 Y 的付款條件",internal_task:"內部追蹤"};
+const TERMS={decline:"婉拒，維持月結 60 天",accept:"接受月結 90 天",counter_75:"折衷月結 75 天，以客戶買回專用料並簽署補充協議為條件",accept_with_factoring:"接受 90 天，同時將客戶 Y 應收帳款無追索權買斷"};
+const GROUP={defer_po:"supply",pull_in_other_customer:"prod",claim_forecast_liability:"cust",reply_terms:"cust"};
+const GNAME={supply:["供應端","延後可調整的採購，保留配貨中的料"],prod:["生產端","不可取消的共用料與產能轉給其他客戶"],cust:["客戶端","專用料買回與付款條件談判"]};
+function authorize(type,target){
+  const po=PO.find(p=>p.id===target);let need=false,why="在 AI 授權範圍內",params={};
+  if(type==="defer_po"){params={amt:po.amt,fee:po.fee||0};if(po.amt>=CON.thr){need=true;why=`金額 ${wan(po.amt)} 達到你設定的核准門檻 ${wan(CON.thr)}`}}
+  if(type==="pull_in_other_customer"){need=true;why="對客戶 X 的交期承諾";params={ot:!CON.noOT}}
+  if(type==="claim_forecast_liability"||type==="reply_terms"){need=true;why="對客戶 Y 的正式回覆，屬經營層決定"}
+  return{need,why,params};
+}
+function applyAuth(a,au){a.need=au.need;a.why=au.why;a.params=au.params;a.conV=CON.v;
+  if(a.type==="pull_in_other_customer")a.title=a.title.replace("（不加班，約三分之二）","")+(au.params.ot?"":"（不加班，約三分之二）");
+  a.est=preview(a.type,a.target,a.params)}
+function violates(a){if(a.type==="pull_in_other_customer"&&CON.noOT&&a.params.ot)return"違反硬性約束：不准加班";return hardCheck(a.type,a.target)}
+function hardCheck(type,target){
+  if(type==="reply_terms"&&target==="decline"&&CON.top3)return"違反硬性約束：不得損害前三大客戶關係";
+  return null;
+}
+function preview(type,target,params){
+  const cur=effects(ST.acts,ST.signed),t=JSON.parse(JSON.stringify(cur));
+  if(type==="defer_po")t.def[target]=1;if(type==="claim_forecast_liability")t.claim=true;if(type==="pull_in_other_customer")t.pull={ot:params.ot};
+  if(type==="reply_terms"){t.terms=target;t.termsEffective=true}
+  const a=metrics(cur,"now"),b=metrics(t,"now");return{cash13_min:Math.round(b.cash-a.cash),ccc_days:+(b.ccc-a.ccc).toFixed(1),note:type==="reply_terms"&&target==="counter_75"?"假設條件全部成立":"假設外部完全配合"};
+}
+function propose({type,target,title,rationale}){
+  type=String(type||"");target=String(target||"").trim();
+  if(!TYPES[type])throw new Error("type 必須是 "+Object.keys(TYPES).join("、")+" 其中之一");
+  if(type==="internal_task")return{status:"ignored",reason:"內部事項請用 create_task"};
+  if(type==="defer_po"&&!PO.find(p=>p.id===target))throw new Error("找不到採購單 "+target);
+  if(type==="defer_po"&&PO.find(p=>p.id===target).term.startsWith("NCNR"))throw new Error(target+" 為不可取消條款，不能提延後");
+  if(type==="pull_in_other_customer"&&target!=="X")throw new Error("target 必須是 X");
+  if(type==="claim_forecast_liability"&&target!=="Y")throw new Error("target 必須是 Y");
+  if(type==="reply_terms"&&!TERMS[target])throw new Error("reply_terms 的 target 必須是 "+Object.keys(TERMS).join("、"));
+  const live=x=>!["denied","failed"].includes(x.status);
+  if(ST.acts.find(a=>a.type===type&&a.target===target&&live(a)))throw new Error("這個行動已經提過了");
+  if(type==="reply_terms"&&ST.acts.find(a=>a.type==="reply_terms"&&live(a)))throw new Error("已有一個付款條件方案，同一客戶只能有一個有效方案；請老闆先否決原方案");
+  const h=hardCheck(type,target);if(h)throw new Error(h);
+  const au=authorize(type,target);
+  const a={id:"A"+(++ST.n),type,target,group:GROUP[type],title:String(title||TYPES[type]).slice(0,40),rationale:String(rationale||"").slice(0,160),status:au.need?"pending":"approved",need:au.need,why:au.why,params:au.params,conV:CON.v,est:preview(type,target,au.params),decided:null};
+  if(type==="pull_in_other_customer"&&!au.params.ot)a.title+="（不加班，約三分之二）";
+  ST.acts.push(a);
+  log("p",`<b>${esc(a.title)}</b>　${a.need?'<span class="pill p-warn">等你核准</span>':'<span class="pill p-ok">授權內</span>'}<br><span class="note">${esc(a.rationale)}</span>`);
+  render();
+  return{id:a.id,status:a.need?"pending_approval":"auto_approved",reason:a.why,estimated_impact:a.est};
+}
+function execute({id}){
+  const a=ST.acts.find(x=>x.id===String(id));
+  if(!a)throw new Error("找不到行動 "+id);
+  if(a.status==="pending")throw new Error("老闆尚未核准，不能執行");
+  if(a.status==="denied")throw new Error("老闆已否決，不能執行");
+  if(a.status==="stale")throw new Error("約束已變更，需老闆重新核准");
+  if(["done","partial","awaiting","failed"].includes(a.status))return{id:a.id,status:a.status,result:"已處理過"};
+  const v=violates(a);if(v){a.status="stale";render();throw new Error(v+"，需老闆重新核准")}
+  const now=authorize(a.type,a.target);if(JSON.stringify(now.params)!==JSON.stringify(a.params)||now.need!==a.need&&!a.conApproved){a.status="stale";render();throw new Error("核准內容與目前約束不一致，需老闆重新核准")}
+  let res="",fb=false;
+  if(a.type==="defer_po"){const p=PO.find(x=>x.id===a.target);
+    if(p.id==="P05"){a.status="partial";const net=p.amt/2-p.amt*0.03;res=`熱傳科技回覆：散熱模組已完成一半生產，只能延後一半並收 3% 費用。原預估現金 ${sgn(p.amt)}，修正為 ${sgn(net)}，剩餘一半待再談`;fb=true}
+    else{a.status="done";res=`${p.id} ${p.part} 已延後到第 10 週以後${p.fee?`，費用 ${wan(p.amt*p.fee)}`:""}${p.id==="P02"?"；原廠提醒下季配貨可能調整":""}`}}
+  else if(a.type==="pull_in_other_customer"){a.status="done";res=a.params.ot?"客戶 X 確認追加 2,000 台，安排一個週末加班":"客戶 X 確認追加約 1,300 台（不加班）"}
+  else if(a.type==="claim_forecast_liability"){a.status="done";res="客戶 Y 同意買回專用機殼與 PCB 共 1,510 萬，分兩期付款（第 6 週、第 10 週）。這是付款承諾，尚未收款";fb=true}
+  else if(a.type==="reply_terms"){
+    if(a.target==="counter_75"){a.status="awaiting";res="客戶 Y 回覆：原則接受 75 天，但需雙方主管簽署補充協議；在買回條件成立並簽署前，維持原付款條件";fb=true}
+    else if(a.target==="decline"){a.status="done";res="客戶 Y 表示將向上呈報，並加速評估第二家組裝廠";fb=true}
+    else if(a.target==="accept"){a.status="done";res="已書面同意改為月結 90 天"}
+    else{a.status="done";res="已同意 90 天，並與銀行完成應收帳款買斷，費用 108 萬"}}
+  a.result=res;log(fb?"f":"x",esc(res));render();
+  return{id:a.id,status:a.status,result:res,dashboard:snap()};
+}
+function addTask({dept,title,due}){const t={dept:String(dept||"").slice(0,10),title:String(title||"").slice(0,80),due:String(due||"").slice(0,20)};ST.tasks.push(t);log("k",`${esc(t.dept)}：${esc(t.title)}（${esc(t.due)}）`);renderTasks();return{ok:true}}
+function snap(){const m=metrics(effects(ST.acts,ST.signed),"now");return{ccc_days:+m.ccc.toFixed(1),dio_days:+m.dio.toFixed(1),dso_days:+m.dso.toFixed(1),cash_13w_min:Math.round(m.cash),cash_min_week:m.minWk,cash_safety_level:B.safe,customer_Y_credit_exposure:Math.round(m.expo),credit_limit:AR.credit_limit,open_items:getOpenItems()}}
+/* 約束變更：重新檢查尚未執行的行動 */
+function onConsChange(){
+  readCons();
+  ST.acts.forEach(a=>{
+    if(!["pending","approved","stale"].includes(a.status))return;
+    const h=hardCheck(a.type,a.target);
+    if(h){a.status="denied";a.decided=a.decided||"rule";log("f",`「${esc(a.title)}」${esc(h)}，已自動否決`);return}
+    const au=authorize(a.type,a.target);
+    const changed=au.need!==a.need||JSON.stringify(au.params)!==JSON.stringify(a.params);
+    if(a.status==="pending"){if(changed)applyAuth(a,au);return}
+    if(a.status==="approved"&&changed){a.status="stale";log("f",`約束已變更，「${esc(a.title)}」需要重新核准`);return}
+    if(a.status==="stale"&&!changed){a.status="approved";a.conV=CON.v;log("x",`約束回到原核准條件，「${esc(a.title)}」恢復為可執行`)}
+  });
+  render();
+}
+function decide(a,ok){
+  if(ok)applyAuth(a,authorize(a.type,a.target));
+  a.status=ok?"approved":"denied";a.decided=ok?"ok":"no";if(ok)a.conApproved=CON.v;
+  ST.groupsDecided[a.group]=1;log(ok?"x":"f",`你${ok?"核准":"否決"}了「${esc(a.title)}」`);
+}
+/* ===== 三組決定 UI ===== */
+const STL={pending:["p-warn","待核准"],approved:["p-ok","可執行"],denied:["p-bad","已否決"],done:["p-ok","已完成"],partial:["p-warn","部分完成"],awaiting:["p-warn","待條件成立"],failed:["p-bad","未成功"],stale:["p-warn","需重新核准"]};
+function renderApps(){
+  const list=ST.acts;
+  if(!list.length){$("apps").innerHTML='<p class="note">尚無提案。</p>';}
+  else $("apps").innerHTML=["supply","prod","cust"].map(g=>{const its=list.filter(a=>a.group===g);if(!its.length)return"";
+    const pend=its.filter(a=>a.status==="pending"||a.status==="stale"),cash=its.filter(a=>a.status!=="denied").reduce((s,a)=>s+(a.est?.cash13_min||0),0);
+    return `<div class="grp ${pend.length?"need":""}"><div class="row"><b>${GNAME[g][0]}：${GNAME[g][1]}</b><span class="note">${its.length} 項・待你決定 ${pend.length} 項</span></div>
+     <span class="note">預估對 13 週最低現金的影響：${sgn(cash)}（依外部完全配合估算）</span>
+     ${pend.length?`<div class="gacts"><button type="button" data-gok="${g}">核准本組待決項目</button><button type="button" class="no" data-gno="${g}">否決本組待決項目</button></div>`:""}
+     <details ${pend.length&&its.length<=3?"open":""}><summary>展開查看各項（${its.length}）</summary>${its.map(a=>`<div class="it"><div class="row"><span>${esc(a.title)}</span><span class="pill ${STL[a.status][0]}">${STL[a.status][1]}</span></div><span class="note">${esc(a.why)}・預估現金 ${sgn(a.est?.cash13_min||0)}、CCC ${a.est?.ccc_days>0?"+":""}${a.est?.ccc_days??0} 天${a.result?"<br>結果："+esc(a.result):""}</span>${a.status==="pending"||a.status==="stale"?`<div class="gacts"><button type="button" data-ok="${a.id}">核准</button><button type="button" class="no" data-no="${a.id}">否決</button></div>`:""}</div>`).join("")}</details></div>`}).join("");
+  const pend=list.some(a=>a.status==="pending"||a.status==="stale"),ready=list.some(a=>a.status==="approved");
+  $("run2").disabled=busy||pend||!ready;$("run1").disabled=busy;
+  $("run2Txt").textContent=busy?"處理中……":pend?"還有待你決定的行動。":ready?"可以執行了。":list.length?"沒有待執行的行動。":"先完成第 3 步。";
+}
+function renderCond(E){
+  const aw=ST.acts.find(a=>a.type==="reply_terms"&&a.status==="awaiting");
+  if(!aw){$("cond").innerHTML="";return}
+  $("cond").innerHTML=`<div class="box"><span class="label">條件生效步驟：月結 75 天</span><ul><li>${"✓"} 老闆核准談判</li><li>✓ 客戶原則同意</li><li>${E.claim?"✓":"○"} 客戶買回專用料（條件）</li><li>${ST.signed?"✓":"○"} 雙方簽署補充協議</li><li>${E.termsEffective?"✓ 條件生效，財務效果已計入":"○ 條件生效（尚未計入財務效果）"}</li></ul>${ST.signed?"":`<button type="button" class="sign" id="sign" ${E.claim?"":"disabled"}>模擬：雙方簽署補充協議</button>${E.claim?"":'<span class="note">需先完成「客戶買回專用料」</span>'}`}</div>`;
+}
+function renderTasks(){$("tasks").innerHTML=ST.tasks.length?ST.tasks.map(t=>`<div><b>${esc(t.dept)}</b><span>${esc(t.title)}</span><span class="note">${esc(t.due)}</span></div>`).join(""):'<p class="note">尚無任務。</p>'}
+function renderResult(){
+  const E=effects(ST.acts,ST.signed),none=metrics(NONE,"none"),now=metrics(E,"now");
+  const dec=ST.acts.filter(a=>a.decided==="ok"||a.decided==="no"),auto=ST.acts.filter(a=>!a.need&&["done","partial"].includes(a.status));
+  const part=ST.acts.filter(a=>a.status==="partial"),wait=ST.acts.filter(a=>a.status==="awaiting"),fail=ST.acts.filter(a=>a.status==="failed");
+  const pendingFx=[];if(wait.length)pendingFx.push("月結 75 天的應收與現金影響，待條件成立後才計入");if(E.claim)pendingFx.push("買回專用料 1,510 萬為客戶承諾，第 6、10 週才收款");part.forEach(a=>pendingFx.push(a.title+"：剩餘一半仍待再談"));
+  $("result").innerHTML=`<div class="result"><span class="eyebrow">結果：你授權了什麼，AI 完成了什麼</span>
+   <p>你完成 <b>${Object.keys(ST.groupsDecided).length}</b> 組經營決策，核准 ${dec.filter(a=>a.decided==="ok").length} 項、否決 ${dec.filter(a=>a.decided==="no").length} 項需授權的行動。AI 另完成 <b>${QN}</b> 次查詢、<b>${auto.length}</b> 項授權內作業、建立 <b>${ST.tasks.length}</b> 項追蹤任務；${part.length} 項只完成部分，${wait.length} 項待外部條件成立${fail.length?`，${fail.length} 項未成功`:""}。</p>
+   <p>13 週最低現金：事件後未處理 ${wan(none.cash)} → 目前 ${wan(now.cash)}（第 ${now.minWk} 週）。CCC：${none.ccc.toFixed(0)} 天 → ${now.ccc.toFixed(0)} 天。CCC 較短不代表當下現金最多，兩者請一起看。</p>
+   ${pendingFx.length?`<div><span class="label">尚未實現的效果</span><ul style="margin:2px 0 0;padding-left:1.1em">${pendingFx.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
+   <details class="dv"><summary>設計者觀點：CCC 與現金要一起看</summary><p>縮短現金循環天數，不一定讓這 13 週的最低現金最多。答應客戶較短的折衷帳期、要求買回專用料、把產能轉給其他客戶，每一項影響的時點都不同。經營判斷要同時看營運資金效率與收付款時點，而不是只追一個漂亮的指標。</p></details>
+</div>`;
+}
+document.addEventListener("click",e=>{
+  if(busy&&e.target.closest("[data-ok],[data-no],[data-gok],[data-gno]"))return;
+  const ok=e.target.closest("[data-ok]"),no=e.target.closest("[data-no]");
+  if(ok||no){const a=ST.acts.find(x=>x.id===(ok||no).dataset[ok?"ok":"no"]);if(a){decide(a,!!ok);render()}return}
+  const gok=e.target.closest("[data-gok]"),gno=e.target.closest("[data-gno]");
+  if(gok||gno){const g=(gok||gno).dataset[gok?"gok":"gno"];ST.acts.filter(a=>a.group===g&&(a.status==="pending"||a.status==="stale")).forEach(a=>decide(a,!!gok));render();return}
+  if(e.target.id==="sign"&&!ST.signed){ST.signed=true;log("x","雙方簽署補充協議：自下月 1 日起開立的發票適用月結 75 天");const aw=ST.acts.find(a=>a.type==="reply_terms"&&a.status==="awaiting");if(aw){aw.status="done";aw.result="補充協議已簽署，條件生效"}
+    /* 在 done 狀態下仍要維持 counter_75 生效 */render();renderResult();if(ST.debriefShown)renderDebrief();}
+});
+/* ===== 工具定義 ===== */
+const q=(name,txt,fn)=>({name,description:txt,execute:()=>{QN++;const r=fn();log("q",`<code>${name}</code> ${esc(r.__s||"")}`);delete r.__s;return r}});
+const READ=[
+ q("get_customer_message","讀取客戶 Y 寄來的信件原文。",()=>({mail:MAIL,__s:"讀取客戶 Y 來信"})),
+ q("get_open_purchase_orders","列出為客戶 Y 機種下的 12 張未結採購單：編號、料件、供應商、金額（萬元）、到貨週、取消或延後條件、是否 Y 專用。到貨後約 8 週付款。",()=>({pos:PO,payment_lag_weeks:PAYLAG,__s:`查到 ${PO.length} 張未結採購單，其中 ${PO.filter(p=>p.term.startsWith("NCNR")).length} 張不可取消`})),
+ q("get_sales_orders_and_wip","查詢客戶 Y 的出貨計畫、受影響營收與在製品。",()=>({...SO,__s:"查詢 Y 出貨計畫與在製品 1,200 萬"})),
+ q("get_customer_ar_and_credit","查詢客戶 Y 的應收帳款餘額、帳齡、付款習慣與信用額度。",()=>({...AR,__s:"Y 應收 1.8 億，額度 2.5 億"})),
+ q("get_customer_contract","查詢與客戶 Y 的合約：付款條件、預測責任條款、條件變更規定。",()=>({...CONTRACT,__s:"讀取合約，含第 7 條預測責任條款"})),
+ q("get_other_demand_and_capacity","查詢其他客戶的追加需求與可用產能。",()=>({...OTHER,__s:"客戶 X 有追加 2,000 台需求"})),
+ q("get_dashboard","查詢目前的經營儀表板：現金循環天數、13 週最低現金與週次、客戶 Y 信用曝險、未解事項。",()=>({...snap(),__s:"查詢儀表板"})),
+ q("get_boss_constraints","查詢老闆設定的經營約束與核准門檻。",()=>({hard_no_overtime:CON.noOT,hard_protect_top3_customers:CON.top3,prefer_cash_over_margin:CON.cash,prefer_no_long_leadtime_without_commitment:CON.noLong,approval_threshold_wan:CON.thr,__s:"讀取老闆的約束"})),
+];
+const PROPOSE={name:"propose_action",description:"提出一個行動建議（不會執行）。type 與 target：defer_po（採購單編號，例如 P03；不可取消的不能提）、pull_in_other_customer（X）、claim_forecast_liability（Y）、reply_terms（decline、accept、counter_75、accept_with_factoring 擇一；同一客戶只能有一個有效方案）。違反硬性約束會被拒絕。回傳是否需要老闆核准與預估影響。",
+  inputSchema:{type:"object",properties:{type:{type:"string"},target:{type:"string"},title:{type:"string",description:"20 字內繁體中文標題"},rationale:{type:"string",description:"60 字內依據"}},required:["type","target","title","rationale"]},execute:i=>propose(i)};
+const EXEC={name:"execute_action",description:"執行一個已核准或授權內的行動（propose_action 回傳的 id）。回傳執行結果、外部回饋與更新後的儀表板。外部回饋可能與預估不同。",inputSchema:{type:"object",properties:{id:{type:"string"}},required:["id"]},execute:i=>execute(i)};
+const TASK={name:"create_task",description:"建立追蹤任務給某部門。",inputSchema:{type:"object",properties:{dept:{type:"string",description:"業務、採購、生管、財務、法務擇一"},title:{type:"string"},due:{type:"string",description:"例如：本週五、第 6 週"}},required:["dept","title","due"]},execute:i=>addTask(i)};
+const DASH=READ.find(t=>t.name==="get_dashboard");
+/* ===== 流程 ===== */
+let SAMPLE=null,CAN=false;
+const sp=window.claude?.use?window.claude.use("sample").catch(()=>null):Promise.resolve(null);
+sp.then(async s=>{SAMPLE=s;if(s){const l=await s.limits().catch(()=>null);CAN=!!l?.tools}$("modeTxt").textContent=CAN?"將由 Claude 即時操作，每個階段約 1–2 分鐘；第一次會詢問是否同意使用你的 Claude 帳號。":"網站版：播放預先錄製的情境示範（同一套工具與規則引擎，依約束切換少數分支）。"});
+const ROLE=()=>`你是電子製造公司的一組 AI agents（業務情報、採購、生管、信用、財務），由同一個模型分飾，協助老闆處理一個跨部門事件。用繁體中文（台灣用語）。金額單位為新台幣萬元。
+原則：只依工具查到的資料判斷，不要捏造；不確定的事要標明；對外承諾一律提案等老闆核准；現金與天數以工具回傳為準；CCC 較短不一定代表現金較多，兩者都要考慮。
+老闆約束：${CON.noOT?"硬性－不准加班；":""}${CON.top3?"硬性－不得損害前三大客戶關係；":""}${CON.cash?"偏好－現金優先於毛利；":""}${CON.noLong?"偏好－未取得客戶承諾不備長交期料；":""}單筆達 ${CON.thr} 萬須老闆核准。`;
+function lock(v){busy=v;renderApps();render2Guide()}
+async function phase1(){
+  if(busy)return;readCons();reset();$("log").dataset.started="";["sum1","sum2","result","debrief"].forEach(k=>$(k).innerHTML="");renderTasks();render();
+  lock(true);log("n",'<span class="spin"></span>AI agents 開始查證……');
+  try{
+    if(!CAN){await demo1();return}
+    const prompt=`${ROLE()}
+
+第一階段：查證與提案。
+1. 第一輪同時呼叫所有查詢工具。
+2. 找出部門之間的衝突，對每個建議行動呼叫 propose_action（可同時呼叫多個）。可延後的採購單逐張提出；付款條件只提一個方案。工具回傳錯誤時，依錯誤訊息修正。
+3. 不要執行任何行動。
+最後只回覆 JSON：{"summary":"一句話判斷（50 字內）","findings":["查證發現，最多 5 項"],"conflicts":["部門衝突，最多 3 項"],"uncertain":["需要人確認的事，最多 3 項"]}`;
+    const d=await SAMPLE.json(prompt,{tools:[...READ,PROPOSE]});showSum("sum1","AI 的查證結果",d);log("n","查證與提案完成，請在右側做三組決定。");
+  }catch(e){aiErr(e)}finally{lock(false);$("run1").textContent="重新開始"}
+}
+async function phase2(){
+  if(busy)return;lock(true);
+  const ok=ST.acts.filter(a=>a.status==="approved"),den=ST.acts.filter(a=>a.status==="denied");
+  log("n",'<span class="spin"></span>依你的核准開始執行……');
+  try{
+    if(!CAN){await demo2();return}
+    const prompt=`${ROLE()}
+
+第二階段：執行與追蹤。
+可執行的行動：${ok.map(a=>`${a.id}「${a.title}」`).join("、")||"無"}。老闆否決：${den.map(a=>`${a.id}「${a.title}」`).join("、")||"無"}。
+1. 對每個可執行的行動呼叫 execute_action。
+2. 依回饋調整：部分完成或條件未成立的，用 create_task 指派追蹤；需要新方案的用 propose_action（等老闆核准）。被否決的不要執行。
+3. 至少建立 3 個追蹤任務，涵蓋尚不確定的事（例如客戶 Y 是延後還是可能轉單）。
+4. 最後呼叫 get_dashboard。
+最後只回覆 JSON：{"summary":"一句話總結（50 字內）","done":["已完成，最多 5 項"],"adjusted":["依回饋所做的調整，最多 3 項"],"remaining":["仍待處理的事，最多 3 項"]}`;
+    const d=await SAMPLE.json(prompt,{tools:[EXEC,PROPOSE,TASK,DASH]});showSum("sum2","AI 的執行回報",d);log("n","執行完成。");
+  }catch(e){aiErr(e)}finally{lock(false);renderResult();renderDebrief()}
+}
+function showSum(el,title,d){const L=x=>Array.isArray(x)?x:[];const blocks=[["findings","查證發現"],["conflicts","部門衝突"],["uncertain","尚不確定"],["done","已完成"],["adjusted","依回饋調整"],["remaining","仍待處理"]];
+  $(el).innerHTML=`<div class="sumbox"><span class="eyebrow">${title}</span><b>${esc(d.summary)}</b>${blocks.filter(b=>L(d[b[0]]).length).map(b=>`<div><span class="label">${b[1]}</span><ul>${L(d[b[0]]).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`).join("")}</div>`}
+function aiErr(e){const HIDE=["not_granted","sampling_disabled","not_declared","capability_disabled","capability_removed","tools_unavailable"];
+  if(HIDE.includes(e?.code)){CAN=false;$("modeTxt").textContent="未取得 AI 使用許可，再按一次會播放示範過程。";log("f","未取得 AI 使用許可。")}
+  else log("f",e?.code==="rate_limited"?"使用次數暫時達上限，請稍後再試。":e?.code==="cancelled"?"已取消。":"這次沒有取得完整結果，請再試一次。")}
+/* ===== 示範重播：依約束切換少數分支 ===== */
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const tryP=x=>{try{propose(x)}catch(err){log("f",esc(err.message))}};
+async function demo1(){
+  for(const t of READ){t.execute({});await wait(220)}
+  log("n","發現：P01、P04、P07 共 3,910 萬不可取消；合約第 7 條規定客戶須承擔依預測採購的專用料。");await wait(350);
+  log("n","發現：若接受月結 90 天，第 10–13 週約 8,300 萬收款順延，13 週最低現金將跌破安全水位，客戶 Y 信用曝險也會超過額度。");await wait(350);
+  if(CON.noLong){log("n","依你的偏好「未取得客戶承諾不備長交期料」，DRAM 也提出延後，但會承擔配貨風險。")}else log("n","判斷：DRAM 可延後，但原廠正在配貨，延後可能失去下季配額，建議保留。");
+  await wait(300);
+  const ids=["P03","P06","P08","P10","P11","P12","P09","P05"];if(CON.noLong)ids.push("P02");
+  for(const id of ids){const p=PO.find(x=>x.id===id);tryP({type:"defer_po",target:id,title:`延後 ${id} ${p.part}`,rationale:`${p.term}；Y 延後期間用不到`});await wait(180)}
+  tryP({type:"pull_in_other_customer",target:"X",title:"共用料與產能轉給客戶 X",rationale:"SoC 不可取消，轉用於 X 追加需求，減少庫存並補回收款"});await wait(200);
+  tryP({type:"claim_forecast_liability",target:"Y",title:"要求 Y 買回專用料",rationale:"合約第 7 條：延後超過 4 週可要求買回專用料（機殼、PCB 共 1,510 萬）"});await wait(200);
+  const tgt=CON.top3?(CON.cash?"counter_75":"accept_with_factoring"):(CON.cash?"decline":"counter_75");
+  const why={counter_75:"90 天會使現金跌破安全水位且超過信用額度；75 天並以買回為條件，兼顧關係",accept_with_factoring:"保住客戶關係，以買斷維持現金，代價是買斷費",decline:"現金優先，維持 60 天；需承擔客戶關係風險"}[tgt];
+  tryP({type:"reply_terms",target:tgt,title:"付款條件："+TERMS[tgt].slice(0,14),rationale:why});await wait(200);
+  const n=metrics(NONE,"none");
+  showSum("sum1","示範：AI 的查證結果",{summary:"客戶延後與延長帳期同時發生；若照單全收，13 週現金跌破安全水位、信用曝險超過額度。",findings:["3 張採購單不可取消，共 3,910 萬","合約第 7 條：客戶須承擔依預測採購的專用料",`事件發生、尚未處理時，13 週最低現金約 ${wan(n.cash)}`,"客戶 X 的追加需求可吸收不可取消的 SoC"],conflicts:["業務想保住客戶 Y，財務擔心現金與信用曝險","採購想延後進料，但 DRAM 延後可能失去配貨"],uncertain:["客戶 Y 是延後還是可能轉單到第二家組裝廠","第 10 週後的拉貨時間未確認"]});
+  log("n","查證與提案完成，請在右側做三組決定。");
+}
+async function demo2(){
+  for(const a of ST.acts.filter(x=>x.status==="approved")){execute({id:a.id});await wait(300)}
+  if(ST.acts.find(a=>a.status==="partial")){addTask({dept:"採購",title:"P05 散熱模組剩餘一半，與供應商確認可否再延後",due:"第 6 週"});await wait(200)}
+  if(ST.acts.find(a=>a.status==="awaiting")){addTask({dept:"法務",title:"準備月結 75 天補充協議，條件為客戶買回專用料",due:"下週三"});await wait(200)}
+  if(ST.acts.find(a=>a.type==="claim_forecast_liability"&&a.status==="denied"))log("n","你否決了要求買回專用料：P04、P07 共 1,510 萬將留在庫存，75 天方案的前提也不成立。");
+  addTask({dept:"業務",title:"確認客戶 Y 是延後還是評估轉單，取得書面拉貨計畫",due:"本週五"});await wait(200);
+  addTask({dept:"財務",title:"更新 13 週現金預測，追蹤買回款第 6、10 週入帳",due:"下週一"});await wait(200);
+  addTask({dept:"生管",title:"依新排程調整第 3–6 週產線，Y 在製品暫停於半成品",due:"明天"});await wait(200);
+  DASH.execute({});
+  const c=snap();
+  showSum("sum2","示範：AI 的執行回報",{summary:`已執行可執行的行動，13 週最低現金 ${wan(c.cash_13w_min)}（第 ${c.cash_min_week} 週）。`,done:ST.acts.filter(a=>a.status==="done").slice(0,5).map(a=>a.title),adjusted:[...ST.acts.filter(a=>a.status==="partial").map(a=>a.title+"：供應商只同意一半，已改列追蹤"),...ST.acts.filter(a=>a.status==="awaiting").map(a=>a.title+"：待條件成立，財務效果暫不計入")],remaining:["客戶 Y 的真實意向仍需業務確認","第 10 週後的產能與進料計畫"]});
+  log("n","執行完成。");
+}
+const PRAC=[["auto","已由系統自動處理","如果你們的系統已經能處理，這個案例不會把同一件事說成 AI 的新價值。值得檢查的是：客戶條件、合約條款與現金預測互相牽動時，系統能否放進同一個決策；約束改變時，已核准的事是否會重新確認。"],["check","系統有提示，仍需人工查證","如果你們的情況是系統提示、人工查證，這個案例最值得看的是第 3 步的工作紀錄：採購單條件、合約條款、應收與信用額度如何被整理成同一份依據，讓需要人判斷的範圍縮小。"],["track","需要跨部門開會追蹤","如果你們要靠跨部門開會追，這個案例最值得看的是第 4 步與未解事項：誰負責什麼、哪些承諾尚未兌現、哪些條件尚未成立，以及如何持續追蹤。"],["none","目前沒有固定處理方式","如果還沒有固定的處理方式，先別急著談 AI。這個情境首先需要治理與流程：誰有權回覆客戶的條件、多少金額要誰核准、合約條款由誰掌握。案例中的授權門檻與條件生效步驟，可以作為設計流程的起點。"]];
+const WANT=["跨部門追蹤","收付款例外處理","採購條件與合約管理","13 週現金預測","授權與核准流程","客戶與供應商情報"];
+$("want").innerHTML=WANT.map(w=>`<button type="button" aria-checked="false" data-want="${w}">${w}</button>`).join("");
+let PSEL=null;const WSEL=new Set();
+let SUMEDIT=false;
+function mySum(force){if(SUMEDIT&&!force){$("sumNote").textContent="你已修改摘要，選項變更不會覆蓋你的內容。";$("regenSum").hidden=false;return}SUMEDIT=false;$("sumNote").textContent="";$("regenSum").hidden=true;const p=PRAC.find(x=>x[0]===PSEL);$("mySum").value=`我們公司遇到類似「客戶延後拉貨並要求延長帳期」的情況時，目前${p?"的做法是「"+p[1]+"」":"還在釐清處理方式"}。${WSEL.size?"最想先改善的是："+[...WSEL].join("、")+"。":""}想討論哪一段適合先用系統與 AI 協助、需要先準備哪些資料與流程。`}
+document.addEventListener("click",async e=>{
+  const w=e.target.closest("[data-want]");if(w){const v=w.dataset.want;WSEL.has(v)?WSEL.delete(v):WSEL.add(v);w.setAttribute("aria-checked",WSEL.has(v)?"true":"false");mySum();return}
+  if(e.target.id==="copySum"){const t=$("mySum").value;try{await navigator.clipboard.writeText(t);e.target.textContent="已複製"}catch(_){$("mySum").select();e.target.textContent="已選取，請按複製"}}
+  if(e.target.id==="regenSum"){mySum(true)}
+  if(e.target.id==="copyMail"){try{await navigator.clipboard.writeText("research@sinclairhuang.org");e.target.textContent="已複製"}catch(_){const r=document.createRange();r.selectNodeContents($("mail2"));const sel=getSelection();sel.removeAllRanges();sel.addRange(r);e.target.textContent="已選取，請按複製"}}
+  if(e.target.id==="go"){$("stepAI").scrollIntoView({behavior:RM?"auto":"smooth",block:"start"});if(!busy&&!ST.acts.length)phase1()}
+  if(e.target.id==="toMethod"){$("methodDet").open=true;$("methodSec").scrollIntoView({behavior:RM?"auto":"smooth",block:"start"})}
+});
+mySum();
+document.addEventListener("input",e=>{if(e.target.id==="mySum"){SUMEDIT=true;$("sumNote").textContent="你已修改摘要，選項變更不會覆蓋你的內容。";$("regenSum").hidden=false}});
+$("prac").innerHTML=PRAC.map(p=>`<button type="button" role="radio" aria-checked="false" data-prac="${p[0]}">${p[1]}</button>`).join("");
+document.addEventListener("click",e=>{const b=e.target.closest("[data-prac]");if(!b)return;document.querySelectorAll("[data-prac]").forEach(x=>x.setAttribute("aria-checked",x===b?"true":"false"));PSEL=b.dataset.prac;$("pracOut").textContent=PRAC.find(p=>p[0]===PSEL)[2];$("pracOut").classList.remove("note");mySum()});
+$("run1").addEventListener("click",phase1);$("run2").addEventListener("click",phase2);
+document.addEventListener("change",e=>{if(e.target.closest("#cons"))onConsChange()});
+document.addEventListener("input",e=>{if(e.target.id==="thr"){$("thrv").textContent=wan(+e.target.value)}});
+$("mail").textContent=MAIL;readCons();reset();render();
+</script>
+
+</body>
+</html>

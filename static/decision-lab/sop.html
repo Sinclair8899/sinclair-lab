@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>供需情報與 S&amp;OP 模擬器</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+TC:wght@700&display=swap">
+<style>
+/* Layout: executive briefing — two external ports feeding S&OP: customer intelligence, supplier intelligence, monthly S&OP meeting game */
+:root{
+  --bg:#f3f5f7; --panel:#ffffff; --ink:#18222d; --muted:#5b6876; --line:#d9dfe6;
+  --accent:#1f5f8b; --accent-soft:#e3eef6; --inv:#8a4b2a; --inv-soft:#f6e9e1; --ai:#5a4a9e; --ai-soft:#ece9f7;
+  --ok:#2f7d4f; --ok-soft:#e2f2e8; --warn:#a86a0c; --warn-soft:#fbefd9; --bad:#b33a3a; --bad-soft:#f8e1e1;
+  --f-display:"Noto Serif TC","Songti TC",serif; --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11161c; --panel:#18202a; --ink:#e4e9ef; --muted:#93a1b0; --line:#2b3644;
+  --accent:#6fb0dc; --accent-soft:#1c3346; --inv:#e0a07c; --inv-soft:#3a2619; --ai:#b3a5ef; --ai-soft:#2a2545;
+  --ok:#6cc792; --ok-soft:#1a3326; --warn:#e3a94a; --warn-soft:#3a2d16; --bad:#ec7f7f; --bad-soft:#3d1f22; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161c; --panel:#18202a; --ink:#e4e9ef; --muted:#93a1b0; --line:#2b3644;
+  --accent:#6fb0dc; --accent-soft:#1c3346; --inv:#e0a07c; --inv-soft:#3a2619; --ai:#b3a5ef; --ai-soft:#2a2545;
+  --ok:#6cc792; --ok-soft:#1a3326; --warn:#e3a94a; --warn-soft:#3a2d16; --bad:#ec7f7f; --bad-soft:#3d1f22; color-scheme:dark}
+*{box-sizing:border-box}
+html{font-size:106.25%}
+@media (max-width:480px){html{font-size:100%}}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1rem;line-height:1.65}
+.wrap{max-width:1040px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:24px}
+h1{font-family:var(--f-display);font-size:clamp(1.7rem,4.6vw,2.4rem);line-height:1.25;margin:4px 0 0;text-wrap:balance}
+h2{font-family:var(--f-display);font-size:1.25rem;margin:0;text-wrap:balance}
+h3{font-size:1rem;margin:0}
+p{margin:0}
+.lead{color:var(--muted);max-width:66ch;margin-top:10px}
+.eyebrow{font-size:.78rem;letter-spacing:.12em;color:var(--ai);font-weight:500}
+.label{font-size:.72rem;letter-spacing:.08em;color:var(--muted)}
+.mono,.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.note{color:var(--muted);font-size:.84rem}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px}
+a{color:var(--accent)}
+.opener{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.opener div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 14px;display:flex;flex-direction:column;gap:2px}
+.opener b{font-size:1rem}.opener span{color:var(--muted);font-size:.84rem}
+.opener a{text-decoration:none}
+.thesis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.thesis div{padding:12px 14px;border-left:3px solid var(--inv);background:var(--panel);border-radius:0 6px 6px 0}
+.thesis p{color:var(--muted);font-size:.88rem;margin-top:2px}
+.sec{display:flex;flex-direction:column;gap:10px}
+.tablebox{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:680px}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap;font-size:.88rem}
+th{font-weight:500;color:var(--muted);font-size:.78rem}
+td.num,th.num{text-align:right}
+.score{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.score>div{padding:12px 16px;border-radius:8px;border:1px solid var(--line);background:var(--panel)}
+.score>div.ag{border-color:var(--ai);background:var(--ai-soft)}
+.score dl{display:grid;grid-template-columns:auto 1fr;gap:2px 14px;margin:6px 0 0}
+.score dt{color:var(--muted);font-size:.86rem}.score dd{margin:0;font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.weeks{display:flex;gap:6px;flex-wrap:wrap}
+.weeks span{font-family:var(--f-mono);font-size:.78rem;padding:2px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.weeks span.on{border-color:var(--inv);color:var(--inv);background:var(--inv-soft);font-weight:500}
+.weeks span.done{color:var(--ok);border-color:var(--ok)}
+.event{padding:18px;display:flex;flex-direction:column;gap:12px}
+.event .what{border-left:3px solid var(--inv);padding-left:12px}
+.lag{font-size:.86rem;color:var(--bad)}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.opts button{all:unset;cursor:pointer;border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:var(--bg);display:flex;flex-direction:column;gap:2px}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.opts button:disabled{cursor:default}
+.opts button.pick{border-color:var(--accent);background:var(--accent-soft)}
+.opts small{color:var(--muted);font-size:.8rem}
+.res{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.res>div{border-radius:6px;padding:10px 14px}
+.r-me{background:var(--bg);border:1px solid var(--line)}
+.r-ag{background:var(--ai-soft);border:1px solid var(--ai)}
+.r-ag b{color:var(--ai)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.chip{font-family:var(--f-mono);font-size:.76rem;padding:1px 7px;border-radius:3px;background:var(--panel);border:1px solid var(--line)}
+.c-bad{color:var(--bad);border-color:var(--bad)}.c-warn{color:var(--warn);border-color:var(--warn)}.c-ok{color:var(--ok);border-color:var(--ok)}
+.btn{font:inherit;cursor:pointer;border-radius:5px;padding:8px 16px;border:1px solid var(--accent);background:var(--accent);color:var(--panel);font-weight:500;align-self:flex-start}
+.btn.ai{border-color:var(--ai);background:var(--ai)}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.6;cursor:default}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chg{background:var(--ai-soft);color:var(--ai);font-weight:500;border-radius:3px;padding:0 4px}
+.strat{font-size:.74rem;padding:1px 7px;border-radius:999px;font-weight:500}
+.s-jit{background:var(--ok-soft);color:var(--ok)}.s-jic{background:var(--warn-soft);color:var(--warn)}
+.console{padding:18px;background:var(--ai-soft);border-color:var(--ai);display:flex;flex-direction:column;gap:10px}
+.console textarea{font:inherit;width:100%;min-height:70px;padding:8px;border:1px solid var(--line);border-radius:4px;background:var(--panel);color:var(--ink)}
+.console textarea:focus-visible{outline:2px solid var(--ai)}
+.ex{display:flex;flex-wrap:wrap;gap:6px}
+.ex button{font:inherit;font-size:.82rem;cursor:pointer;border:1px solid var(--ai);background:var(--panel);color:var(--ai);border-radius:999px;padding:2px 10px}
+.agents{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.agents div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+.agents p{font-size:.84rem;color:var(--muted)}
+details{border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:12px 16px}
+details summary{cursor:pointer;font-weight:700}
+details summary:focus-visible{outline:2px solid var(--accent)}
+details>div{margin-top:12px;display:flex;flex-direction:column;gap:10px}
+.bar{height:8px;border-radius:2px;background:var(--line);overflow:hidden;width:120px;display:inline-block;vertical-align:middle;margin-right:6px}
+.bar i{display:block;height:100%}
+@media (max-width:820px){.opener,.thesis,.opts,.res,.score,.agents{grid-template-columns:1fr}}
+.ports{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:10px;align-items:stretch}
+.ports div{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:4px}
+.ports div.mid{border-color:var(--accent);background:var(--accent-soft)}
+.ports p{font-size:.86rem;color:var(--muted)}
+.ports .arrow{font-family:var(--f-mono);color:var(--muted);font-size:.8rem}
+.bw{display:flex;flex-direction:column;gap:6px}
+.bw .r{display:grid;grid-template-columns:110px 1fr 60px;gap:10px;align-items:center;font-size:.88rem}
+.bw .b{height:14px;border-radius:2px;background:var(--inv)}
+.pill{font-size:.75rem;padding:1px 8px;border-radius:999px;font-weight:500;white-space:nowrap}
+.p-ok{background:var(--ok-soft);color:var(--ok)}.p-warn{background:var(--warn-soft);color:var(--warn)}.p-bad{background:var(--bad-soft);color:var(--bad)}
+.feed{display:flex;flex-direction:column;gap:6px}
+.feed div{display:grid;grid-template-columns:110px 1fr;gap:10px;padding:8px 12px;background:var(--panel);border:1px solid var(--line);border-radius:6px;font-size:.88rem}
+.voices{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.voices div{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:.86rem}
+.voices b{display:block;font-size:.78rem;color:var(--muted)}
+.callout{padding:14px 16px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 6px 6px 0;font-size:.95rem}
+@media (max-width:820px){.ports,.voices{grid-template-columns:1fr}.feed div{grid-template-columns:1fr}}
+</style><style>
+[data-live] textarea,[data-live] label,[data-live] button,[data-live] input,[data-live] select,[data-live] .ex,[data-live] [aria-live],[data-live] .note{display:none!important}
+[data-live]::after{content:"這一區需要連接 AI 模型即時分析，網站版不開放操作。本頁其他區塊為規則試算或情境示範，可以完整操作。";display:block;margin-top:8px;padding:8px 12px;border:1px dashed var(--line,#ccc);border-radius:6px;font-size:.9rem;color:var(--muted,#666)}
+</style>
+</head>
+<body>
+<div style="background:#fbefd9;color:#6b4407;font:14px/1.5 system-ui,sans-serif;padding:8px max(16px,env(safe-area-inset-left,0px));text-align:center">網站版・測試版 2026-10-20：「規則試算」依公式即時計算；「情境示範」為預設結果或重播；標示「本版未提供即時 AI」的區塊需要連接 AI 模型，網站版不開放操作。</div>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">AI LAB · 現金循環系列 04 · 供需兩端</span>
+    <h1>供需情報與 S&amp;OP 模擬器</h1>
+    <p class="lead">MRP 能不能順暢運作，關鍵不在系統裡面，而在兩個對外的端口：業務能不能及早掌握客戶的產品發展、供應鏈與生產計畫，採購能不能以技術眼光判斷料源是否合格、供應是否充分、條件是否合理。兩端的情報最後在 S&amp;OP（產銷協調會議）匯合，讓業務、生管、採購、財務看同一套數字。</p>
+    <div class="opener">
+      <div><b>5 分鐘</b><span>看兩端情報，主持一場 S&amp;OP 月會</span></div>
+      <div><b>情境示範</b><span>AI agents 的處理結果為預設情境，可與人工流程對照</span></div>
+      <div><a href="index.html"><b>← 現金循環總覽</b></a><span>預測準不準，決定存貨天數；條件談得好不好，決定應收與應付天數</span></div>
+    </div>
+    <p class="note modeline" style="margin-top:12px;padding:8px 12px;border:1px dashed var(--line);border-radius:6px">本頁說明（網站版）：<b>情境示範</b>是依實務整理的預設結果或重播；<b>規則試算</b>是依公式即時計算；標示「本版未提供即時 AI」的區塊需要連接 AI 模型，網站版不開放操作。</p>
+  </header>
+
+  <section class="ports" aria-label="兩個端口">
+    <div><span class="label">客戶端・業務</span><b>客戶管理（CRM）</b><p>拜訪回饋、客戶產品藍圖、客戶的供應鏈與生產計畫、預測與實際的落差。</p><span class="arrow">需求情報 →</span></div>
+    <div class="mid"><span class="label">公司內部</span><b>S&amp;OP 產銷協調</b><p>業務、生管、採購、財務每月對齊一套數字：要生產多少、備多少料、承擔多少風險、卡多少現金。</p><p>AI agents 在會前整理好差異與建議，會議只花時間在取捨。</p></div>
+    <div><span class="label">供應商端・採購</span><b>供應商管理</b><p>技術與品質評鑑、交期與產能、成本與交易條件、財務健康、替代料源。</p><span class="arrow">← 供應情報</span></div>
+  </section>
+
+  <section class="sec" aria-label="客戶端">
+    <div><span class="label">客戶端</span><h2>預測準不準，要按客戶看</h2>
+    <p class="note" style="margin-top:4px">每家客戶的預測習慣不同：有的固定灌水，有的新產品期波動很大。AI 把過去預測與實際出貨逐月比對，算出每家客戶的準確度與偏差方向，MRP 用的就不再是原始預測，而是校正後的需求。</p></div>
+    <div class="panel tablebox"><table id="fc"></table></div>
+    <div class="panel" style="padding:16px;display:flex;flex-direction:column;gap:10px">
+      <h3>長鞭效應：越往上游，波動越大</h3>
+      <div class="bw" id="bw"></div>
+      <p class="note">終端市場只變動 5%，傳到我方採購可能變成 50%。越早、越直接掌握客戶端的真實需求，就越能壓低這條長鞭。</p>
+    </div>
+    <div class="panel console" data-live>
+      <div><span class="eyebrow">本版未提供即時 AI · 拜訪紀錄更新客戶資料</span><h3 style="margin-top:2px">貼上業務的拜訪紀錄，AI 整理成情報並提出內部待辦</h3>
+      <p class="note" style="margin-top:4px" id="vHint">業務常把重要訊息寫在拜訪紀錄裡，卻沒有人整理。AI 會抽出需求變化、規格變更、客戶供應鏈動向與風險，並列出生管、採購、研發、財務各自該做什麼。本版未提供即時 AI；請勿貼上機密資料。</p></div>
+      <label for="vTxt" class="note">拜訪紀錄</label>
+      <textarea id="vTxt" style="min-height:140px">10/16 拜訪雲端客戶 Y 硬體採購經理與 PM。對方提到明年第二季要推新一代 AI 伺服器主機板，目前在 EVT 階段，預計 3 月 DVT。新機種會改用新一代記憶體，散熱方案還沒定。目前舊機種 Q4 出貨可能比預測少兩成，因為終端客戶延後部署。對方採購說明年會導入第二家組裝廠分散風險，付款條件希望從月結 60 天改為 90 天。PM 私下透露他們老闆對交期很在意，上次我們延遲兩天被記了一筆。</textarea>
+      <button class="btn ai" id="vBtn" type="button">交給 AI 整理</button>
+      <div id="vOut" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="sec" aria-label="供應商端">
+    <div><span class="label">供應商端</span><h2>管理供應商，和管理客戶一樣重要</h2>
+    <p class="note" style="margin-top:4px">採購是公司對外的另一個端口。具備理工背景的採購，才能判斷供應商的材料與製程是否真正合格。AI 把品質、交期、成本、技術、財務與交易條件放在同一張評鑑表，並全天候盯著供應商的變化。</p></div>
+    <div class="panel tablebox"><table id="vs"></table></div>
+    <div><h3>供應商 agent 本週偵測到的訊號</h3></div>
+    <div class="feed" id="feed"></div>
+  </section>
+
+  <section class="sec" aria-label="S&OP 月會">
+    <div><span class="label">S&amp;OP 月會</span><h2>你是主席：三個議題，四個部門各說各話</h2>
+    <p class="note" style="margin-top:4px">每個議題先聽四個部門的意見，再做決定。決定之後，會看到 AI 在會前依資料整理的建議。</p></div>
+    <div class="weeks" id="weeks"></div>
+    <div class="score" id="score"></div>
+    <article class="panel event" id="event"></article>
+  </section>
+
+  <p class="callout">流程可以交給 AI agents 盯，但業務對客戶情報、採購對料源、生管對排程、財務對資金，各自的責任仍要劃分清楚。S&amp;OP 會議上做決定、承擔結果的，永遠是人。</p>
+
+  <p class="note">本頁客戶、供應商、數字與情境皆為虛構示範，僅供教學與研究用途，與作者任職或服務的任何公司無關。</p>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+const FC=[["美系品牌客戶 X",[100,110,95,120,105,100],[82,90,80,98,86,83],"固定高估約兩成，MRP 自動乘以 0.83 校正。"],["雲端服務商 Y",[60,80,120,150,90,70],[58,72,85,96,88,66],"新機種爬坡期高估嚴重，量產穩定後準確；需業務確認客戶自己的生產計畫。"],["歐系工控客戶 Z",[40,40,42,41,40,43],[39,41,40,42,39,42],"預測穩定可信，可直接使用。"],["新創客戶 V",[20,25,35,50,30,30],[8,12,15,20,22,25],"預測與實際落差極大，建議改以訂單驅動、不備長交期料。"]];
+const acc=(f,a)=>{const e=f.reduce((s,v,i)=>s+Math.abs(v-a[i]),0),t=a.reduce((s,v)=>s+v,0);return Math.max(0,1-e/t)};
+const bias=(f,a)=>f.reduce((s,v)=>s+v,0)/a.reduce((s,v)=>s+v,0)-1;
+$("fc").innerHTML=`<thead><tr><th>客戶</th><th class="num">近 6 個月預測準確度</th><th class="num">偏差</th><th>AI 判讀</th></tr></thead><tbody>${FC.map(c=>{const A=acc(c[1],c[2]),B=bias(c[1],c[2]);return `<tr><td><b>${c[0]}</b></td><td class="num"><span class="pill ${A>=0.9?"p-ok":A>=0.75?"p-warn":"p-bad"}">${(A*100).toFixed(0)}%</span></td><td class="num">${B>=0?"高估":"低估"} ${(Math.abs(B)*100).toFixed(0)}%</td><td style="white-space:normal">${c[3]}</td></tr>`}).join("")}</tbody>`;
+const BW=[["終端市場",5],["客戶下單",15],["我方生產",30],["我方採購",50]];
+$("bw").innerHTML=BW.map(b=>`<div class="r"><span>${b[0]}</span><div><div class="b" style="width:${b[1]*2}%"></div></div><span class="num">±${b[1]}%</span></div>`).join("");
+const VS=[["供應商 A・晶片原廠","優","95%","中","優","優","月結 60","核心策略夥伴，配貨期維持長約。"],["供應商 B・電源模組","中","88%","優","中","優","月結 90","價格最低，但近 3 批製程能力指標下滑，採購工程師已安排稽核。"],["供應商 C・機構件","優","97%","中","中","警示","月結 60","品質交期都好，但主要股東股權質押比例上升，建議啟動第二來源。"],["供應商 D・被動元件","優","96%","優","中","優","VMI 寄售","採 VMI，上線才扣帳，同時改善存貨與應付天數。"],["供應商 E・連接器","中","85%","中","優","優","月結 45","技術能力強但交期不穩，建議提高預測分享頻率。"]];
+const g=v=>v==="優"?"p-ok":v==="中"?"p-warn":"p-bad";
+$("vs").innerHTML=`<thead><tr><th>供應商</th><th>品質</th><th class="num">準交率</th><th>成本</th><th>技術能力</th><th>財務健康</th><th>交易條件</th><th>AI 判讀</th></tr></thead><tbody>${VS.map(v=>`<tr><td><b>${v[0]}</b></td><td><span class="pill ${g(v[1])}">${v[1]}</span></td><td class="num">${v[2]}</td><td><span class="pill ${g(v[3])}">${v[3]}</span></td><td><span class="pill ${g(v[4])}">${v[4]}</span></td><td><span class="pill ${g(v[5])}">${v[5]}</span></td><td>${v[6]}</td><td style="white-space:normal">${v[7]}</td></tr>`).join("")}</tbody>`;
+const FEED=[["品質","供應商 B 連續 3 批出貨檢驗的製程能力指標下滑，從 1.5 降到 1.1。"],["財務","供應商 C 主要股東股權質押比例由 20% 升至 45%。"],["產能","供應商 D 新廠擴產完成，產能增加 40%，下季議價空間擴大。"],["市場","晶片原廠發布配貨通知，第一季交期延長 4 週。"],["交期","供應商 E 本月準交率 78%，主因是其上游電鍍廠停工。"]];
+$("feed").innerHTML=FEED.map(f=>`<div><span class="pill p-warn" style="justify-self:start">${f[0]}</span><span>${f[1]}</span></div>`).join("");
+
+/* S&OP 月會 */
+const AG=[
+ {title:"客戶 Y 新機種：要不要全額備料？",ctx:"客戶 Y 預測新機種首年 50 萬台。關鍵料交期 20 週，必須現在下單。",
+  v:[["業務","客戶很重要，全額備料，不能讓我們缺貨。"],["生管","產能可以排，但要先確定料。"],["採購","關鍵料交期 20 週，再不下單就來不及。"],["財務","全額備料要卡 4.2 億現金，客戶若延後就變呆料。"]],
+  opts:[{t:"全額備料",d:"照客戶預測",s:0,inv:42000,risk:"客戶延後時，存貨風險最高"},{t:"依歷史紀錄備 60%，長交期料談保留產能",d:"客戶 Y 過去新機種首季只達預測 55%",s:-1,inv:25200,risk:"需和原廠談產能保留"},{t:"等客戶正式下訂單",d:"零存貨風險",s:-6,inv:0,risk:"可能趕不上客戶上市"}],
+  ai:{k:1,why:"CRM 資料顯示客戶 Y 過去 3 個新機種首季實際只達預測 50～60%，且這次仍在 EVT 階段。建議先備 60%，長交期晶片與原廠談可延後確認的產能保留；同時請業務取得客戶自己的生產排程，下次會議再校正。"}},
+ {title:"供應商 B：續約還是換掉？",ctx:"供應商 B 價格最低，但近 3 批品質指標下滑。年度合約下週到期。",
+  v:[["採購","價格最低，換掉一年多花 800 萬。"],["品保","製程能力一直掉，再出事就是客訴。"],["生管","換供應商要重新驗證，至少 3 個月。"],["財務","B 給月結 90 天，換掉會影響應付天數。"]],
+  opts:[{t:"照常續約",d:"保住價格與付款條件",s:-2,inv:0,risk:"品質持續下滑時，客訴與重工風險高"},{t:"立即換供應商",d:"品質優先",s:-1,inv:300,risk:"驗證期需備安全庫存，成本上升"},{t:"續約但降到 60%，同時輔導並驗證第二來源",d:"兼顧品質、價格與料源",s:0,inv:100,risk:"需要採購工程師投入輔導"}],
+  ai:{k:2,why:"供應商 agent 顯示 B 的指標下滑集中在一條新產線，舊產線穩定。建議續約但降到 60%，要求改善計畫與每週回報，同時讓 D 進入驗證。這樣保住大部分成本優勢，也不讓單一料源的品質風險擴大。"}},
+ {title:"財務要求下季存貨降 15 天",ctx:"公司現金循環偏長，財務希望下季存貨天數從 62 天降到 47 天。",
+  v:[["財務","存貨降 15 天，可以釋放約 2 億現金。"],["生管","全面降庫存，準交率一定掉。"],["業務","客戶最在意交期，不能出錯。"],["採購","有些料是配貨中，降了就買不回來。"]],
+  opts:[{t:"所有料號一律降 15 天",d:"簡單直接",s:-4,inv:-20000,risk:"關鍵料缺料，準交率下滑"},{t:"維持現狀",d:"避免影響交期",s:0,inv:0,risk:"現金壓力持續"},{t:"依料號分類調整",d:"穩定料改 JIT 大幅降，配貨中的關鍵料維持 JIC",s:-0.5,inv:-16000,risk:"需要逐料號設定參數"}],
+  ai:{k:2,why:"依料號分析，70% 的料是穩定、多來源的通用料，可改 JIT 降 20 天以上；配貨中的關鍵料只占 15%，維持安全庫存。整體可降約 12 天、釋放約 1.6 億，準交率影響在 0.5 個百分點內。"}},
+];
+let S={i:0,picks:[]};
+const wan=n=>{const a=Math.abs(n),sg=n<0?"−":"";return a>=10000?sg+(a/10000).toLocaleString("zh-TW",{maximumFractionDigits:2})+" 億":sg+Math.round(a).toLocaleString("zh-TW")+" 萬"};
+function tot(list){return list.reduce((a,r)=>({s:a.s+r.s,inv:a.inv+r.inv}),{s:0,inv:0})}
+function render(){
+  const me=tot(S.picks.map((p,i)=>AG[i].opts[p])),ai=tot(S.picks.map((p,i)=>AG[i].opts[AG[i].ai.k]));
+  $("weeks").innerHTML=AG.map((a,i)=>`<span class="${i<S.picks.length?"done":i===S.i?"on":""}">議題 ${i+1}</span>`).join("");
+  const card=(t,r,cls)=>`<div class="${cls}"><span class="label">${t}</span><dl><dt>準交率變化</dt><dd>${r.s>0?"+":""}${r.s} 個百分點</dd><dt>存貨變化</dt><dd>${wan(r.inv)}</dd></dl></div>`;
+  $("score").innerHTML=card("你的決定",me,"")+card("依 AI 會前建議",ai,"ag");
+  if(S.i>=AG.length){$("event").innerHTML=`<h2>月會結束</h2><p>你的決定：準交率 ${me.s>0?"+":""}${me.s} 個百分點，存貨 ${wan(me.inv)}。依 AI 建議：準交率 ${ai.s} 個百分點，存貨 ${wan(ai.inv)}。</p><p class="note">AI 的建議不一定是最保守或最積極的選項，而是把客戶歷史、供應商數據與料號特性放在一起看的結果。S&amp;OP 的價值，在於讓四個部門依同一份數字取捨，而不是比誰說話大聲。</p><button class="btn ghost" id="again" type="button">重新開一次會</button>`;return}
+  const a=AG[S.i],picked=S.picks.length>S.i;
+  $("event").innerHTML=`<span class="label">議題 ${S.i+1}</span><h2>${a.title}</h2><p class="what">${a.ctx}</p>
+   <div class="voices">${a.v.map(v=>`<div><b>${v[0]}</b>${v[1]}</div>`).join("")}</div>
+   <div class="opts">${a.opts.map((o,k)=>`<button type="button" data-opt="${k}" ${picked?"disabled":""} class="${picked&&S.picks[S.i]===k?"pick":""}"><b>${o.t}</b><small>${o.d}</small></button>`).join("")}</div>
+   ${picked?(()=>{const o=a.opts[S.picks[S.i]],x=a.opts[a.ai.k];const ch=r=>`<div class="chips"><span class="chip ${r.s<-2?"c-bad":r.s<0?"c-warn":"c-ok"}">準交率 ${r.s>0?"+":""}${r.s} 個百分點</span><span class="chip ${r.inv>=10000?"c-bad":r.inv>0?"c-warn":"c-ok"}">存貨 ${wan(r.inv)}</span></div>`;
+     return `<div class="res"><div class="r-me"><b>你的決定：${o.t}</b>${ch(o)}<p class="note" style="margin-top:4px">風險：${o.risk}</p></div><div class="r-ag"><b>AI 會前建議：${x.t}</b><p style="margin-top:4px;font-size:.9rem">${a.ai.why}</p>${ch(x)}</div></div>
+     <button class="btn" id="next" type="button">${S.i===AG.length-1?"看月會總結":"下一個議題"}</button>`})():""}`;
+}
+document.addEventListener("click",e=>{
+  const o=e.target.closest("[data-opt]");if(o&&S.picks.length===S.i){S.picks.push(+o.dataset.opt);render();return}
+  if(e.target.id==="next"){S.i++;render();return}
+  if(e.target.id==="again"){S={i:0,picks:[]};render()}
+});
+render();
+
+/* 真 AI：拜訪紀錄 */
+const samp=window.claude?.use?window.claude.use("sample").catch(()=>null):Promise.resolve(null);
+samp.then(s=>{if(!s){$("vHint").textContent="本版未提供即時 AI。";$("vBtn").disabled=true}});
+const L=x=>Array.isArray(x)?x:[];
+$("vBtn").addEventListener("click",async()=>{
+  const s=await samp,btn=$("vBtn"),out=$("vOut"),txt=$("vTxt").value.trim().slice(0,5000);
+  if(!s||!txt)return;btn.disabled=true;out.innerHTML='<p class="note">AI 整理中，約需 30–60 秒……</p>';
+  const prompt=`你是電子製造公司的客戶情報 agent。請把下面的業務拜訪紀錄整理成可以更新到 CRM 的結構化情報，並列出內部各部門應啟動的配合。只依紀錄內容判斷，不要捏造；推測的部分要標明「推測」。用繁體中文（台灣用語），精簡。
+
+拜訪紀錄：
+${txt}
+
+只回覆一個 JSON 物件：
+{"summary":"一句話重點（40 字內）","signals":[{"type":"需求變化|規格變更|客戶供應鏈|商務條件|關係與風險","content":"內容，40 字內","impact":"高|中|低"}],"actions":[{"dept":"生管|採購|研發|品保|財務|業務","action":"具體行動，30 字內","when":"時間點"}],"risks":["需要注意的風險，最多 3 項"],"next_visit":["下次拜訪要追問的問題，最多 3 項"]}`;
+  try{const d=await s.json(prompt);
+    const lv={"高":"p-bad","中":"p-warn","低":"p-ok"};
+    out.innerHTML=`<h3 style="margin-top:4px">${esc(d.summary)}</h3>
+     <div class="tablebox" style="background:var(--panel);border-radius:6px;margin-top:8px"><table style="min-width:520px"><thead><tr><th>類型</th><th>情報</th><th>影響</th></tr></thead><tbody>${L(d.signals).map(x=>`<tr><td>${esc(x.type)}</td><td style="white-space:normal">${esc(x.content)}</td><td><span class="pill ${lv[x.impact]||"p-warn"}">${esc(x.impact)}</span></td></tr>`).join("")}</tbody></table></div>
+     <div class="tablebox" style="background:var(--panel);border-radius:6px;margin-top:8px"><table style="min-width:520px"><thead><tr><th>部門</th><th>要做的事</th><th>時間點</th></tr></thead><tbody>${L(d.actions).map(x=>`<tr><td><b>${esc(x.dept)}</b></td><td style="white-space:normal">${esc(x.action)}</td><td>${esc(x.when)}</td></tr>`).join("")}</tbody></table></div>
+     <div class="res" style="margin-top:8px"><div class="r-me" style="background:var(--panel)"><b>風險</b><ul style="margin:4px 0 0;padding-left:1.1em">${L(d.risks).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div><div class="r-me" style="background:var(--panel)"><b>下次拜訪要追問</b><ul style="margin:4px 0 0;padding-left:1.1em">${L(d.next_visit).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></div>`;
+  }catch(e){const HIDE=["not_granted","sampling_disabled","not_declared","capability_disabled","capability_removed"];out.innerHTML=`<p class="note">${HIDE.includes(e.code)?"目前無法使用 AI（本版未提供即時 AI）。":e.code==="rate_limited"?"使用次數暫時達上限，請稍後再試。":e.code==="cancelled"?"":"這次沒有取得完整結果，請再按一次。"}</p>`}
+  finally{btn.disabled=false}
+});
+</script>
+
+</body>
+</html>
