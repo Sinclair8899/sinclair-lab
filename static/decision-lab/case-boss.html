@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="robots" content="noindex">
+<meta name="robots" content="noindex, nofollow">
 <style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>3 分鐘當老闆</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+TC:wght@700&display=swap">
@@ -118,7 +118,7 @@ details>div{margin-top:12px;display:flex;flex-direction:column;gap:10px}
 .cons{padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:6px 20px}
 .cons label{display:flex;gap:8px;align-items:baseline;font-size:.92rem}
 .cons .thr{grid-column:1/-1;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.work{display:grid;grid-template-columns:1.1fr 1fr;gap:12px;align-items:start}
+.work{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:12px;align-items:start}.work>div{min-width:0}.lg code{overflow-wrap:anywhere}
 .log{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;max-height:520px;overflow:auto;min-width:0}
 .lg{display:grid;grid-template-columns:52px 1fr;gap:8px;font-size:.86rem;padding:4px 0;border-bottom:1px dashed var(--line)}
 .lg:last-child{border-bottom:0}
@@ -141,7 +141,7 @@ details>div{margin-top:12px;display:flex;flex-direction:column;gap:10px}
 .spin{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--ai);animation:pulse 1s infinite alternate;margin-right:6px}
 @keyframes pulse{from{opacity:.3}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){.spin{animation:none}}
-@media (max-width:820px){.kpis{grid-template-columns:1fr 1fr}.work,.cons{grid-template-columns:1fr}.tasks div{grid-template-columns:1fr}}
+@media (max-width:820px){.kpis{grid-template-columns:1fr 1fr}.work,.cons{grid-template-columns:minmax(0,1fr)}.tasks div{grid-template-columns:1fr}}
 .cashwrap{display:grid;grid-template-columns:1.2fr 1fr;gap:12px;align-items:start}
 .chart{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
 .chart svg{width:100%;height:auto;display:block}
@@ -150,6 +150,9 @@ details>div{margin-top:12px;display:flex;flex-direction:column;gap:10px}
 .brk table{min-width:0}
 .brk td{white-space:normal}
 .two2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.consalert{margin-top:10px;border:1px solid var(--line);border-left:4px solid var(--warn);background:var(--panel);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}.consalert ul{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:4px}
+.gatebox{border:1px solid var(--line);border-left:4px solid var(--ai);background:var(--panel);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.real{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:10px}.real>div{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}.real b{font-size:.95rem}
 .box{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
 .box ul{margin:0;padding-left:1.1em;font-size:.88rem}
 .grp{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:6px}
@@ -213,7 +216,7 @@ details>div{margin-top:12px;display:flex;flex-direction:column;gap:10px}
 </style>
 </head>
 <body>
-<div style="background:#fbefd9;color:#6b4407;font:14px/1.5 system-ui,sans-serif;padding:8px max(16px,env(safe-area-inset-left,0px));text-align:center">網站版・測試版 2026-10-20：「規則試算」依公式即時計算；「情境示範」為預設結果或重播；標示「本版未提供即時 AI」的區塊需要連接 AI 模型，網站版不開放操作。</div>
+<div style="background:#fbefd9;color:#6b4407;font:14px/1.5 system-ui,sans-serif;padding:8px max(16px,env(safe-area-inset-left,0px));text-align:center">網站版・測試版 2026-10-21：「規則試算」依公式即時計算；「情境示範」為預設結果或重播；標示「本版未提供即時 AI」的區塊需要連接 AI 模型，網站版不開放操作。</div>
 
 <div class="wrap">
   <header>
@@ -240,6 +243,7 @@ details>div{margin-top:12px;display:flex;flex-direction:column;gap:10px}
       <label for="c4"><input type="checkbox" id="c4"> 偏好：未取得客戶承諾，不備長交期料</label>
       <div class="thr"><label for="thr">單筆超過多少金額須由你核准</label><input id="thr" type="range" min="100" max="1000" step="100" value="300"><b class="num" id="thrv"></b></div>
     </div>
+    <div id="consAlert" aria-live="polite"></div>
   </section>
 
   <section class="step" id="stepAI" aria-label="交給 AI agents">
@@ -284,6 +288,19 @@ details>div{margin-top:12px;display:flex;flex-direction:column;gap:10px}
     <div id="debrief"></div>
   </section>
 
+  <section class="step" id="realSec" aria-label="用在自己公司">
+    <div class="hd"><span class="n">↳</span><h2>如果要用在自己公司，從一個事件開始</h2></div>
+    <p class="note">這個案例的資料是虛構的，而且已經替你整理好。實際導入時，不必一開始就整合所有系統。比較穩的做法是：挑一個最近真的發生、牽動多個部門的經營事件，用各部門現有的匯出資料走一遍，再決定哪些地方值得串接。</p>
+    <div class="real">
+      <div><b>1　決策事件</b><span class="note">選一件真實發生的事，例如客戶延後拉貨又要求延長帳期。先講清楚要回答什麼問題，以及用什麼標準判斷好壞，例如 13 週最低現金、信用曝險。</span></div>
+      <div><b>2　資料來源</b><span class="note">這個決定需要哪些依據：採購單與取消條款、合約、應收與信用額度、庫存、現金預測。各來自哪個系統或報表、多久更新一次。</span></div>
+      <div><b>3　確認責任</b><span class="note">每一項依據由誰確認正確；資料彼此矛盾時，由誰決定以哪一份為準。</span></div>
+      <div><b>4　授權界線</b><span class="note">哪些金額以下、哪些類型的行動可以先做；哪些對外承諾一定要由人核准；約束改變時，已核准的事如何重新確認。</span></div>
+      <div><b>5　決策紀錄</b><span class="note">每次核准留下當時的依據、數字、條件與核准人，事後才能追蹤結果、檢討判斷。</span></div>
+    </div>
+    <p class="note">先用 Excel 或系統匯出的資料完成一次，通常就能看出問題出在資料、流程，還是判斷規則；這時再決定需要哪些系統串接，以及 AI agents 適合放在哪一段。人負責判斷、承諾與核准；AI 負責查證、提醒與追蹤。</p>
+  </section>
+
   <section class="panel contactbox" id="contactSec" aria-label="與你的公司對照">
     <h2>這個案例，最接近你公司的哪一段？</h2>
     <div style="display:flex;flex-direction:column;gap:8px"><h3>你的公司接到這樣的信，現在通常怎麼處理？</h3>
@@ -298,7 +315,7 @@ details>div{margin-top:12px;display:flex;flex-direction:column;gap:10px}
       <div class="bar2"><a class="btn" href="mailto:research@sinclairhuang.org?subject=%E8%B7%A8%E9%83%A8%E9%96%80%E7%B6%93%E7%87%9F%E6%B1%BA%E7%AD%96%E8%A8%8E%E8%AB%96">寄信討論</a><b class="mono" id="mail2" style="font-size:1.05rem">research@sinclairhuang.org</b><button class="btn ghost" id="copyMail" type="button">複製信箱</button><a class="btn ghost" href="https://sinclairhuang.org/advisory/" target="_blank" rel="noopener">了解顧問合作</a></div><p class="note">若按鈕沒有開啟郵件程式，請複製信箱後自行寄信，主旨可寫「跨部門經營決策討論」。</p>
     </div>
     <div class="bar2"><a class="btn ghost" href="index.html">先看其他案例與研究</a><a class="btn ghost" href="https://lab.sinclairhuang.org" target="_blank" rel="noopener">lab.sinclairhuang.org</a></div>
-    <p class="note">初步討論通常聚焦三件事：找出流程中最值得先改善的一個環節；分清楚是資料、流程，還是 AI 能力的問題；討論一個小範圍驗證的做法。不必先提供機密資料，也不是正式診斷。</p>
+    <p class="note">初步交流會從一個實際事件出發，辨識所需的資料、核准責任，以及可以驗證的改善範圍。不必先提供機密資料；這不是正式診斷，也不是系統導入的報價。</p>
   </section>
 
   <section class="step" id="methodSec" aria-label="方法與假設">
@@ -467,7 +484,7 @@ function renderGuide(E,now,none){
   const G=g=>{const its=ST.acts.filter(a=>a.group===g);if(!its.length)return"";const ok=its.filter(a=>["approved","done","partial","awaiting"].includes(a.status)).length,no=its.filter(a=>a.status==="denied").length,pe=its.filter(a=>["pending","stale"].includes(a.status)).length;return `<li>${GNAME[g][0]}：${its.length} 項${pe?`，<b style="color:var(--warn)">待決 ${pe}</b>`:""}${ok?`，採行 ${ok}`:""}${no?`，否決 ${no}`:""}</li>`};
   $("guide").innerHTML=`<span class="label">流程指引</span>
    <div class="gst done"><b>① 狀況發生</b><ul><li>客戶 Y 延後 40% 拉貨</li><li>帳期要求 60 → 90 天</li><li>評估第二家組裝廠</li></ul></div>
-   <div class="gst ${started?(decided?"done":"on"):"on"}"><b>② 選擇行動方案</b>${started?`<ul>${["supply","prod","cust"].map(G).join("")}</ul>`:'<span class="s">按「開始」，AI 查證後提出三組方案</span>'}</div>
+   <div class="gst ${started?(decided?"done":"on"):"on"}"><b>② 選擇行動方案</b>${started&&GATE?'<span class="s">AI 已提出方案；看完工作紀錄後，按「看完了，進入決策」</span>':started?`<ul>${["supply","prod","cust"].map(G).join("")}</ul>`:'<span class="s">按「開始」，AI 查證後提出三組方案</span>'}</div>
    <div class="gst ${exec?"done":decided?"on":""}"><b>③ 結果</b>
     <div class="gr"><span>13 週最低現金</span><span class="num">${wan(now.cash)}</span></div><div class="gr"><span class="s">相對事件後未處理</span>${arrow(now.cash-none.cash,1)}</div>
     <div class="gr"><span>CCC</span><span class="num">${now.ccc.toFixed(0)} 天</span></div><div class="gr"><span class="s">相對事件後未處理</span>${arrow(now.ccc-none.ccc,-1)}</div>
@@ -638,19 +655,31 @@ function execute({id}){
 function addTask({dept,title,due}){const t={dept:String(dept||"").slice(0,10),title:String(title||"").slice(0,80),due:String(due||"").slice(0,20)};ST.tasks.push(t);log("k",`${esc(t.dept)}：${esc(t.title)}（${esc(t.due)}）`);renderTasks();return{ok:true}}
 function snap(){const m=metrics(effects(ST.acts,ST.signed),"now");return{ccc_days:+m.ccc.toFixed(1),dio_days:+m.dio.toFixed(1),dso_days:+m.dso.toFixed(1),cash_13w_min:Math.round(m.cash),cash_min_week:m.minWk,cash_safety_level:B.safe,customer_Y_credit_exposure:Math.round(m.expo),credit_limit:AR.credit_limit,open_items:getOpenItems()}}
 /* 約束變更：重新檢查尚未執行的行動 */
-function onConsChange(){
-  readCons();
+function onConsChange(src){
+  readCons();const ch=[];
   ST.acts.forEach(a=>{
     if(!["pending","approved","stale"].includes(a.status))return;
+    const t0=a.title,s0=a.status;
     const h=hardCheck(a.type,a.target);
-    if(h){a.status="denied";a.decided=a.decided||"rule";log("f",`「${esc(a.title)}」${esc(h)}，已自動否決`);return}
+    if(h){a.status="denied";a.decided=a.decided||"rule";log("f",`「${esc(a.title)}」${esc(h)}，已自動否決`);ch.push({t:t0,why:h,next:"已自動否決，不會執行；若之後放寬約束，需要按「重新開始」讓 AI 重新提案"});return}
     const au=authorize(a.type,a.target);
-    const changed=au.need!==a.need||JSON.stringify(au.params)!==JSON.stringify(a.params);
-    if(a.status==="pending"){if(changed)applyAuth(a,au);return}
-    if(a.status==="approved"&&changed){a.status="stale";log("f",`約束已變更，「${esc(a.title)}」需要重新核准`);return}
-    if(a.status==="stale"&&!changed){a.status="approved";a.conV=CON.v;log("x",`約束回到原核准條件，「${esc(a.title)}」恢復為可執行`)}
+    const needCh=au.need!==a.need,parCh=JSON.stringify(au.params)!==JSON.stringify(a.params),changed=needCh||parCh;
+    const why=[needCh?(au.need?`核准門檻改為 ${wan(CON.thr)}，這項現在需要由你核准`:`核准門檻改為 ${wan(CON.thr)}，這項已在 AI 授權範圍內`):"",
+      parCh&&a.type==="pull_in_other_customer"?(au.params.ot?"允許加班，可轉移全部追加產能":"不准加班，只能轉移約三分之二的追加產能"):parCh?"方案內容依新約束調整":""].filter(Boolean).join("；");
+    if(s0==="pending"){if(changed){applyAuth(a,au);ch.push({t:t0,why:why+(a.title!==t0?`；方案改為「${a.title}」`:""),next:"仍待你決定，預估效果已更新"})}return}
+    if(s0==="approved"&&changed){a.status="stale";log("f",`約束已變更，「${esc(a.title)}」需要重新核准`);ch.push({t:t0,why,next:"原本的核准已失效，目前不計入效果；請在第 3 步重新核准或否決",re:1});return}
+    if(s0==="stale"&&!changed){a.status="approved";a.conV=CON.v;log("x",`約束回到原核准條件，「${esc(a.title)}」恢復為可執行`);ch.push({t:t0,why:"約束回到你核准時的條件",next:"恢復為可執行，不必重新核准"})}
   });
-  render();
+  showConsAlert(ch,src);render();
+}
+function showConsAlert(ch,src){
+  const el=$("consAlert");if(!ST.acts.length){el.innerHTML="";return}
+  const ex=ST.acts.filter(a=>["done","partial","awaiting","failed"].includes(a.status)).length,pref=src==="c3"||src==="c4";
+  el.innerHTML=`<div class="consalert" role="status"><b>${ch.length?`這次變更影響 ${ch.length} 項提案`:"這次變更沒有影響任何現有提案"}</b>
+   ${ch.length?`<ul>${ch.map(c=>`<li><b>${esc(c.t)}</b><br><span class="note">原因：${esc(c.why)}。下一步：${esc(c.next)}。</span></li>`).join("")}</ul>`:""}
+   ${pref?'<p class="note">偏好不會改變已提出的方案，只影響 AI 下一次提案的方向；若要依新偏好重新提案，請按第 3 步的「重新開始」。</p>':""}
+   ${ex?`<p class="note">已經執行的 ${ex} 項不受這次變更影響，也不會自動撤回；若要改變，需要另外與供應商或客戶協商，提出新的行動。</p>`:""}
+   ${ch.some(c=>c.re)?'<button type="button" class="btn ghost" id="toApps">前往重新核准</button>':""}</div>`;
 }
 function decide(a,ok){
   if(ok)applyAuth(a,authorize(a.type,a.target));
@@ -662,6 +691,7 @@ const STL={pending:["p-warn","待核准"],approved:["p-ok","可執行"],denied:[
 function renderApps(){
   const list=ST.acts;
   if(!list.length){$("apps").innerHTML='<p class="note">尚無提案。</p>';}
+  else if(GATE)$("apps").innerHTML=`<div class="gatebox"><b>${busy?"AI agents 正在查證並提出方案……":`AI agents 已提出 ${list.length} 項行動，分成三組。`}</b><p class="note">做決定之前，建議先看完工作紀錄：查了哪些資料、發現哪些衝突、為什麼這樣提案。紀錄會完整保留，看完再往下走。</p><button type="button" class="btn" id="gateGo" ${busy?"disabled":""}>看完了，進入決策</button></div>`;
   else $("apps").innerHTML=["supply","prod","cust"].map(g=>{const its=list.filter(a=>a.group===g);if(!its.length)return"";
     const pend=its.filter(a=>a.status==="pending"||a.status==="stale"),cash=its.filter(a=>a.status!=="denied").reduce((s,a)=>s+(a.est?.cash13_min||0),0);
     return `<div class="grp ${pend.length?"need":""}"><div class="row"><b>${GNAME[g][0]}：${GNAME[g][1]}</b><span class="note">${its.length} 項・待你決定 ${pend.length} 項</span></div>
@@ -717,7 +747,7 @@ const EXEC={name:"execute_action",description:"執行一個已核准或授權內
 const TASK={name:"create_task",description:"建立追蹤任務給某部門。",inputSchema:{type:"object",properties:{dept:{type:"string",description:"業務、採購、生管、財務、法務擇一"},title:{type:"string"},due:{type:"string",description:"例如：本週五、第 6 週"}},required:["dept","title","due"]},execute:i=>addTask(i)};
 const DASH=READ.find(t=>t.name==="get_dashboard");
 /* ===== 流程 ===== */
-let SAMPLE=null,CAN=false;
+let SAMPLE=null,CAN=false,GATE=false;
 const sp=window.claude?.use?window.claude.use("sample").catch(()=>null):Promise.resolve(null);
 sp.then(async s=>{SAMPLE=s;if(s){const l=await s.limits().catch(()=>null);CAN=!!l?.tools}$("modeTxt").textContent=CAN?"將由 Claude 即時操作，每個階段約 1–2 分鐘；第一次會詢問是否同意使用你的 Claude 帳號。":"網站版：播放預先錄製的情境示範（同一套工具與規則引擎，依約束切換少數分支）。"});
 const ROLE=()=>`你是電子製造公司的一組 AI agents（業務情報、採購、生管、信用、財務），由同一個模型分飾，協助老闆處理一個跨部門事件。用繁體中文（台灣用語）。金額單位為新台幣萬元。
@@ -725,7 +755,7 @@ const ROLE=()=>`你是電子製造公司的一組 AI agents（業務情報、採
 老闆約束：${CON.noOT?"硬性－不准加班；":""}${CON.top3?"硬性－不得損害前三大客戶關係；":""}${CON.cash?"偏好－現金優先於毛利；":""}${CON.noLong?"偏好－未取得客戶承諾不備長交期料；":""}單筆達 ${CON.thr} 萬須老闆核准。`;
 function lock(v){busy=v;renderApps();render2Guide()}
 async function phase1(){
-  if(busy)return;readCons();reset();$("log").dataset.started="";["sum1","sum2","result","debrief"].forEach(k=>$(k).innerHTML="");renderTasks();render();
+  if(busy)return;readCons();reset();GATE=true;$("consAlert").innerHTML="";$("log").dataset.started="";["sum1","sum2","result","debrief"].forEach(k=>$(k).innerHTML="");renderTasks();render();
   lock(true);log("n",'<span class="spin"></span>AI agents 開始查證……');
   try{
     if(!CAN){await demo1();return}
@@ -736,7 +766,7 @@ async function phase1(){
 2. 找出部門之間的衝突，對每個建議行動呼叫 propose_action（可同時呼叫多個）。可延後的採購單逐張提出；付款條件只提一個方案。工具回傳錯誤時，依錯誤訊息修正。
 3. 不要執行任何行動。
 最後只回覆 JSON：{"summary":"一句話判斷（50 字內）","findings":["查證發現，最多 5 項"],"conflicts":["部門衝突，最多 3 項"],"uncertain":["需要人確認的事，最多 3 項"]}`;
-    const d=await SAMPLE.json(prompt,{tools:[...READ,PROPOSE]});showSum("sum1","AI 的查證結果",d);log("n","查證與提案完成，請在右側做三組決定。");
+    const d=await SAMPLE.json(prompt,{tools:[...READ,PROPOSE]});showSum("sum1","AI 的查證結果",d);log("n","查證與提案完成。看完以上紀錄後，按「看完了，進入決策」做三組決定。");
   }catch(e){aiErr(e)}finally{lock(false);$("run1").textContent="重新開始"}
 }
 async function phase2(){
@@ -780,7 +810,7 @@ async function demo1(){
   tryP({type:"reply_terms",target:tgt,title:"付款條件："+TERMS[tgt].slice(0,14),rationale:why});await wait(200);
   const n=metrics(NONE,"none");
   showSum("sum1","示範：AI 的查證結果",{summary:"客戶延後與延長帳期同時發生；若照單全收，13 週現金跌破安全水位、信用曝險超過額度。",findings:["3 張採購單不可取消，共 3,910 萬","合約第 7 條：客戶須承擔依預測採購的專用料",`事件發生、尚未處理時，13 週最低現金約 ${wan(n.cash)}`,"客戶 X 的追加需求可吸收不可取消的 SoC"],conflicts:["業務想保住客戶 Y，財務擔心現金與信用曝險","採購想延後進料，但 DRAM 延後可能失去配貨"],uncertain:["客戶 Y 是延後還是可能轉單到第二家組裝廠","第 10 週後的拉貨時間未確認"]});
-  log("n","查證與提案完成，請在右側做三組決定。");
+  log("n","查證與提案完成。看完以上紀錄後，按「看完了，進入決策」做三組決定。");
 }
 async function demo2(){
   for(const a of ST.acts.filter(x=>x.status==="approved")){execute({id:a.id});await wait(300)}
@@ -806,6 +836,8 @@ document.addEventListener("click",async e=>{
   if(e.target.id==="copySum"){const t=$("mySum").value;try{await navigator.clipboard.writeText(t);e.target.textContent="已複製"}catch(_){$("mySum").select();e.target.textContent="已選取，請按複製"}}
   if(e.target.id==="regenSum"){mySum(true)}
   if(e.target.id==="copyMail"){try{await navigator.clipboard.writeText("research@sinclairhuang.org");e.target.textContent="已複製"}catch(_){const r=document.createRange();r.selectNodeContents($("mail2"));const sel=getSelection();sel.removeAllRanges();sel.addRange(r);e.target.textContent="已選取，請按複製"}}
+  if(e.target.id==="gateGo"&&!busy){GATE=false;render();$("apps").scrollIntoView({behavior:RM?"auto":"smooth",block:"start"});return}
+  if(e.target.id==="toApps"){$("stepAI").scrollIntoView({behavior:RM?"auto":"smooth",block:"start"});return}
   if(e.target.id==="go"){$("stepAI").scrollIntoView({behavior:RM?"auto":"smooth",block:"start"});if(!busy&&!ST.acts.length)phase1()}
   if(e.target.id==="toMethod"){$("methodDet").open=true;$("methodSec").scrollIntoView({behavior:RM?"auto":"smooth",block:"start"})}
 });
@@ -814,7 +846,7 @@ document.addEventListener("input",e=>{if(e.target.id==="mySum"){SUMEDIT=true;$("
 $("prac").innerHTML=PRAC.map(p=>`<button type="button" role="radio" aria-checked="false" data-prac="${p[0]}">${p[1]}</button>`).join("");
 document.addEventListener("click",e=>{const b=e.target.closest("[data-prac]");if(!b)return;document.querySelectorAll("[data-prac]").forEach(x=>x.setAttribute("aria-checked",x===b?"true":"false"));PSEL=b.dataset.prac;$("pracOut").textContent=PRAC.find(p=>p[0]===PSEL)[2];$("pracOut").classList.remove("note");mySum()});
 $("run1").addEventListener("click",phase1);$("run2").addEventListener("click",phase2);
-document.addEventListener("change",e=>{if(e.target.closest("#cons"))onConsChange()});
+document.addEventListener("change",e=>{if(e.target.closest("#cons"))onConsChange(e.target.id)});
 document.addEventListener("input",e=>{if(e.target.id==="thr"){$("thrv").textContent=wan(+e.target.value)}});
 $("mail").textContent=MAIL;readCons();reset();render();
 </script>
