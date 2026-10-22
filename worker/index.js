@@ -5,8 +5,8 @@
 //   GET  /api/stats?key=…     private usage dashboard (key = STATS_KEY secret)
 // Everything else falls through to the static site.
 
-const DEFAULT_MODEL = "@cf/google/gemma-4-26b-a4b-it";
-const FALLBACK_MODEL = "@cf/mistralai/mistral-small-3.1-24b-instruct";
+const DEFAULT_MODEL = "@cf/mistralai/mistral-small-3.1-24b-instruct";
+const FALLBACK_MODEL = "@cf/google/gemma-4-26b-a4b-it";
 const BOT_RE = /bot|crawl|spider|slurp|preview|facebookexternalhit|lighthouse|headless/i;
 const PAGES = new Set(["index", "case-boss", "ap", "mrp", "sourcing", "production", "ar", "sop", "cash-cycle-lab"]);
 const EVENTS = new Set(["view", "scenario", "lever", "lens", "ai_run", "ai_ok", "ai_fail", "copy_email", "module_click"]);
