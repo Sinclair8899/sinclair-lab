@@ -21,9 +21,8 @@ AI_MODEL = "@cf/mistralai/mistral-small-3.1-24b-instruct"
 AI_DAILY_CAP = "300"
 AI_PER_VISITOR_10MIN = "5"
 
-# Usage statistics (D1). Create a database named "lab-stats" in the Cloudflare
-# dashboard (Storage & Databases → D1), paste its ID below, then remove the "#".
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "lab-stats"
-# database_id = "PASTE-DATABASE-ID-HERE"
+# Usage statistics (D1 database "lab-stats"); tables are created automatically on first use.
+[[d1_databases]]
+binding = "DB"
+database_name = "lab-stats"
+database_id = "c499ee8e-1de7-4dcd-a4d6-6999da06d131"
