@@ -126,15 +126,15 @@ a{color:var(--accent)}
   <header>
     <span class="eyebrow">AI LAB · 經營決策實驗・訂單、庫存與現金（測試版）</span>
     <h1>把經營判斷，變成可以持續運作的 AI 工作流程</h1>
-    <p class="lead">從現金循環、採購、生產到應收管理，透過互動案例，探索 AI 如何協助企業查證資訊、協調例外與推進執行，以及哪些決定仍應由人負責。每個案例都來自電子、化工與生技產業 30 年的實務，你可以只玩 3 分鐘，也可以展開看判斷依據、假設與導入條件。</p>
+    <p class="lead">從現金循環、採購、生產到應收管理，透過互動案例，探索 AI 如何協助企業查證資訊、協調例外與推進執行，以及哪些決定仍應由人負責。每個案例都以作者約 30 年電子、化工與生技產業的實務經驗為基礎，你可以只玩 3 分鐘，也可以展開看判斷依據、假設與導入條件。</p>
   </header>
 
   <a class="cta" href="case-boss.html"><span class="eyebrow">開始一個經營情境 · 3 分鐘</span><b>當一次老闆：大客戶突然延後拉貨，還要求延長帳期</b><span class="note">看 AI agents 自己查採購單、應收與合約，提出方案、等你核准、執行後依回饋調整，現金與天數即時變化 →</span></a>
 
-  <section aria-label="試算說明"><h2>先算一算：你的現金，卡在哪裡？</h2><p class="note" style="margin-top:4px;max-width:66ch">從付錢給供應商，到收回客戶的貨款，中間有多少天，公司的錢就被卡住多少天，這就是現金轉換循環（CCC）。輸入貴公司的數字，看出錢卡在存貨、應收還是應付。</p></section>
+  <section aria-label="試算說明"><h2>先算一算：你的現金，卡在哪裡？</h2><p class="note" style="margin-top:4px;max-width:66ch">從付錢給供應商，到收回客戶的貨款，中間有多少天，公司的錢就被卡住多少天，這就是現金轉換週期（CCC）。輸入貴公司的數字，看出錢卡在存貨、應收還是應付。</p></section>
 
   <section class="kpis" aria-label="結論">
-    <div class="panel kpi"><span class="label">現金轉換循環</span><span class="v" id="k1"></span><span class="h">CCC = 存貨天數 + 應收天數 − 應付天數</span></div>
+    <div class="panel kpi"><span class="label">現金轉換週期</span><span class="v" id="k1"></span><span class="h">現金轉換週期 = 存貨天數 + 應收天數 − 應付天數</span></div>
     <div class="panel kpi"><span class="label">被卡住的營運資金</span><span class="v" id="k2"></span><span class="h">存貨 + 應收 − 應付</span></div>
     <div class="panel kpi"><span class="label">每改善 1 天，約可釋放</span><span class="v" id="k3" style="font-size:1.05rem"></span><span class="h">應收以每日營收計；存貨與應付以每日成本計</span></div>
   </section>
@@ -176,7 +176,7 @@ a{color:var(--accent)}
     <div class="lrow"><label for="lInv">存貨少放幾天<span class="tag" style="background:var(--inv-soft);color:var(--inv)">MRP／庫存</span></label><input id="lInv" type="range" min="0" max="30" value="10"><span class="num" id="vInv"></span></div>
     <div class="lrow"><label for="lAr">應收早收幾天<span class="tag" style="background:var(--ar-soft);color:var(--ar)">AR</span></label><input id="lAr" type="range" min="0" max="30" value="7"><span class="num" id="vAr"></span></div>
     <div class="lrow"><label for="lAp">付款不再提早幾天（合約範圍內）<span class="tag" style="background:var(--accent-soft);color:var(--accent)">AP</span></label><input id="lAp" type="range" min="0" max="15" value="3"><span class="num" id="vAp"></span></div>
-    <p class="note" id="levNote">滑桿上限會隨你的數字調整：存貨與應收的改善不會超過目前天數；應付的改善只到合約付款天數為止。應付天數的改善，指的是準時付款而不提早、不付錯、不重複付，不是拖欠供應商。</p>
+    <p class="note" id="levNote">滑桿上限會隨你的數字調整：存貨與應收的改善不會超過目前天數；應付的改善只到合約付款天數為止（本頁應付天數以營業成本估算，與以進貨金額計的合約天數可能略有差距）。應付天數的改善，指的是準時付款而不提早、不付錯、不重複付，不是拖欠供應商。</p>
     <div class="release"><span>可釋放現金</span><span class="v" id="rel"></span><span>每年省下利息</span><span class="v" id="int"></span><span class="note" id="cccAfter"></span></div>
   </section>
 
@@ -192,10 +192,10 @@ a{color:var(--accent)}
   <section class="panel case" aria-label="案例">
     <div><span class="label">教學案例・全球最大 EMS 廠</span><div class="big">≈ 220 億</div><span class="note">每 1 天的營收規模</span></div>
     <div>
-      <h3>為什麼大型 EMS 廠把 CCC 當成核心功課</h3>
+      <h3>為什麼大型 EMS 廠把現金轉換週期當成核心功課</h3>
       <p style="margin-top:6px">鴻海 2025 年全年營收首度突破新台幣 8 兆元，換算每一天約 220 億元。依公開財報整理，2026 年第 2 季存貨約 49 天、應收約 45 天，光這兩段就是約 94 天的營業週期。毛利率只有個位數的產業，現金能不能轉得快，往往比多接一張訂單更重要。</p>
       <p style="margin-top:8px">規模放大了數字，但道理對每家公司都一樣。以貴公司目前的規模估算：<span id="perDay2"></span></p>
-      <p class="note" style="margin-top:6px">資料來源：營收引自<a href="https://statementdog.com/news/15479" target="_blank" rel="noopener">財報狗新聞（2026 年 1 月）</a>，一天的規模以全年營收 ÷ 365 估算；週轉天數引自<a href="https://statementdog.com/analysis/2317/turnover-days" target="_blank" rel="noopener">財報狗・鴻海（2317）營運週轉天數</a>，2026 年第 2 季單季數據：存貨週轉天數 48.96 天、應收帳款收現天數 45.45 天，兩者相加即營運週轉天數 94.41 天。計算公式以該網站定義為準；本頁計算機採用期末餘額換算，兩者口徑可能略有不同。查閱日期：2026-10-20。</p>
+      <p class="note" style="margin-top:6px">資料來源：營收引自<a href="https://statementdog.com/news/15479" target="_blank" rel="noopener">財報狗新聞（2026 年 1 月）</a>，一天的規模以全年營收 ÷ 365 估算；週轉天數引自<a href="https://statementdog.com/analysis/2317/turnover-days" target="_blank" rel="noopener">財報狗・鴻海（2317）營運週轉天數</a>，2026 年第 2 季單季數據：存貨週轉天數 48.96 天、應收帳款收現天數 45.45 天，兩者相加即營運週轉天數 94.41 天。計算公式以該網站定義為準；本頁計算機以你輸入的存貨、應收、應付餘額換算（建議使用平均餘額），一年以 365 天計，兩者口徑可能略有不同。查閱日期：2026-10-20。</p>
     </div>
   </section>
 
@@ -239,7 +239,7 @@ a{color:var(--accent)}
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
 const num=id=>Math.max(0,+$(id).value||0);
-const money=w=>w>=10000?(w/10000).toLocaleString("zh-TW",{maximumFractionDigits:2})+" 億":Math.round(w).toLocaleString("zh-TW")+" 萬";
+const money=w=>{const a=Math.abs(w),s=w<0?"−":"";return a>=10000?s+(a/10000).toLocaleString("zh-TW",{maximumFractionDigits:2})+" 億":s+Math.round(a).toLocaleString("zh-TW")+" 萬"};
 const IDS=["ind","rev","cogs","inv","ar","ap","terms","rate"];
 const key=()=>JSON.stringify(IDS.map(i=>$(i).value))+PAIN;
 function calc(){
@@ -259,15 +259,15 @@ function render(){
     ["lInv","lAr","lAp"].forEach(i=>$(i).disabled=true);["vInv","vAr","vAp","rel","int"].forEach(i=>$(i).textContent="—");$("cccAfter").textContent="";
     $("perDay2").textContent="請先填入年營收與年營業成本。";$("askAI").disabled=true;markStale();return}
   $("askAI").disabled=BUSY;
-  $("k1").textContent=c.ccc.toFixed(0)+" 天";
+  $("k1").textContent=c.ccc.toFixed(1)+" 天";
   $("k2").textContent="NT$ "+money(c.inv+c.ar-c.ap);
   $("k3").textContent=`應收 ${money(c.dayRev)}｜存貨或應付 ${money(c.dayCost)}`;
   $("perDay2").textContent=`應收提前一天，約釋放 NT$ ${money(c.dayRev)}；存貨少放一天，或在合約範圍內不提早付款一天，約釋放 NT$ ${money(c.dayCost)}。`;
   const span=Math.max(c.dio+c.dso,c.dpo,1)*1.05,pct=d=>Math.min(100,d/span*100);
-  Object.assign($("sInv").style,{left:"0%",width:pct(c.dio)+"%"});$("sInv").textContent=`存貨 ${c.dio.toFixed(0)} 天`;
-  Object.assign($("sAr").style,{left:pct(c.dio)+"%",width:pct(c.dso)+"%"});$("sAr").textContent=`應收 ${c.dso.toFixed(0)} 天`;
-  Object.assign($("sAp").style,{left:"0%",width:pct(Math.min(c.dpo,c.dio+c.dso))+"%"});$("sAp").textContent=`應付 ${c.dpo.toFixed(0)} 天`;
-  const cs=Math.max(0,c.ccc);Object.assign($("sCcc").style,{left:pct(Math.min(c.dpo,c.dio+c.dso))+"%",width:pct(cs)+"%"});$("sCcc").textContent=cs?`自己墊錢 ${c.ccc.toFixed(0)} 天`:"";
+  Object.assign($("sInv").style,{left:"0%",width:pct(c.dio)+"%"});$("sInv").textContent=`存貨 ${c.dio.toFixed(1)} 天`;
+  Object.assign($("sAr").style,{left:pct(c.dio)+"%",width:pct(c.dso)+"%"});$("sAr").textContent=`應收 ${c.dso.toFixed(1)} 天`;
+  Object.assign($("sAp").style,{left:"0%",width:pct(Math.min(c.dpo,c.dio+c.dso))+"%"});$("sAp").textContent=`應付 ${c.dpo.toFixed(1)} 天`;
+  const cs=Math.max(0,c.ccc);Object.assign($("sCcc").style,{left:pct(Math.min(c.dpo,c.dio+c.dso))+"%",width:pct(cs)+"%"});$("sCcc").textContent=cs?`自己墊錢 ${c.ccc.toFixed(1)} 天`:"";
   const step=niceStep(span/8);let ax="";for(let d=0,n=0;d<=span&&n<12;d+=step,n++)ax+=`<span>${Math.round(d).toLocaleString()}</span>`;$("axis").innerHTML=ax;
   const mx=Math.max(c.dio,c.dso,c.dpo,1);
   [["Inv",c.dio],["Ar",c.dso],["Ap",c.dpo]].forEach(([k,v])=>{$("b"+k).style.width=(v/mx*100)+"%";$("d"+k).textContent=v.toFixed(1)+" 天"});
@@ -278,7 +278,7 @@ function render(){
   $("vAp").textContent=room<1?"已達合約付款天數，沒有空間":`${lp} 天・${money(lp*c.dayCost)}`;
   const rel=li*c.dayCost+la*c.dayRev+lp*c.dayCost;
   $("rel").textContent="NT$ "+money(rel);$("int").textContent="NT$ "+money(rel*c.rate);
-  $("cccAfter").textContent=`CCC 從 ${c.ccc.toFixed(0)} 天降到 ${(c.ccc-li-la-lp).toFixed(0)} 天`;
+  $("cccAfter").textContent=`現金轉換週期從 ${c.ccc.toFixed(1)} 天${li+la+lp>0?"降到":"維持"} ${(c.ccc-li-la-lp).toFixed(1)} 天`;
   markStale();
 }
 /* 初步排查 */
@@ -317,10 +317,11 @@ $("askAI").addEventListener("click",async()=>{
 
 資料（新台幣萬元，存貨、應收、應付可能是期末餘額）：
 產業：${ind}；年營收 ${c.rev}；年營業成本 ${c.cogs}；存貨 ${c.inv}；應收帳款 ${c.ar}；應付帳款 ${c.ap}；供應商合約付款天數平均 ${c.terms}；資金成本年利率 ${(c.rate*100).toFixed(1)}%
-計算：存貨 ${c.dio.toFixed(1)} 天、應收 ${c.dso.toFixed(1)} 天、應付 ${c.dpo.toFixed(1)} 天、CCC ${c.ccc.toFixed(1)} 天；應收每提前一天約 ${Math.round(c.dayRev)} 萬元，存貨或應付每一天約 ${Math.round(c.dayCost)} 萬元。
+計算：存貨 ${c.dio.toFixed(1)} 天、應收 ${c.dso.toFixed(1)} 天、應付 ${c.dpo.toFixed(1)} 天、現金轉換週期 ${c.ccc.toFixed(1)} 天；應收每提前一天約 ${Math.round(c.dayRev)} 萬元，存貨或應付每一天約 ${Math.round(c.dayCost)} 萬元。
 企業主最困擾的是：${pain}
 
 要求：
+- 回覆中不要使用縮寫 CCC，一律寫「現金轉換週期」。
 - 不要依產業名稱判斷天數偏高或偏低，也不要引用產業平均數字。
 - 排序要考慮他的困擾與金額，不只看天數長短。
 - 應付的建議只能是付款紀律（不提早、不重複、不付錯、在合約範圍內），不可建議拖欠供應商。
