@@ -197,11 +197,11 @@ $("hz").innerHTML=HZ.map(h=>`<div><b>${h[0]}</b><span class="rng">${h[1]}</span>
 
 const EV=[
  {t:"10:00",title:"2 號線貼片機故障",what:"2 號線的貼片機停機，維修人員估計要 4 小時。線上有兩張今天要出貨的工單。",lag:"人工：你手上的是早上 8 點版的報表，要先打電話問清楚各線狀況，再重排。",
-  opts:[{t:"等修好再說",d:"不動其他產線",l:2,c:0,i:0},{t:"移到 3 號線",d:"換線要 2 小時，3 號線原本的工單會延後",l:1,c:8,i:0},{t:"晚班加班補回",d:"今天照原計畫出貨",l:0,c:25,i:0}],
-  ag:{who:"產線 agent",how:"從設備數據判斷維修約需 3.5 小時，只把今天要出貨的工單移到 3 號線，3 號線原本的低優先工單順延，並自動更新各訂單的完成時間。",l:0,c:6,i:0}},
+  opts:[{t:"等修好再說",d:"不動其他產線",l:2,c:0,i:0},{t:"移到 1 號線",d:"換線要 2 小時，1 號線原本的工單會延後",l:1,c:8,i:0},{t:"晚班加班補回",d:"今天照原計畫出貨",l:0,c:25,i:0}],
+  ag:{who:"產線 agent",how:"從設備數據判斷維修約需 3.5 小時，只把今天要出貨的工單移到 1 號線，1 號線原本的低優先工單順延，並自動更新各訂單的完成時間。",l:0,c:6,i:0}},
  {t:"11:30",title:"客戶急單：明天要 3,000 台",what:"重要客戶來電，明天要多出 3,000 台 A 機種，業務希望一小時內回覆。",lag:"人工：要先整理最新的產能與工單，至少半天才能回覆。",
   opts:[{t:"先答應客戶",d:"再想辦法擠產能",l:2,c:15,i:0,lost:0},{t:"婉拒",d:"保住既有訂單",l:0,c:0,i:0,lost:1},{t:"下班前回覆",d:"慢慢算清楚",l:0,c:0,i:0,lost:1}],
-  ag:{who:"排程 agent",how:"3 分鐘內算出可承諾方案：明天出 2,000 台、後天補 1,000 台，不影響其他訂單。業務當場回覆，客戶接受。",l:0,c:10,i:0,lost:0}},
+  ag:{who:"排程 agent",how:"3 分鐘內算出：不動其他訂單時，第 4 天前只能出 1,000 台；加上 1、2 號線加班與順延一張低優先工單，可在第 5 天出齊 3,000 台。業務當場回覆替代方案，客戶接受。",l:0,c:10,i:0,lost:0}},
  {t:"13:00",title:"電容下午才會到",what:"一顆電容的進料延到下午 4 點，原本 2 點要開工的工單會缺料。",lag:"人工：產線要開工時發料不出來，才知道缺料。",
   opts:[{t:"停線等料",d:"其他工單不動",l:1,c:12,i:0},{t:"先做其他工單",d:"換線，下週的成品提前做",l:0,c:6,i:40},{t:"拆單先做有料的部分",d:"缺料的板子之後再補件",l:0,c:4,i:0}],
   ag:{who:"物料 agent",how:"早上 9 點就從物流狀態預測進料會延誤，提前把有料的工單排到下午 2 點，缺料工單改到 4 點後開工。",l:0,c:0,i:0}},
@@ -281,7 +281,7 @@ $("ctpBtn").addEventListener("click",async()=>{
   const bad=[];if(!/^\d+$/.test(qtyS)||!(qty>0))bad.push("急單數量請填正整數（至少 1 台）");if(!/^\d+$/.test(dueS)||!(due>=1&&due<=7))bad.push("要求出貨日請填 1 到 7 的整數");
   if(bad.length){out.innerHTML=`<p class="note" style="color:var(--bad)">${bad.join("；")}。</p>`;return}
   const rule=ruleCTP(model,qty,due),s=await samp;
-  const verdict=rule.avail>=qty?"可以接":rule.avail>0?"只能接一部分":"無法如期";
+  const verdict=rule.avail>=qty?"可以接":rule.avail>0?"部分可接":"無法如期";
   const ruleHtml=`<p><b>${verdict}</b>：第 ${due} 天前可完成 ${rule.avail.toLocaleString()} 台（測試與出貨需 1 天）。</p><p class="note">${rule.plan.join("；")||"出貨日前沒有剩餘產能"}</p>`;
   if(!s){out.innerHTML=`<span class="chip c-warn">規則試算</span>${ruleHtml}`;return}
   btn.disabled=true;out.innerHTML='<p class="note">AI 試算中，約需 30–60 秒……</p>';

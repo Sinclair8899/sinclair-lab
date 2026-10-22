@@ -92,7 +92,7 @@ td.num,th.num{text-align:right;white-space:nowrap}
     <p class="lead">AI 伺服器帶動的搶料潮裡，關鍵晶片不是有錢就買得到：大廠先拿走產能，其他人要簽長約、付預付款排隊。採購真正長期的責任，是平時就養好多個合格料源，既不缺料、品質穩定，也能持續降本。這個模擬器讓你配置一顆關鍵料的料源組合，再用三種真實情境壓力測試。</p>
     <div class="opener">
       <div><b>3 分鐘</b><span>調整料源比例與合約條件，按下壓力測試</span></div>
-      <div><b>現金的代價</b><span>預付款與安全庫存都會卡住現金，影響應付與存貨天數</span></div>
+      <div><b>現金的代價</b><span>預付款與安全庫存都會卡住現金：預付款另列占用，安全庫存拉長存貨天數</span></div>
       <div><a href="index.html"><b>← 現金循環總覽</b></a><span>也可回到 <a href="mrp.html">MRP 動態物控</a></span></div>
     </div>
     <p class="note modeline" style="margin-top:12px;padding:8px 12px;border:1px dashed var(--line);border-radius:6px">本頁說明（網站版）：<b>情境示範</b>是依實務整理的預設結果或重播；<b>規則試算</b>是依公式即時計算；標示「本版未提供即時 AI」的區塊需要連接 AI 模型，網站版不開放操作。</p>
@@ -120,7 +120,7 @@ td.num,th.num{text-align:right;white-space:nowrap}
 
   <section class="sec" aria-label="壓力測試">
     <div><span class="label">壓力測試</span><h2>同一個組合，遇到三種真實情境</h2>
-    <p class="note" style="margin-top:4px">情境持續期間的缺口先由安全庫存吸收，不夠再向代理商買現貨（價格高 25%，有品質風險）；現貨也買不到時就停線。結果隨上方配置即時更新。</p></div>
+    <p class="note" style="margin-top:4px">情境持續期間的缺口先由安全庫存吸收，不夠再向代理商買現貨（價格高 25%，有品質風險，情境期間最多買到 60,000 顆）；現貨也買不到時就停線。結果隨上方配置即時更新。</p></div>
     <div class="panel tablebox"><table id="stress"></table></div>
   </section>
 
@@ -170,7 +170,8 @@ function model(){
   const usable=st.qc||st.c===0;
   const effA=usable?sh.a:sh.a+sh.c; // 未驗證 C 的量，暫由原廠 A 補位（成本與供應同一口徑）
   const srcs=[effA>=0.15,sh.b>=0.15,sh.c>=0.15&&st.qc].filter(Boolean).length;
-  const ssw=srcs>=3?3:srcs===2?4:6;
+  const maxSh=Math.max(effA,sh.b,(st.qc?sh.c:0));
+  const ssw=2+4*maxSh; // 最大單一來源占比越高，安全庫存越多：單一來源 100% → 6 週；50/50 → 4 週
   const spendY=NEED*12*price*FX/1e4; // 萬元
   const prepay=st.lta?0.2*6*NEED*effA*pa*FX/1e4:0;
   const ssCash=ssw/52*spendY;
@@ -178,7 +179,7 @@ function model(){
   return{sh,effA,pa,price,pricePot,usable,srcs,ssw,spendY,prepay,ssCash,qual,save:(4.00-price)*NEED*12*FX/1e4,pot:(price-pricePot)*NEED*12*FX/1e4};
 }
 function stress(m){
-  const ss=m.ssw*NEED/4.33,day=NEED/22,spotMax=60000,res=[];
+  const ss=m.ssw*NEED*12/52,day=NEED/22,spotMax=60000,res=[];
   const run=(name,desc,months,fill,extraPrice)=>{
     const supply=m.effA*fill.a+m.sh.b*fill.b+(m.usable?m.sh.c*fill.c:0);
     const gap=Math.max(0,months*NEED*(1-supply)),afterSS=Math.max(0,gap-ss),spot=Math.min(afterSS,spotMax),stop=(afterSS-spot)/day;
@@ -201,10 +202,10 @@ function render(){
     if(s.k==="c")ctrl=`<input type="range" id="rc" min="0" max="${s.max}" step="5" value="${st.c}" aria-label="新供應商 C 比例"><label class="tg" for="qc"><input type="checkbox" id="qc" ${st.qc?"checked":""}> 已投入驗證並取得客戶核可</label>`;
     const q=s.k==="c"?(st.qc?'<span class="tagq q-ok">已驗證</span>':'<span class="tagq q-no">未驗證</span>'):'<span class="tagq q-ok">已驗證</span>';
     return `<div class="srow" style="border-left:4px solid var(${s.color})"><div class="top"><b>${s.name} ${q}</b><span class="num">${share}%${s.k==="a"&&!m.usable?`＋補位 ${st.c}%`:s.k==="c"&&!m.usable?"（暫由 A 補位）":""}・USD ${(s.k==="a"?m.pa:s.price).toFixed(2)}</span></div><span class="note">${s.desc}</span>${ctrl}</div>`}).join("");
-  $("mix").innerHTML=[["a","--sa"],["b","--sb"],["c","--sc"]].map(([k,c])=>`<i style="width:${m.sh[k]*100}%;background:var(${c})"></i>`).join("");
+  $("mix").innerHTML=[["a","--sa"],["b","--sb"],["c","--sc"]].map(([k,c])=>`<i style="width:${m.sh[k]*100}%;background:${k==="c"&&!m.usable?"repeating-linear-gradient(45deg,var(--sa) 0 6px,var(--panel) 6px 9px)":`var(${c})`}"></i>`).join("");
   $("mets").innerHTML=[
     ["加權單價（目前可實現）","USD "+m.price.toFixed(3),`相較全買原廠 A：${m.save>=0?"每年省":"每年多花"} ${wan(Math.abs(m.save))}${m.pot>0?`；C 完成驗證後的潛在節省再多 ${wan(m.pot)}（未驗證前，C 的量由原廠 A 補位、以 A 價格計）`:""}`],
-    ["合格料源數",m.srcs+" 家",`建議安全庫存 ${m.ssw} 週`],
+    ["有效料源數（占比 ≥15%）",m.srcs+" 家",`建議安全庫存 ${m.ssw.toFixed(1)} 週（隨最大單一來源占比調整）；占比低於 15% 的已驗證來源不計入家數`],
     ["預付款占用現金","NT$ "+wan(m.prepay),st.lta?"長約預付：付款早於交貨，另列為預付款占用，不計入應付天數":"未簽長約"],
     ["安全庫存占用現金","NT$ "+wan(m.ssCash),"影響存貨天數"],
   ].map(x=>`<div class="met"><span class="label">${x[0]}</span><div class="v">${x[1]}</div><span class="h">${x[2]}</span></div>`).join("");
@@ -245,7 +246,7 @@ $("aiBtn").addEventListener("click",async()=>{
 
 料號：AI 伺服器電源控制晶片，每月需求 100,000 顆。
 配置：原廠 A ${Math.round(m.sh.a*100)}%（${st.lta?"已簽長約，價格降 3%，預付 6 個月用量 20%":"未簽長約"}）、原廠 B（已驗證第二來源，價高 6%）${Math.round(m.sh.b*100)}%、新供應商 C（價低 12%，${st.qc?"已完成驗證":"尚未驗證"}）${Math.round(m.sh.c*100)}%。
-加權單價 USD ${m.price.toFixed(3)}；合格料源 ${m.srcs} 家；安全庫存 ${m.ssw} 週；預付占用 NT$ ${Math.round(m.prepay)} 萬；安全庫存占用 NT$ ${Math.round(m.ssCash)} 萬。
+加權單價 USD ${m.price.toFixed(3)}；有效料源（占比 ≥15%）${m.srcs} 家；安全庫存 ${m.ssw.toFixed(1)} 週；預付占用 NT$ ${Math.round(m.prepay)} 萬；安全庫存占用 NT$ ${Math.round(m.ssCash)} 萬。
 壓力測試：${S.map(r=>`${r.name}：缺口 ${Math.round(r.gap)} 顆、停線 ${r.stop.toFixed(1)} 天、額外成本 ${Math.round(r.cost)} 萬元`).join("；")}。
 
 要求：同時兼顧供應安全、品質、成本與現金占用；不要捏造市場數據。
