@@ -11,6 +11,8 @@ ShowToc: false
 
 Most companies do not run out of cash because they are unprofitable. They run out because cash is tied up somewhere between the purchase order and the customer's payment: in receivables, in inventory, or in paying suppliers earlier than they need to. The **cash conversion cycle** (receivable days + inventory days − payable days) measures that gap. Every day of it is money the company must finance.
 
+The theory is settled. What is hard is applying it: customers, suppliers, competitors, growth, capital spending and financing all pull the numbers in different directions, and every fix moves the cost to someone else. This lab is about that practice, drawn from about 30 years of running operations and finance, and about how decisions should be made when those variables collide.
+
 This lab turns that idea into decisions you can make yourself. Each module starts from a realistic operating event, lets you choose, and shows what your choice does to cash, profit and relationships. Then it shows what an AI agent would have done with the same data, and where people still have to decide and take responsibility.
 
 **[Open the Cash Cycle Lab →](/decision-lab/)**
@@ -18,6 +20,8 @@ This lab turns that idea into decisions you can make yourself. Each module start
 ## 現金循環實驗室（中文說明）
 
 大多數公司缺錢，不是因為不賺錢，而是錢卡在下單到收款之間：卡在應收帳款、卡在存貨，或是比必要更早付給供應商。現金轉換週期（應收天數＋存貨天數−應付天數）衡量的就是這段時間，而每一天都要有人出錢支應。
+
+這套理論早已沒有爭議，難的是應用：客戶、供應商、競爭、成長、資本支出與融資，各自把數字往不同方向拉，每一種解法也都會把代價轉給某個人。這個實驗室談的就是這些實務心得，以及在這些變數交錯下，決策應該建立在什麼基礎上。
 
 這個實驗室把這個概念變成可以親手做的決定。每個模組都從一件真實常見的經營事件開始，讓你做選擇，再告訴你這個選擇對現金、獲利和上下游關係的影響，以及 AI agent 會怎麼處理同一批資料、哪些事情仍然要由人決定與承擔。
 
