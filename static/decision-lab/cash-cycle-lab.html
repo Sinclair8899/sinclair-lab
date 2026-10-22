@@ -245,7 +245,7 @@ footer{max-width:1120px;margin:20px auto 0;font-size:12px;color:var(--muted)}
     <a class="backlink" href="index.html">← 現金循環總覽</a>
     <div class="eyebrow">AI Lab · 現金循環系列 05 · 綜合診斷</div>
     <h1>現金卡在哪裡？<br>每一種解法，又是誰在付代價？</h1>
-    <p class="lede">先選一個情境。突發事件看 13 週現金能不能撐過去；結構診斷看 現金轉換週期（CCC）為什麼長、AI 時代的高成長為什麼「賺錢卻缺錢」，用五力、杜邦、財務結構與自由現金流四種角度拆解，並把每個改善動作的代價算出來。不需要登入或提供任何資料。</p>
+    <p class="lede">先選一個情境。突發事件看 13 週現金能不能撐過去；結構診斷看現金轉換週期（CCC）為什麼長、AI 時代的高成長為什麼「賺錢卻缺錢」，用五力、杜邦、財務結構與自由現金流四種角度拆解，並把每個改善動作的代價算出來。不需要登入或提供任何資料。</p>
   </header>
 
   <nav class="scbar" id="scbar" aria-label="選擇情境"></nav>
@@ -270,7 +270,7 @@ footer{max-width:1120px;margin:20px auto 0;font-size:12px;color:var(--muted)}
 
       <section class="panel" aria-labelledby="s-dec">
         <h2 id="s-dec">你的三個決定</h2>
-        <p class="sub">硬性約束：不得損害前三大客戶的關係。其他都可以取捨。</p>
+        <p class="sub">硬性約束：不能讓前三大客戶的關係變成「緊張」。其他都可以取捨。</p>
 
         <div class="decision" role="radiogroup" aria-labelledby="d1">
           <div class="dhead"><span class="k">決定 1</span><h3 id="d1">客戶要求的帳期</h3></div>
@@ -302,9 +302,9 @@ footer{max-width:1120px;margin:20px auto 0;font-size:12px;color:var(--muted)}
 
       <section class="panel compare" aria-labelledby="s-cmp">
         <h2 id="s-cmp">事後解析：這是較好的做法嗎？</h2>
-        <p class="sub" style="margin:0">規則引擎把 18 種組合全部算過一次，只保留不損害客戶 Y 關係的做法，再比較 13 週最低現金。</p>
+        <p class="sub" style="margin:0">規則引擎把 18 種組合全部算過一次，排除會讓客戶 Y 關係變成「緊張」的做法，再比較 13 週最低現金。</p>
         <div class="row" id="rowYou"><span class="who">你的做法</span><span class="what" id="youWhat"></span><span class="val" id="youVal"></span></div>
-        <div class="row best" id="rowBest"><span class="who">符合約束、最低現金最高</span><span class="what" id="bestWhat"></span><span class="val" id="bestVal"></span></div>
+        <div class="row best" id="rowBest"><span class="who">客戶關係未變緊張、最低現金最高</span><span class="what" id="bestWhat"></span><span class="val" id="bestVal"></span></div>
         <p class="note" id="bestNote"></p>
         <div class="btns">
           <button class="btn" id="applyBest" type="button">套用這個組合</button>
@@ -362,7 +362,7 @@ footer{max-width:1120px;margin:20px auto 0;font-size:12px;color:var(--muted)}
 
       <section class="panel" aria-labelledby="bLevH">
         <h2 id="bLevH">可以拉的槓桿</h2>
-        <p class="sub">每一個都能縮短 現金轉換週期（CCC）或改善獲利，但都有人付代價。標籤是「單獨採用這一項」的效果：釋放多少現金、每年稅前損益變多少，以及換算成資金成本後跟銀行利率比。</p>
+        <p class="sub">每一個都能縮短現金轉換週期（CCC）或改善獲利，但都有人付代價。標籤是「單獨採用這一項」的效果：釋放多少現金、每年稅前損益變多少，以及換算成資金成本後跟銀行利率比。</p>
         <div id="levers"></div>
         <div class="btns" style="margin-top:12px"><button class="btn ghost sm" id="bClear" type="button">全部取消</button></div>
       </section>
@@ -383,8 +383,8 @@ footer{max-width:1120px;margin:20px auto 0;font-size:12px;color:var(--muted)}
       <div class="pane" data-pane="ccc" role="tabpanel">
         <div class="legend">
           <span><s style="background:var(--warn)"></s>存貨天數 DIO</span>
-          <span><s style="background:var(--accent)"></s>收款天數 DSO</span>
-          <span><s style="background:var(--naive)"></s>付款天數 DPO</span>
+          <span><s style="background:var(--accent)"></s>應收天數 DSO</span>
+          <span><s style="background:var(--naive)"></s>應付天數 DPO</span>
         </div>
         <svg class="chart" id="cccChart" viewBox="0 0 640 250" role="img" aria-label="營業循環與現金循環天數比較"></svg>
         <div class="explain" id="cccText"></div>
@@ -408,7 +408,7 @@ footer{max-width:1120px;margin:20px auto 0;font-size:12px;color:var(--muted)}
       </div>
 
       <div class="pane" data-pane="struct" role="tabpanel" hidden>
-        <h3>財務結構：拉長的 現金轉換週期（CCC）由誰來出錢？</h3>
+        <h3>財務結構：拉長的現金轉換週期（CCC）由誰來出錢？</h3>
         <div class="ctl">
           <label for="bEq">現金增資 <output id="bEqOut" class="num">0</output> 萬</label>
           <input type="range" id="bEq" min="0" max="10000" step="500" value="0" style="accent-color:var(--accent)">
@@ -472,15 +472,15 @@ footer{max-width:1120px;margin:20px auto 0;font-size:12px;color:var(--muted)}
 
   <section class="panel mods" style="margin-top:16px" aria-labelledby="s-mods">
     <h2 id="s-mods">現金循環系列：各模組</h2>
-    <p class="sub" style="margin:0">現金轉換週期＝收款天數＋存貨天數−付款天數。每個模組處理其中一段，點選會在新分頁開啟。</p>
+    <p class="sub" style="margin:0">現金轉換週期＝應收天數＋存貨天數−應付天數。每個模組處理其中一段，點選會在新分頁開啟。</p>
     <div class="modgrid">
       <a class="mod" href="case-boss.html" ><span class="code">主案例</span><b>3 分鐘當老闆</b><span class="seg2">客戶延後拉貨、要求延長帳期</span></a>
       <a class="mod" href="sop.html" ><span class="code">04 · 源頭</span><b>供需情報與 S&amp;OP</b><span class="seg2">需求預測，決定後面所有天數</span></a>
       <a class="mod" href="mrp.html" ><span class="code">02 · 存貨天數</span><b>MRP 動態物控</b><span class="seg2">該買多少、何時買</span></a>
       <a class="mod" href="sourcing.html" ><span class="code">02B · 存貨天數</span><b>關鍵料源策略</b><span class="seg2">寡占料、交期與安全庫存</span></a>
       <a class="mod" href="production.html" ><span class="code">02C · 存貨天數</span><b>生管指揮中心</b><span class="seg2">在製品與排程</span></a>
-      <a class="mod" href="ap.html" ><span class="code">01 · 付款天數</span><b>AP 四單比對</b><span class="seg2">付款前的核對與時點</span></a>
-      <a class="mod" href="ar.html" ><span class="code">03 · 收款天數</span><b>AR 應收收款</b><span class="seg2">授信、催收與入帳</span></a>
+      <a class="mod" href="ap.html" ><span class="code">01 · 應付天數</span><b>AP 四單比對</b><span class="seg2">付款前的核對與時點</span></a>
+      <a class="mod" href="ar.html" ><span class="code">03 · 應收天數</span><b>AR 應收收款</b><span class="seg2">授信、催收與入帳</span></a>
       <a class="mod" href="index.html" ><span class="code">總覽</span><b>現金循環實驗室</b><span class="seg2">系列首頁與案例說明</span></a>
     </div>
   </section>
@@ -493,7 +493,7 @@ footer{max-width:1120px;margin:20px auto 0;font-size:12px;color:var(--muted)}
   </section>
 </div>
 
-<footer>本頁情境與數字為虛構示範，模型為簡化版：營業費用視為固定，進貨以銷貨成本估算，稅率 20%，期末固定資產＝期初＋資本支出−折舊，權益不含當年保留盈餘；「未來 5 年」假設原有業務營業利益持平、成長率逐年遞減三成、折舊維持不變、不配息，各槓桿的流失率與加價幅度為依五力分數調整的教學假設。所有數字由頁面規則計算，不由 AI 決定。與作者任職或服務的任何公司無關。</footer>
+<footer>本頁情境與數字為虛構示範，模型為簡化版：營業費用視為固定，進貨以銷貨成本估算，稅率 20%，期末固定資產＝期初＋資本支出−折舊，權益不含當年保留盈餘；「未來 5 年」假設原有業務營業利益持平、成長率逐年遞減三成、原有折舊不變、新增資本支出的折舊以 8 年攤提並從營業利益中扣除、不配息，各槓桿的流失率與加價幅度為依五力分數調整的教學假設。所有數字由頁面規則計算，不由 AI 決定。與作者任職或服務的任何公司無關。</footer>
 
 <div class="cashbar" id="barA" aria-live="polite">
   <div><div class="l">13 週最低現金</div><div class="v" id="barVal">0</div></div>
@@ -510,9 +510,10 @@ footer{max-width:1120px;margin:20px auto 0;font-size:12px;color:var(--muted)}
 /* ============ 共用 ============ */
 document.getElementById("nojs").hidden=true;
 const $=id=>document.getElementById(id);
-const fmt=n=>(n<0?"−":"")+Math.abs(Math.round(n)).toLocaleString("en-US");
-const sfmt=n=>(n>0?"+":"")+fmt(n);
-const pct=(x,d=1)=>(x<0?"−":"")+Math.abs(x*100).toFixed(d)+"%";
+const fmt=n=>{const r=Math.round(n);return (r<0?"−":"")+Math.abs(r).toLocaleString("en-US");};
+const sfmt=n=>(Math.round(n)>0?"+":"")+fmt(n);
+const fx=(x,d)=>{const s=Math.abs(x).toFixed(d);return (x<0&&+s!==0?"−":"")+s;};
+const pct=(x,d=1)=>fx(x*100,d)+"%";
 const NS="http://www.w3.org/2000/svg";
 function mk(svg,t,a){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);svg.appendChild(e);return e;}
 function txt(svg,x,y,s,a={}){const e=mk(svg,"text",Object.assign({x,y,"font-size":11,fill:"var(--muted)"},a));e.textContent=s;return e;}
@@ -655,7 +656,7 @@ function update(){
   drawChart(cur,naive,base,p);
 
   const b=best(p.delay);
-  $("youWhat").textContent=desc(p)+(rel(p)>=2?"（違反約束）":"");
+  $("youWhat").textContent=desc(p)+(rel(p)>=2?"（客戶關係緊張，違反約束）":"");
   $("youVal").textContent=fmt(m.v); $("youVal").style.color=`var(--${st})`;
   $("bestWhat").textContent=desc(b.p);
   $("bestVal").textContent=fmt(b.m); $("bestVal").style.color=`var(--${status(b.m)[1]})`;
@@ -663,6 +664,10 @@ function update(){
   let n = same ? "你的做法就是規則引擎在約束內找到的最好組合。" : "";
   if(b.m<SAFE) n+=(n?" ":"")+`即使是最好的組合，最低現金仍${b.m<0?"轉負":"低於安全水位"}，代表這個事件光靠營運調整不夠，還需要財務面的準備。`;
   if(sup(b.p)===2) n+=(n?" ":"")+"這個組合的代價是供應商關係緊張，客戶恢復拉貨時可能缺料，要先和業務確認恢復時間。";
+  const outside=q=>q.mat==="defer"?500*Math.max(0,(q.delay+5+6-1)-WEEKS):0;
+  const ob=outside(b.p), oy=outside(p);
+  if(ob>0) n+=(n?" ":"")+`注意：這個組合延後的料款中，有 ${fmt(ob)} 萬落在第 ${WEEKS} 週之後，不在 13 週比較範圍內，最低現金看起來會比較好。`;
+  else if(oy>0) n+=(n?" ":"")+`你的做法延後的料款中，有 ${fmt(oy)} 萬落在第 ${WEEKS} 週之後，不在 13 週比較範圍內。`;
   n+=" 參考方案只比較預設選項，真實評估還要加入客戶重要性與談判回饋。";
   $("bestNote").textContent=n;
   $("applyBest").disabled=same; $("applyBest").style.opacity=same?.5:1;
@@ -676,7 +681,7 @@ update();
 
 /* ============ B：結構診斷 ============ */
 (function(){
-const TAX=0.2;
+const TAX=0.2, BOND_SPREAD=.008;
 const FN={buyer:"買方議價力",supplier:"供應商議價力",subst:"替代品威脅",entrant:"新進者威脅",rivalry:"同業競爭強度"};
 const SC={
   elec:{chip:"電子零組件廠",tag:"被大客戶壓帳期",
@@ -725,7 +730,7 @@ function model(S,f,act,fin){
   if(act.has("price")){price+=.02; revLoss+=.03*mult(cp);}
   if(act.has("tighten")){DSO-=15; revLoss+=.015*mult(cp);}
   if(act.has("disc")){discShare=.4; DSO=DSO*(1-discShare)+10*discShare;}
-  if(act.has("lean")){DIO-=15; revLoss+=.01*mult(rv);}
+  if(act.has("lean")){DIO-=Math.min(15,DIO); revLoss+=.01*mult(rv);}
   if(act.has("vmi")){DIO*=.65; cogsAdj+=.008*mult(sp);}
   if(act.has("extend")){DPO+=20; cogsAdj+=.006*mult(sp);}
   if(act.has("supdisc")){DPO=10; cogsAdj-=.015;}
@@ -750,7 +755,7 @@ function model(S,f,act,fin){
   let debt=TA-AP-adv-E;
   if(debt<0){cash-=debt; TA-=debt; debt=0;}
   const longD=debt*fin.long, shortD=debt-longD;
-  const interest=shortD*S.rate+longD*(S.rate+.006);
+  const interest=shortD*S.rate+longD*(S.rate+BOND_SPREAD);
   const NI=(EBIT-interest-finFee)*(1-TAX);
   const NWC=AR+Inv-AP-adv;
   // 去年（基準天數、營收 R/(1+g)）
@@ -764,7 +769,7 @@ function model(S,f,act,fin){
   const effDSO=DSO*(factored?0.7:1);
   return {adv,FA,capex:S.capex,DSO,DIO,DPO,effDSO,CCC:effDSO+DIO-DPO,trueCCC:DSO+DIO-DPO,rev,cogs,opex,EBIT,AR,Inv,AP,factored,finFee,cash,TA,E,debt,shortD,longD,interest,NI,NWC,
     margin:NI/rev,turn:rev/TA,lev:TA/E,ROE:NI/E,ROA:NI/TA,
-    debtRatio:(AP+adv+debt)/TA,current:(cash+AR+Inv)/(AP+adv+shortD),cover:EBIT/Math.max(1,interest+finFee),
+    debtRatio:(AP+adv+debt)/TA,current:(cash+AR+Inv)/(AP+adv+shortD),cover:EBIT/Math.max(1,interest+finFee),noInt:interest+finFee<1,
     NOPAT,dAR,dInv,dAP,FCF,growthNWC:(sAR+sInv-sAP)-(pAR+pInv-pAP),daysNWC:NWC-(sAR+sInv-sAP),revLoss,cogsAdj,disc,price};
 }
 
@@ -780,6 +785,7 @@ function single(k){
   let label,cls;
   if(cashRel>1&&op<0){const r=-op/cashRel; label=`資金成本 ${pct(r)}`; cls=r<rate?"good":r<rate*2?"warn":"bad";}
   else if(cashRel>1&&op>=0){label="釋放現金且不傷損益"; cls="good";}
+  else if(cashRel<-1&&op>0&&k==="price"){label="改善損益（營收變大，應收跟著增加）"; cls="good";}
   else if(cashRel<-1&&op>0){const r=op/-cashRel; label=`投入報酬 ${pct(r)}`; cls=r>rate?"good":"bad";}
   else if(cashRel<-1&&op<=0){label="又吃現金又傷損益"; cls="bad";}
   else {label=op>=0?"只改善損益":"只增加成本"; cls=op>=0?"good":"bad";}
@@ -790,13 +796,13 @@ function risk(k){
   switch(k){
     case "tighten": return cp>=3.8?"客戶議價力高：可能被要求降價、減量或轉單。模型估計流失 "+pct(.015*mult(cp))+" 營收，真實情況可能更多。":"客戶議價力不高，帳期長多半是內部授信與催收紀律問題，可以直接談。";
     case "disc": return "折扣給的是所有提早付款的客戶，包括原本就準時付款的；換算年化成本常高於銀行借款。";
-    case "factor": return "帳面 現金轉換週期（CCC）變短、資產變少、周轉率變好，但本質是融資，費率高於借款；揭露時可能被解讀為資金吃緊。";
+    case "factor": return "帳面現金轉換週期（CCC）變短、資產變少、周轉率變好，但本質是融資，費率高於借款；揭露時可能被解讀為資金吃緊。";
     case "price": return cp>=3.8?"買方強勢、同業競爭激烈，漲價可能換來轉單，流失量估計 "+pct(.03*mult(cp))+"。":"具議價空間，可搭配規格、交期或服務調整一起談。";
     case "lean": return rv>=4?"同業競爭激烈，缺貨一次就可能被替換；估計營收流失 "+pct(.01*mult(rv))+"。":"需要搭配需求預測與供應商交期改善，否則缺貨風險上升。";
     case "vmi": return sp>=4?"供應商強勢，寄售多半要用較高單價或長約交換，估計進價 +"+pct(.008*mult(sp))+"。":"需要足夠採購量；料權、盤點與呆料責任要在合約寫清楚。";
     case "extend": return sp>=4?"原料寡占：拉長帳期可能換來漲價（估計 +"+pct(.006*mult(sp))+"）、配額縮減或斷料。":"可以談，但對中小供應商是把資金壓力往上游推，長期關係與供貨優先順序會受影響。";
     case "prepay": return cp>=3.8?"買方強勢：客戶通常不願預付，硬要會換來讓價（估計 "+pct(.005*mult(cp),2)+"）或轉單。":"供不應求時，客戶願意用預付款或長約換取產能保證，是上游關鍵零組件廠常見做法；代價是交貨承諾、違約責任，以及景氣反轉時客戶要求退款或延後。";
-    case "supdisc": return "毛利與淨利率變好，杜邦看起來更漂亮；但 現金轉換週期（CCC）拉長、要多準備營運資金。只有在資金成本低於折扣年化報酬時才划算。";
+    case "supdisc": return "毛利與淨利率變好，杜邦看起來更漂亮；但現金轉換週期（CCC）拉長、要多準備營運資金。只有在資金成本低於折扣年化報酬時才划算。";
   }
 }
 
@@ -844,14 +850,14 @@ function renderB(){
   const s=S(), base=model(s,st.f,new Set(),NOFIN), cur=model(s,st.f,st.act,st.fin);
   $("bTitle").textContent=`${s.chip}：${s.tag}`;
   $("bStory").innerHTML=`<b>情境</b>${s.story}`;
-  const g=(v,b,inv)=>{const d=v-b; if(Math.abs(d)<1) return `<em>同業 ${b}</em>`; const bad=inv?d<0:d>0; return `<em class="${bad?"bad":"good"}">同業 ${b}（${d>0?"+":"−"}${Math.abs(Math.round(d))}）</em>`;};
+  const g=(v,b,inv)=>{const d=v-b; if(Math.abs(d)<1) return `<em>同業 ${fmt(b)}</em>`; const bad=inv?d<0:d>0; return `<em class="${bad?"bad":"good"}">同業 ${fmt(b)}（${sfmt(d)}）</em>`;};
   $("bFacts").innerHTML=
-    `<div class="fact"><span>收款天數 DSO</span><strong>${s.DSO}</strong>${g(s.DSO,s.bDSO)}</div>`+
+    `<div class="fact"><span>應收天數 DSO</span><strong>${s.DSO}</strong>${g(s.DSO,s.bDSO)}</div>`+
     `<div class="fact"><span>存貨天數 DIO</span><strong>${s.DIO}</strong>${g(s.DIO,s.bDIO)}</div>`+
-    `<div class="fact"><span>付款天數 DPO</span><strong>${s.DPO}</strong>${g(s.DPO,s.bDPO,true)}</div>`+
-    `<div class="fact"><span>現金轉換週期（CCC）</span><strong>${s.DSO+s.DIO-s.DPO}</strong>${g(s.DSO+s.DIO-s.DPO,s.bDSO+s.bDIO-s.bDPO)}</div>`+
+    `<div class="fact"><span>應付天數 DPO</span><strong>${s.DPO}</strong>${g(s.DPO,s.bDPO,true)}</div>`+
+    `<div class="fact"><span>現金轉換週期（CCC）</span><strong>${fmt(s.DSO+s.DIO-s.DPO)}</strong>${g(s.DSO+s.DIO-s.DPO,s.bDSO+s.bDIO-s.bDPO)}</div>`+
     `<div class="fact"><span>年營收</span><strong>${fmt(s.R)}</strong><em>年成長 ${pct(s.g,0)}</em></div>`+
-    `<div class="fact"><span>週期每 1 天</span><strong>${fmt(s.R/365)}</strong><em>萬元營運資金</em></div>`;
+    `<div class="fact"><span>應收每 1 天（營收÷365）</span><strong>${fmt(s.R/365)}</strong><em>存貨／應付每 1 天（成本÷365）${fmt(s.R*s.cogs/365)} 萬</em></div>`;
   $("bGOut").textContent=pct(s.g,0);
   $("bCxOut").textContent=fmt(s.capex)+" 萬";
   $("bCxNote").textContent=`資本支出是折舊的 ${(s.capex/s.DA).toFixed(1)} 倍${s.capex>s.DA*1.5?"，處於擴產期：固定資產增加 "+fmt(s.capex-s.DA)+" 萬，需要新的資金來源。":"。"}`;
@@ -864,13 +870,13 @@ function renderB(){
 
   const rel=base.NWC-cur.NWC;
   $("bMeters").innerHTML=
-    meter("現金轉換週期（帳面）",base.CCC,cur.CCC,v=>Math.round(v)+" 天","down")+
+    meter("現金轉換週期（帳面）",base.CCC,cur.CCC,v=>fmt(v)+" 天","down")+
     `<div class="meter"><span>一次性釋放現金</span><strong class="num ${rel>0?"good":rel<0?"bad":""}">${sfmt(rel)}</strong><em>營運資金減少</em></div>`+
     meter("年度淨利",base.NI,cur.NI,fmt,"up")+
     meter("ROE",base.ROE,cur.ROE,v=>pct(v),"up")+
     meter("自由現金流",base.FCF,cur.FCF,fmt,"up")+
     meter("負債比",base.debtRatio,cur.debtRatio,v=>pct(v,0),"down");
-  $("barBccc").textContent=Math.round(cur.CCC);
+  $("barBccc").textContent=fmt(cur.CCC);
   $("barBcash").textContent=sfmt(rel);
 
   drawCCC(s,base,cur); renderFive(s); renderDupont(base,cur); renderStruct(s,base,cur); drawFCF(s,base,cur); renderFuture(s,cur); renderCosts(s,base,cur);
@@ -880,40 +886,50 @@ function diagnose(s){
   const gaps=[["DSO",s.DSO-s.bDSO],["DIO",s.DIO-s.bDIO],["DPO",s.bDPO-s.DPO]].sort((a,b)=>b[1]-a[1]);
   const [k,d]=gaps[0]; const f=st.f;
   const ccc0=s.DSO+s.DIO-s.DPO;
-  if(ccc0<0) return `現金轉換週期（CCC）是負的（${ccc0} 天）：客戶先付錢、供應商後收錢，營運資金本身就是資金來源，<b>現金轉換週期（CCC）完全不是問題</b>。壓力在資本支出：是折舊的 ${(s.capex/s.DA).toFixed(1)} 倍，營業現金流再強也被吃掉。請看自由現金流與「未來 5 年」分頁。`;
-  if(d<=5) return `三個天數都和同業差不多，現金轉換週期（CCC）不是主要問題。壓力來自<b>成長（${pct(s.g,0)}）與擴產（資本支出是折舊的 ${(s.capex/s.DA).toFixed(1)} 倍）</b>：帳面獲利高，但現金先被新產能和營運資金吃掉。請看自由現金流與財務結構分頁。`;
+  const m0=model(s,f,new Set(),NOFIN), cxr=(s.capex/s.DA).toFixed(1), expand=s.capex>s.DA*1.5;
+  const fcfTail=m0.FCF<0
+    ?`自由現金流為負 ${fmt(-m0.FCF)} 萬${expand?`，主因是擴產：資本支出是折舊的 ${cxr} 倍`:""}。請看自由現金流與「未來 5 年」分頁。`
+    :`在目前的成長率（${pct(s.g,0)}）與資本支出（折舊的 ${cxr} 倍）下，自由現金流為正（${fmt(m0.FCF)} 萬），現金壓力不大；試著提高成長率或資本支出，看缺口怎麼出現。`;
+  if(ccc0<0){
+    const head=`現金轉換週期（CCC）是負的（${fmt(ccc0)} 天）：客戶付款比供應商收款早。`;
+    const nwcTxt=m0.NWC<0
+      ?`以金額計算，營運資金是 ${fmt(m0.NWC)} 萬，<b>營運資金本身就是資金來源</b>，現金轉換週期（CCC）不是問題。`
+      :`但應收天數以營收計、存貨與應付天數以成本計，換成金額後營運資金仍佔用約 <b>${fmt(m0.NWC)}</b> 萬，只是佔用得不多，現金轉換週期（CCC）不是主要問題。`;
+    return head+nwcTxt+fcfTail;
+  }
+  if(d<=5) return `三個天數都和同業差不多，現金轉換週期（CCC）不是主要問題。`+fcfTail;
   const cash=fmt(d*s.R/365*(k==="DSO"?1:s.cogs));
-  if(k==="DSO") return `最大缺口在<b>收款</b>：比同業多 ${d} 天，約卡住 ${cash} 萬。對應五力：買方議價力 ${f.buyer}/5。`+(custP(f)>=3.8?"客戶集中、你可被替代，硬縮帳期代價高；先看折扣或保理的資金成本，長期要分散客戶或提高不可替代性。":"買方不算強勢，多半是授信與催收紀律問題，可以直接處理。");
+  if(k==="DSO") return `最大缺口在<b>應收</b>：比同業多 ${d} 天，約卡住 ${cash} 萬。對應五力：買方議價力 ${f.buyer}/5。`+(custP(f)>=3.8?"客戶集中、你可被替代，硬縮帳期代價高；先看折扣或保理的資金成本，長期要分散客戶或提高不可替代性。":"買方不算強勢，多半是授信與催收紀律問題，可以直接處理。");
   if(k==="DIO") return `最大缺口在<b>存貨</b>：比同業多 ${d} 天，約卡住 ${cash} 萬。對應五力：供應商議價力 ${f.supplier}/5。`+(f.supplier>=4?"關鍵原料或零組件掌握在少數供應商手上，交期長或價格上漲，被迫超前備料、囤安全庫存；降庫存的真正解法在供應端（第二供應來源、寄售、長約），單純砍庫存會增加斷料風險。":"供應端不算強勢，多半是預測與料號管理問題，屬內部可控。");
-  return `最大缺口在<b>付款</b>：比同業少 ${d} 天，約多墊 ${cash} 萬。對應五力：供應商議價力 ${f.supplier}/5。`+(f.supplier>=4?"供應商強勢，拉長帳期可能換來漲價或斷料，先算清楚代價。":"供應商不算強勢，有談判空間；但要注意對中小供應商的影響。");
+  return `最大缺口在<b>應付</b>：比同業少 ${d} 天，約多墊 ${cash} 萬。對應五力：供應商議價力 ${f.supplier}/5。`+(f.supplier>=4?"供應商強勢，拉長帳期可能換來漲價或斷料，先算清楚代價。":"供應商不算強勢，有談判空間；但要注意對中小供應商的影響。");
 }
 
 /* 現金轉換週期（CCC）圖 */
 function drawCCC(s,base,cur){
   const svg=$("cccChart"); svg.innerHTML="";
   const rows=[["調整前",base.DSO,base.DIO,base.DPO,base.CCC],["調整後",cur.effDSO,cur.DIO,cur.DPO,cur.CCC],["同業",s.bDSO,s.bDIO,s.bDPO,s.bDSO+s.bDIO-s.bDPO]];
-  const max=Math.max(...rows.map(r=>r[1]+r[2]),...rows.map(r=>r[3]))+20;
+  const max=Math.max(...rows.map(r=>Math.max(0,r[1])+Math.max(0,r[2])),...rows.map(r=>r[3]))+20;
   const X0=64,X1=620,px=(X1-X0)/max, x=d=>X0+d*px;
   for(let d=0;d<=max;d+=30){mk(svg,"line",{x1:x(d),x2:x(d),y1:8,y2:232,stroke:"var(--line)"});txt(svg,x(d),246,d,{"text-anchor":"middle","font-family":"IBM Plex Mono,monospace"});}
   rows.forEach((r,i)=>{
     const y=14+i*74;
     txt(svg,X0-8,y+20,r[0],{"text-anchor":"end",fill:"var(--ink)","font-size":12,"font-weight":700});
-    mk(svg,"rect",{x:x(0),y,width:r[2]*px,height:20,rx:4,fill:"var(--warn)",opacity:i===2?.45:.9});
-    mk(svg,"rect",{x:x(r[2]),y,width:r[1]*px,height:20,rx:4,fill:"var(--accent)",opacity:i===2?.45:.9});
-    txt(svg,x(r[2]/2),y+14,Math.round(r[2]),{"text-anchor":"middle",fill:"#fff","font-family":"IBM Plex Mono,monospace"});
-    txt(svg,x(r[2]+r[1]/2),y+14,Math.round(r[1]),{"text-anchor":"middle",fill:"#fff","font-family":"IBM Plex Mono,monospace"});
-    mk(svg,"rect",{x:x(0),y:y+24,width:r[3]*px,height:8,rx:3,fill:"var(--naive)"});
-    txt(svg,x(r[3])+4,y+32,"付款 "+Math.round(r[3]),{"font-family":"IBM Plex Mono,monospace"});
+    mk(svg,"rect",{x:x(0),y,width:Math.max(0,r[2]*px),height:20,rx:4,fill:"var(--warn)",opacity:i===2?.45:.9});
+    mk(svg,"rect",{x:x(Math.max(0,r[2])),y,width:Math.max(0,r[1]*px),height:20,rx:4,fill:"var(--accent)",opacity:i===2?.45:.9});
+    txt(svg,x(r[2]/2),y+14,fmt(r[2]),{"text-anchor":"middle",fill:"#fff","font-family":"IBM Plex Mono,monospace"});
+    txt(svg,x(r[2]+r[1]/2),y+14,fmt(r[1]),{"text-anchor":"middle",fill:"#fff","font-family":"IBM Plex Mono,monospace"});
+    mk(svg,"rect",{x:x(0),y:y+24,width:Math.max(0,r[3]*px),height:8,rx:3,fill:"var(--naive)"});
+    txt(svg,x(r[3])+4,y+32,"應付 "+fmt(r[3]),{"font-family":"IBM Plex Mono,monospace"});
     const y2=y+46;
     mk(svg,"line",{x1:x(r[3]),x2:x(r[1]+r[2]),y1:y2,y2:y2,stroke:i===1?"var(--accent)":"var(--ink)","stroke-width":2});
     mk(svg,"line",{x1:x(r[3]),x2:x(r[3]),y1:y2-5,y2:y2+5,stroke:"var(--ink)"});
     mk(svg,"line",{x1:x(r[1]+r[2]),x2:x(r[1]+r[2]),y1:y2-5,y2:y2+5,stroke:"var(--ink)"});
-    txt(svg,(x(r[3])+x(r[1]+r[2]))/2,y2-4,"現金轉換週期 "+Math.round(r[4])+" 天",{"text-anchor":"middle",fill:"var(--ink)","font-weight":700,"font-size":12});
+    txt(svg,(x(r[3])+x(r[1]+r[2]))/2,y2-4,"現金轉換週期 "+fmt(r[4])+" 天",{"text-anchor":"middle",fill:"var(--ink)","font-weight":700,"font-size":12});
   });
-  let h=`<ul><li>現金轉換週期（CCC）＝收款天數＋存貨天數−付款天數。這家公司 現金轉換週期（CCC）每縮短 1 天，約釋放 <b>${fmt(s.R/365)}</b> 萬元（以營收估）。</li>`;
-  h+=`<li>改善 現金轉換週期（CCC）釋放的是<b>一次性</b>現金；之後每年的好處只有省下的利息。所以要看「換到這筆錢，每年付出多少」，也就是左邊標籤的資金成本。</li>`;
-  if(cur.factored) h+=`<li class="warn">有用保理：帳面 現金轉換週期（CCC）${Math.round(cur.CCC)} 天，但客戶實際付款還是 ${Math.round(cur.trueCCC+0)} 天的循環。問題沒被解決，只是換一個人墊錢。</li>`;
-  if(st.act.has("supdisc")) h+=`<li>拿提早付款折扣讓付款天數降到 10 天，現金轉換週期（CCC）反而變長，這是刻意用現金換毛利。</li>`;
+  let h=`<ul><li>現金轉換週期（CCC）＝應收天數＋存貨天數−應付天數。這家公司應收天數每縮短 1 天，約釋放 <b>${fmt(s.R/365)}</b> 萬元（營收÷365）；存貨天數每縮短 1 天或應付天數每延長 1 天，約釋放 <b>${fmt(s.R*s.cogs/365)}</b> 萬元（銷貨成本÷365）。</li>`;
+  h+=`<li>改善現金轉換週期（CCC）釋放的是<b>一次性</b>現金；之後每年的好處只有省下的利息。所以要看「換到這筆錢，每年付出多少」，也就是左邊標籤的資金成本。</li>`;
+  if(cur.factored) h+=`<li class="warn">有用保理：帳面現金轉換週期（CCC）${fmt(cur.CCC)} 天，但客戶實際付款還是 ${fmt(cur.trueCCC)} 天的循環。問題沒被解決，只是換一個人墊錢。</li>`;
+  if(st.act.has("supdisc")) h+=`<li>拿提早付款折扣讓應付天數降到 10 天，現金轉換週期（CCC）${cur.trueCCC>base.trueCCC?"反而變長":"沒有因此縮短"}，這是刻意用現金換毛利。</li>`;
   $("cccText").innerHTML=h+"</ul>";
 }
 
@@ -940,16 +956,22 @@ function renderDupont(b,c){
   const box=(cls,lab,a,v,f)=>{const d=v-a; const k=Math.abs(d)<1e-6?"":d>0?"good":"bad";
     return `<div class="dbox ${cls}"><span>${lab}</span><strong>${f(v)}</strong><em class="${k}">前 ${f(a)}</em></div>`;};
   $("dupont").innerHTML=box("roe","ROE",b.ROE,c.ROE,v=>pct(v))+box("","淨利率",b.margin,c.margin,v=>pct(v,2))+box("","資產周轉率",b.turn,c.turn,v=>v.toFixed(2)+"×")+box("","權益乘數",b.lev,c.lev,v=>v.toFixed(2)+"×");
-  const lm=Math.log(c.margin/b.margin)||0, lt=Math.log(c.turn/b.turn)||0, ll=Math.log(c.lev/b.lev)||0;
+  const signFlip=b.margin<=0||c.margin<=0;
+  const lm=signFlip?0:Math.log(c.margin/b.margin), lt=Math.log(c.turn/b.turn), ll=Math.log(c.lev/b.lev);
+  const dir=v=>v>.002?"上升":v<-.002?"下降":"幾乎不變";
   let h="<ul>";
   if(!st.act.size&&!st.fin.eq&&!st.fin.long) h+="<li>先在左邊選幾個槓桿，看 ROE 的三個因子怎麼動。</li>";
   else{
-    const parts=[["淨利率",lm],["資產周轉率",lt],["權益乘數",ll]].filter(p=>Math.abs(p[1])>.002).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]));
-    if(parts.length) h+=`<li>ROE 變動主要來自 <b>${parts[0][0]}</b>（${parts[0][1]>0?"上升":"下降"}）。</li>`;
-    h+="<li>縮短 現金轉換週期（CCC）讓應收與存貨變少、資產變小，<b>資產周轉率</b>上升；同時借款減少，<b>權益乘數</b>下降。兩者會部分抵銷。</li>";
-    if(lm<-.002) h+="<li class=\"warn\">淨利率下降：你用毛利或費用換了現金，這就是代價的所在。</li>";
-    if(st.act.has("supdisc")) h+="<li>提早付款折扣讓淨利率上升，但存貨與現金需求不變、應付變少、借款變多，權益乘數上升。ROE 變好有一部分是靠槓桿。</li>";
-    if(st.act.has("factor")) h+="<li class=\"warn\">保理讓應收「消失」，資產周轉率看起來大幅改善，但這是財務安排造成的，不代表營運變好。</li>";
+    if(signFlip&&Math.abs(c.margin-b.margin)>1e-6) h+=`<li>ROE 變動主要來自 <b>淨利率</b>（${c.margin>b.margin?"上升":"下降"}，${pct(b.margin,2)} → ${pct(c.margin,2)}${c.margin<=0?"，已經轉為虧損":""}）。</li>`;
+    else{
+      const parts=[["淨利率",lm],["資產周轉率",lt],["權益乘數",ll]].filter(p=>Math.abs(p[1])>.002).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]));
+      if(parts.length) h+=`<li>ROE 變動主要來自 <b>${parts[0][0]}</b>（${parts[0][1]>0?"上升":"下降"}）。</li>`;
+    }
+    const dCCC=c.trueCCC-b.trueCCC;
+    h+=`<li>現金轉換週期（CCC）${dCCC<-.5?`縮短 ${fmt(-dCCC)} 天`:dCCC>.5?`拉長 ${fmt(dCCC)} 天`:"幾乎不變"}；總資產 ${fmt(b.TA)} → ${fmt(c.TA)} 萬，<b>資產周轉率</b>${dir(lt)}；借款 ${fmt(b.debt)} → ${fmt(c.debt)} 萬，<b>權益乘數</b>${dir(ll)}。`+((lt>.002&&ll<-.002)||(lt<-.002&&ll>.002)?"兩者方向相反，會部分抵銷。":"")+`</li>`;
+    if(c.margin<b.margin-1e-5) h+="<li class=\"warn\">淨利率下降：你用毛利或費用換了現金，這就是代價的所在。</li>";
+    if(st.act.has("supdisc")) h+=`<li>提早付款折扣讓進貨變便宜、淨利率${c.margin>b.margin?"上升":"沒有上升"}；但應付變少，借款${c.debt>b.debt?"變多":"沒有減少"}、負債比 ${pct(b.debtRatio,0)} → ${pct(c.debtRatio,0)}。權益乘數${dir(ll)}，${ll>.002?"ROE 變好有一部分是靠槓桿。":"ROE 的變化主要來自淨利率，但用的是更多借款。"}</li>`;
+    if(st.act.has("factor")) h+="<li class=\"warn\">保理讓應收「消失」，資產周轉率看起來改善，但這是財務安排造成的，不代表營運變好。</li>";
     if(ll>.05&&lt<.02) h+="<li class=\"bad\">ROE 主要靠權益乘數撐起來，屬於高風險的 ROE。</li>";
     if(st.fin.eq) h+="<li>現金增資讓權益變大，權益乘數下降、ROE 被稀釋，但財務結構更安全。</li>";
   }
@@ -975,16 +997,17 @@ function renderStruct(s,b,c){
   $("cov").innerHTML=
     row("負債比（調整後）",c.debtRatio,c.debtRatio<=.6,v=>pct(v,0),"≤ 60%")+
     row("流動比率",c.current,c.current>=1.2,v=>v.toFixed(2)+"×","≥ 1.2×")+
-    row("利息保障倍數",c.cover,c.cover>=4,v=>v.toFixed(1)+"×","≥ 4×");
+    (c.noInt?`<div><span>利息保障倍數</span><span class="num good">無付息負債</span><span class="tag good">符合 ≥ 4×</span></div>`:row("利息保障倍數",c.cover,c.cover>=4,v=>v>100?"> 100×":fx(v,1)+"×","≥ 4×"));
   let h="<ul>";
-  h+=`<li>這家公司的營運資金（應收＋存貨−應付）約 <b>${fmt(c.NWC)}</b> 萬，其中大部分是「長期都會在」的永久性營運資金。用短期借款支應，等於<b>以短支長</b>：銀行抽額度時，就會變成流動性危機。</li>`;
-  if(st.fin.long>0) h+=`<li>改用公司債或長期借款：流動比率改善、不怕銀行抽額度，代價是利率較高（模型假設 +0.6 個百分點），每年多付約 ${fmt(c.longD*.006)} 萬利息；公司債還有發行成本、信用評等與財務承諾的約束。</li>`;
+  if(c.NWC>0) h+=`<li>這家公司的營運資金（應收＋存貨−應付−客戶預收）約 <b>${fmt(c.NWC)}</b> 萬，其中大部分是「長期都會在」的永久性營運資金。用短期借款支應，等於<b>以短支長</b>：銀行抽額度時，就會變成流動性危機。</li>`;
+  else h+=`<li>營運資金（應收＋存貨−應付−客戶預收）是 <b>${fmt(c.NWC)}</b> 萬，為負數：客戶與供應商的資金已足以支應營運週轉，借款主要是在支應固定資產。</li>`;
+  if(st.fin.long>0) h+=`<li>改用公司債或長期借款：流動比率改善、不怕銀行抽額度，代價是利率較高（模型假設 +${fx(BOND_SPREAD*100,1)} 個百分點），每年多付約 ${fmt(c.longD*BOND_SPREAD)} 萬利息；公司債還有發行成本、信用評等與財務承諾的約束。</li>`;
   if(c.adv>0) h+=`<li>客戶預收款 ${fmt(c.adv)} 萬是不用付利息的負債，等於客戶出錢幫你擴產；但它也是交貨承諾，景氣反轉時可能變成退款壓力。</li>`;
   if(s.capex>s.DA*1.5) h+=`<li>擴產期每年固定資產淨增加 ${fmt(s.capex-s.DA)} 萬。這是長期資產，應該用公司債、長期借款或增資支應；用短期借款撐擴產，風險比營運資金更高。</li>`;
   if(st.fin.eq>0) h+=`<li>現金增資 ${fmt(st.fin.eq)} 萬：負債比與利息負擔下降，代價是股權稀釋、ROE 下降，以及股東要求的報酬通常高於借款利率。</li>`;
-  if(c.debtRatio>.6) h+=`<li class="bad">負債比偏高。光靠營運面縮短 現金轉換週期（CCC）不夠，要搭配增資或處分資產。</li>`;
+  if(c.debtRatio>.6) h+=`<li class="bad">負債比偏高。光靠營運面縮短現金轉換週期（CCC）不夠，要搭配增資或處分資產。</li>`;
   h+=`<li>課本說永久性營運資金用長期資金支應「最穩妥」，指的是<b>不會被銀行抽銀根</b>，不是沒有成本，也不是問題解決了。公司債要付息、到期要還或再融資；增資沒有利息，但股東要求的報酬通常高於借款利率，還會稀釋每股盈餘。請看「未來 5 年」分頁。</li>`;
-  h+=`<li>縮短 現金轉換週期（CCC）是「減少需要的資金」，調整財務結構是「換一種資金來源」。前者有營運代價，後者有資金成本，通常要兩者並用。</li>`;
+  h+=`<li>縮短現金轉換週期（CCC）是「減少需要的資金」，調整財務結構是「換一種資金來源」。前者有營運代價，後者有資金成本，通常要兩者並用。</li>`;
   $("structText").innerHTML=h+"</ul>";
 }
 
@@ -1011,13 +1034,14 @@ function drawFCF(s,b,c){
   });
   let h="<ul>";
   h+=`<li>自由現金流＝稅後營業利益＋折舊−資本支出−營運資金增加。調整前 <b>${fmt(b.FCF)}</b>，調整後 <b>${fmt(c.FCF)}</b>。</li>`;
-  h+=`<li>營運資金增加可拆成兩部分：<b>成長效果</b> ${fmt(c.growthNWC)} 萬（營收成長 ${pct(s.g,0)}，天數不變也要多墊的錢），<b>天數效果</b> ${sfmt(c.daysNWC)} 萬（現金轉換週期（CCC）變動造成）。</li>`;
+  h+=`<li>營運資金增加可拆成兩部分：<b>成長效果</b> ${fmt(c.growthNWC)} 萬（營收成長 ${pct(s.g,0)}，天數不變也要多墊的錢），<b>天數與價量效果</b> ${sfmt(c.daysNWC)} 萬（槓桿造成的天數、售價、銷量與客戶預收款變動）。</li>`;
   if(c.FCF<0) h+=`<li class="bad">自由現金流為負 ${fmt(-c.FCF)} 萬：帳面淨利 ${fmt(c.NI)} 萬，但現金不夠支應擴產與營運資金。缺口（還沒算配息）要靠銀行借款、發行公司債或增資補足。</li>`;
   else if(c.FCF<c.NI*.5) h+=`<li class="warn">淨利 ${fmt(c.NI)} 萬，自由現金流只有 ${fmt(c.FCF)} 萬：獲利只有一部分變成可自由運用的現金，要特別留意配息與還債能力。</li>`;
   h+=`<li>資本支出 ${fmt(s.capex)} 萬、折舊 ${fmt(s.DA)} 萬：資本支出大於折舊越多，代表越處於擴產期，未來折舊也會跟著上升、壓縮毛利。</li>`;
-  if(s.g>=.2) h+=`<li class="warn">高成長公司的負自由現金流不一定是壞事，但要確認：現金轉換週期（CCC）不變的情況下，成長每多 10%，就要多準備約 ${fmt(c.growthNWC/s.g*.1)} 萬營運資金。</li>`;
+  if(s.g>=.2&&c.FCF<0) h+=`<li class="warn">高成長公司的負自由現金流不一定是壞事，但要確認：現金轉換週期（CCC）不變的情況下，成長每多 10%，就要多準備約 ${fmt(c.growthNWC/s.g*.1)} 萬營運資金。</li>`;
   if(c.factored) h+=`<li class="warn">保理讓應收減少、自由現金流變好，但那 ${fmt(c.factored)} 萬其實是融資，費用 ${fmt(c.finFee)} 萬記在營業利益之下，不會出現在這張圖上。</li>`;
-  h+=`<li>現金轉換週期（CCC）改善帶來的自由現金流增加只發生在<b>這一年</b>；明年起只剩利息節省，以及（若有）每年的毛利損失。</li>`;
+  if(c.FCF-b.FCF>1) h+=`<li>槓桿帶來的自由現金流增加（${sfmt(c.FCF-b.FCF)} 萬）大多只發生在<b>這一年</b>；明年起只剩利息節省，以及（若有）每年的毛利損失。</li>`;
+  else if(c.FCF-b.FCF<-1) h+=`<li>這組槓桿讓今年自由現金流減少 ${fmt(b.FCF-c.FCF)} 萬：營運資金增加${c.dAR+c.dInv-c.dAP-c.adv>b.dAR+b.dInv-b.dAP-b.adv?"、占用更多現金":""}${c.NOPAT<b.NOPAT?"、稅後營業利益下降":""}。</li>`;
   $("fcfText").innerHTML=h+"</ul>";
 }
 
@@ -1027,7 +1051,7 @@ function project(s,c,opt){
   const Y=5, k=c.NWC/c.rev, rows=[];
   let rev=c.rev, nwc=c.NWC, pool=[c.capex-s.DA+(c.dAR+c.dInv-c.dAP-c.adv)];
   let DA=s.DA, prevCx=c.capex; const cxg=SC[st.sc].cxg||0;
-  let peak=0, bal=0, cumGap=0, cumCost=0, cumEq=0, payback=null, rate=s.rate+(opt==="bond"?.008:0), cover=c.cover;
+  let peak=0, bal=0, cumGap=0, cumCost=0, cumEq=0, payback=null, rate=s.rate+(opt==="bond"?BOND_SPREAD:0), cover=c.cover;
   const baseInt=c.interest+c.finFee;
   for(let t=1;t<=Y;t++){
     const g=s.g*Math.pow(.7,t);
@@ -1036,11 +1060,11 @@ function project(s,c,opt){
     const capex=t<=st.N?c.capex*Math.pow(1+cxg,t):DA; prevCx=capex;
     pool.push(capex-DA+dN);
     const invested=pool.slice(0,Math.max(0,t-1)).reduce((a,b)=>a+b,0);
-    const EBIT=c.EBIT+st.roic*Math.max(0,invested);
+    const EBIT=c.EBIT+st.roic*Math.max(0,invested)-(DA-s.DA);
     const FCF=EBIT*(1-TAX)+DA-capex-dN;
     let cost=0;
     if(opt==="equity"){
-      if(FCF<0){cumEq+=-FCF;} else {bal-=Math.min(bal,0);}
+      if(FCF<0) cumEq+=-FCF;
       cost=KE*cumEq; bal=cumEq;
     }else{
       if(opt==="short"&&cover<3) rate=s.rate+.015; else if(opt==="short") rate=s.rate;
@@ -1049,11 +1073,16 @@ function project(s,c,opt){
       cover=EBIT/Math.max(1,baseInt+bal*rate);
     }
     cumCost+=cost; if(FCF<0) cumGap+=-FCF;
-    if(payback===null&&FCF>0) payback=t;
     peak=Math.max(peak,bal); rows.push({t,FCF,bal,EBIT,cost,cover});
   }
-  const mcap=Math.max(c.NI,1)*PE;
-  return {peak,rows,cumGap,cumCost,bal,payback,dil:cumEq/(mcap+cumEq),cover,rate};
+  // 轉正年：最後一個負值之後的第一個正值年（今年與 5 年都不為負時為 0）
+  let lastNeg=c.FCF<0?0:-1; rows.forEach(r=>{if(r.FCF<0) lastNeg=r.t;});
+  if(lastNeg<0) payback=0;
+  else {const r=rows.find(r=>r.t>lastNeg&&r.FCF>0); payback=r?r.t:null;}
+  let reNeg=null; {let prev=c.FCF; for(const r of rows){if(r.FCF<0&&prev>0){reNeg=r.t;} prev=r.FCF;}}
+  if(payback!==null) reNeg=null;
+  const mcap=Math.max(c.NI*PE,c.E);
+  return {peak,rows,cumGap,cumCost,bal,payback,reNeg,dil:cumEq/(mcap+cumEq),cover,rate};
 }
 function renderFuture(s,c){
   $("fRoicOut").textContent=pct(st.roic,0);
@@ -1077,15 +1106,19 @@ function renderFuture(s,c){
   const row=(name,o,costTxt,deferTxt)=>`<div style="grid-template-columns:minmax(0,1fr)"><span><b>${name}</b>　最高 <span class="num">${fmt(o.peak)}</span>　第 5 年 <span class="num">${fmt(o.bal)}</span>　5 年資金成本 <span class="num">${fmt(o.cumCost)}</span>${costTxt}<br><span class="note">${deferTxt}</span></span></div>`;
   $("futTable").innerHTML=P.short.cumGap<1?'<p class="note">在目前假設下，未來 5 年自由現金流都是正的，沒有需要外部補的缺口。試著提高資本支出或成長率。</p>':
     row("短期銀行借款滾動",P.short,"（稅後利息）",`利率最低，但每年要續約；利息保障倍數跌破 3 倍時模型假設利率加碼 1.5 個百分點。問題延到：<b>下一次銀行審查額度</b>。景氣反轉時最先被抽。`)+
-    row("發行公司債",P.bond,"（稅後利息）",`利率鎖定（模型假設 +0.8 個百分點），不怕抽銀根。問題延到：<b>到期日</b>。${P.bond.bal>1?`5 年後還有 ${fmt(P.bond.bal)} 萬要還，或用當時的利率再融資，這就是「到期牆」。`:`這個假設下投資如期回收、債可以還清；回收若延後，到期時就要用當時的利率再融資，這就是「到期牆」。`}`)+
-    row("現金增資",P.equity,"（股東要求的 10% 報酬）",`沒有利息、沒有到期日，看起來最輕鬆。代價是股權稀釋約 ${pct(P.equity.dil,0)}（以本益比 15 倍估算），每股盈餘下降；股東要求的報酬高於借款利率。問題延到：<b>股東失去耐心的那一天</b>。`);
+    row("發行公司債",P.bond,"（稅後利息）",`利率鎖定（模型假設 +${fx(BOND_SPREAD*100,1)} 個百分點，與財務結構分頁相同），不怕抽銀根。問題延到：<b>到期日</b>。${P.bond.bal>1?`5 年後還有 ${fmt(P.bond.bal)} 萬要還，或用當時的利率再融資，這就是「到期牆」。`:`這個假設下投資如期回收、債可以還清；回收若延後，到期時就要用當時的利率再融資，這就是「到期牆」。`}`)+
+    row("現金增資",P.equity,"（股東要求的 10% 報酬）",`沒有利息、沒有到期日，看起來最輕鬆。代價是股權稀釋約 ${pct(P.equity.dil,0)}（以本益比 15 倍估算市值，且不低於帳面權益），每股盈餘下降；股東要求的報酬高於借款利率。問題延到：<b>股東失去耐心的那一天</b>。`);
 
   const cxg=SC[st.sc].cxg||0;
-  const wd=c.debt/(c.debt+c.E), kd=(s.rate+(st.fopt==="bond"?.008:0))*(1-TAX);
+  const wd=c.debt/(c.debt+c.E), kd=(s.rate+(st.fopt==="bond"?BOND_SPREAD:0))*(1-TAX);
   const cap=wd*kd+(1-wd)*KE, rA=st.roic*(1-TAX);
   let h="<ul>";
-  h+=`<li>未來 5 年累計資金缺口 <b>${fmt(sel.cumGap)}</b> 萬。${sel.payback?`自由現金流在第 ${sel.payback} 年轉正。`:`<span class="bad">5 年內自由現金流都沒有轉正。</span>`}</li>`;
-  if(cxg) h+=`<li>擴產期間資本支出每年再成長 ${pct(cxg,0)}，新增的折舊以 8 年攤提。</li>`;
+  const pbTxt=sel.payback===0?"今年起 5 年自由現金流都不是負的。"
+    :sel.payback?`自由現金流在第 ${sel.payback} 年轉正，之後維持不為負。`
+    :sel.reNeg?`<span class="bad">自由現金流一度為正，但從第 ${sel.reNeg} 年起又轉為負，5 年結束時仍沒有回到正數。</span>`
+    :`<span class="bad">5 年內自由現金流都沒有轉正。</span>`;
+  h+=`<li>未來 5 年累計資金缺口 <b>${fmt(sel.cumGap)}</b> 萬。${pbTxt}</li>`;
+  h+=`<li>${cxg?`擴產期間資本支出每年再成長 ${pct(cxg,0)}；`:""}新增資本支出的折舊以 8 年攤提，並從營業利益中扣除（只留下稅盾）。</li>`;
   h+=`<li>比較基準要用<b>加權平均資金成本</b>（約 ${pct(cap,1)}，股東要求報酬以 10% 計），不是只看借款利率：借錢便宜，但負債越多、股東承擔的風險越高，要求的報酬也越高。</li>`;
   if(rA<cap-.01) h+=`<li class="bad">新投資稅後報酬約 ${pct(rA,1)}，低於資金成本：借越多、虧越多。長期資金沒有解決問題，只是讓問題在到期日或下一輪增資時更大。</li>`;
   else if(rA<cap+.01) h+=`<li class="warn">新投資稅後報酬約 ${pct(rA,1)}，和資金成本差不多：只是在幫資金提供者賺錢，股東沒有多得到什麼。</li>`;
@@ -1105,8 +1138,9 @@ function renderCosts(s,b,c){
       <div class="r num">一次性現金 ${sfmt(r.cashRel)}　每年稅前損益 ${sfmt(r.op)}　銀行利率 ${pct(s.rate)}</div>
       <div class="r">${risk(L.k)}</div><div class="who">誰付代價：<b>${L.who}</b></div></div>`;
   });
-  const rel=b.NWC-c.NWC, dNI=c.NI-b.NI;
-  h+=`<p class="lesson ${dNI<0?"warnbox":""}">合計：一次釋放 <b class="num">${sfmt(rel)}</b> 萬，每年淨利 <b class="num">${sfmt(dNI)}</b> 萬（已含利息節省）。${rel>0&&dNI<0?`等於每年花 ${fmt(-dNI)} 萬，換來 ${fmt(rel)} 萬不用借。`:""}各項合計不等於逐項相加，因為槓桿之間會互相影響。</p>`;
+  const c0=model(s,st.f,st.act,NOFIN);
+  const rel=b.NWC-c0.NWC, dNI=c0.NI-b.NI;
+  h+=`<p class="lesson ${dNI<0?"warnbox":""}">合計：一次釋放 <b class="num">${sfmt(rel)}</b> 萬，每年淨利 <b class="num">${sfmt(dNI)}</b> 萬（已含利息節省；不含增資與長短借選擇的影響，那部分請看財務結構分頁）。${rel>0&&dNI<0?`等於每年花 ${fmt(-dNI)} 萬，換來 ${fmt(rel)} 萬不用借。`:""}各項合計不等於逐項相加，因為槓桿之間會互相影響。</p>`;
   box.innerHTML=h;
 }
 

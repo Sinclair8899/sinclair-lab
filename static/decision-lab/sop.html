@@ -150,6 +150,7 @@ details>div{margin-top:12px;display:flex;flex-direction:column;gap:10px}
     <div><span class="label">客戶端</span><h2>預測準不準，要按客戶看</h2>
     <p class="note" style="margin-top:4px">每家客戶的預測習慣不同：有的固定灌水，有的新產品期波動很大。AI 把過去預測與實際出貨逐月比對，算出每家客戶的準確度與偏差方向，MRP 用的就不再是原始預測，而是校正後的需求。</p></div>
     <div class="panel tablebox"><table id="fc"></table></div>
+    <p class="note">準確度＝1 −（各月｜預測 − 實際｜合計 ÷ 實際合計），以實際量加權，最低 0%；偏差＝預測合計 ÷ 實際合計 − 1，正值代表高估。</p>
     <div class="panel" style="padding:16px;display:flex;flex-direction:column;gap:10px">
       <h3>長鞭效應：越往上游，波動越大</h3>
       <div class="bw" id="bw"></div>
@@ -189,7 +190,7 @@ details>div{margin-top:12px;display:flex;flex-direction:column;gap:10px}
 <script>
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
-const FC=[["美系品牌客戶 X",[100,110,95,120,105,100],[82,90,80,98,86,83],"固定高估約兩成，MRP 自動乘以 0.83 校正。"],["雲端服務商 Y",[60,80,120,150,90,70],[58,72,85,96,88,66],"新機種爬坡期高估嚴重，量產穩定後準確；需業務確認客戶自己的生產計畫。"],["歐系工控客戶 Z",[40,40,42,41,40,43],[39,41,40,42,39,42],"預測穩定可信，可直接使用。"],["新創客戶 V",[20,25,35,50,30,30],[8,12,15,20,22,25],"預測與實際落差極大，建議改以訂單驅動、不備長交期料。"]];
+const FC=[["美系品牌客戶 X",[100,110,95,120,105,100],[82,90,80,98,86,83],"固定高估約兩成，MRP 自動乘以 0.82 校正（近 6 個月實際合計 ÷ 預測合計）。"],["雲端服務商 Y",[60,80,120,150,90,70],[58,72,85,96,88,66],"新機種爬坡期高估嚴重，量產穩定後準確；需業務確認客戶自己的生產計畫。"],["歐系工控客戶 Z",[40,40,42,41,40,43],[39,41,40,42,39,42],"預測穩定可信，可直接使用。"],["新創客戶 V",[20,25,35,50,30,30],[8,12,15,20,22,25],"預測與實際落差極大，建議改以訂單驅動、不備長交期料。"]];
 const acc=(f,a)=>{const e=f.reduce((s,v,i)=>s+Math.abs(v-a[i]),0),t=a.reduce((s,v)=>s+v,0);return Math.max(0,1-e/t)};
 const bias=(f,a)=>f.reduce((s,v)=>s+v,0)/a.reduce((s,v)=>s+v,0)-1;
 $("fc").innerHTML=`<thead><tr><th>客戶</th><th class="num">近 6 個月預測準確度</th><th class="num">偏差</th><th>AI 判讀</th></tr></thead><tbody>${FC.map(c=>{const A=acc(c[1],c[2]),B=bias(c[1],c[2]);return `<tr><td><b>${c[0]}</b></td><td class="num"><span class="pill ${A>=0.9?"p-ok":A>=0.75?"p-warn":"p-bad"}">${(A*100).toFixed(0)}%</span></td><td class="num">${B>=0?"高估":"低估"} ${(Math.abs(B)*100).toFixed(0)}%</td><td style="white-space:normal">${c[3]}</td></tr>`}).join("")}</tbody>`;
@@ -218,18 +219,19 @@ const AG=[
 ];
 let S={i:0,picks:[]};
 const wan=n=>{const a=Math.abs(n),sg=n<0?"−":"";return a>=10000?sg+(a/10000).toLocaleString("zh-TW",{maximumFractionDigits:2})+" 億":sg+Math.round(a).toLocaleString("zh-TW")+" 萬"};
+const pp=v=>(v>0?"+":v<0?"−":"")+Math.abs(v);
 function tot(list){return list.reduce((a,r)=>({s:a.s+r.s,inv:a.inv+r.inv}),{s:0,inv:0})}
 function render(){
   const me=tot(S.picks.map((p,i)=>AG[i].opts[p])),ai=tot(S.picks.map((p,i)=>AG[i].opts[AG[i].ai.k]));
   $("weeks").innerHTML=AG.map((a,i)=>`<span class="${i<S.picks.length?"done":i===S.i?"on":""}">議題 ${i+1}</span>`).join("");
-  const card=(t,r,cls)=>`<div class="${cls}"><span class="label">${t}</span><dl><dt>準交率變化</dt><dd>${r.s>0?"+":""}${r.s} 個百分點</dd><dt>存貨變化</dt><dd>${wan(r.inv)}</dd></dl></div>`;
+  const card=(t,r,cls)=>`<div class="${cls}"><span class="label">${t}</span><dl><dt>準交率變化</dt><dd>${pp(r.s)} 個百分點</dd><dt>存貨變化</dt><dd>${wan(r.inv)}</dd></dl></div>`;
   $("score").innerHTML=card("你的決定",me,"")+card("依 AI 會前建議",ai,"ag");
-  if(S.i>=AG.length){$("event").innerHTML=`<h2>月會結束</h2><p>你的決定：準交率 ${me.s>0?"+":""}${me.s} 個百分點，存貨 ${wan(me.inv)}。依 AI 建議：準交率 ${ai.s} 個百分點，存貨 ${wan(ai.inv)}。</p><p class="note">AI 的建議不一定是最保守或最積極的選項，而是把客戶歷史、供應商數據與料號特性放在一起看的結果。S&amp;OP 的價值，在於讓四個部門依同一份數字取捨，而不是比誰說話大聲。</p><button class="btn ghost" id="again" type="button">重新開一次會</button>`;return}
+  if(S.i>=AG.length){$("event").innerHTML=`<h2>月會結束</h2><p>你的決定：準交率 ${pp(me.s)} 個百分點，存貨 ${wan(me.inv)}。依 AI 建議：準交率 ${pp(ai.s)} 個百分點，存貨 ${wan(ai.inv)}。</p><p class="note">AI 的建議不一定是最保守或最積極的選項，而是把客戶歷史、供應商數據與料號特性放在一起看的結果。S&amp;OP 的價值，在於讓四個部門依同一份數字取捨，而不是比誰說話大聲。</p><button class="btn ghost" id="again" type="button">重新開一次會</button>`;return}
   const a=AG[S.i],picked=S.picks.length>S.i;
   $("event").innerHTML=`<span class="label">議題 ${S.i+1}</span><h2>${a.title}</h2><p class="what">${a.ctx}</p>
    <div class="voices">${a.v.map(v=>`<div><b>${v[0]}</b>${v[1]}</div>`).join("")}</div>
    <div class="opts">${a.opts.map((o,k)=>`<button type="button" data-opt="${k}" ${picked?"disabled":""} class="${picked&&S.picks[S.i]===k?"pick":""}"><b>${o.t}</b><small>${o.d}</small></button>`).join("")}</div>
-   ${picked?(()=>{const o=a.opts[S.picks[S.i]],x=a.opts[a.ai.k];const ch=r=>`<div class="chips"><span class="chip ${r.s<-2?"c-bad":r.s<0?"c-warn":"c-ok"}">準交率 ${r.s>0?"+":""}${r.s} 個百分點</span><span class="chip ${r.inv>=10000?"c-bad":r.inv>0?"c-warn":"c-ok"}">存貨 ${wan(r.inv)}</span></div>`;
+   ${picked?(()=>{const o=a.opts[S.picks[S.i]],x=a.opts[a.ai.k];const ch=r=>`<div class="chips"><span class="chip ${r.s<-2?"c-bad":r.s<0?"c-warn":"c-ok"}">準交率 ${pp(r.s)} 個百分點</span><span class="chip ${r.inv>=10000?"c-bad":r.inv>0?"c-warn":"c-ok"}">存貨 ${wan(r.inv)}</span></div>`;
      return `<div class="res"><div class="r-me"><b>你的決定：${o.t}</b>${ch(o)}<p class="note" style="margin-top:4px">風險：${o.risk}</p></div><div class="r-ag"><b>AI 會前建議：${x.t}</b><p style="margin-top:4px;font-size:.9rem">${a.ai.why}</p>${ch(x)}</div></div>
      <button class="btn" id="next" type="button">${S.i===AG.length-1?"看月會總結":"下一個議題"}</button>`})():""}`;
 }
