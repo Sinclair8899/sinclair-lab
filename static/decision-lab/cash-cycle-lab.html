@@ -1,0 +1,1156 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>現金轉換週期（CCC）決策實驗室</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700&display=swap">
+<style>
+:root{
+  --bg:#eef2f1; --surface:#ffffff; --ink:#15232a; --muted:#5a6a6f; --line:#d4dddb;
+  --accent:#0d6b5f; --accent-ink:#ffffff; --accent-soft:#d8ece8;
+  --ghost:#9aa8ab; --naive:#b9a7a0; --c3:#5b6fb5; --c3-soft:#e2e6f5;
+  --good:#2b8a57; --warn:#b5781a; --bad:#c23a2c;
+  --good-soft:#e1f2e8; --warn-soft:#f8ecd6; --bad-soft:#f8e1de;
+  --shadow:0 1px 2px rgba(21,35,42,.06),0 8px 24px rgba(21,35,42,.06);
+  --f-display:"Noto Serif TC","Songti TC","PMingLiU",serif;
+  --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --f-num:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1618; --surface:#162124; --ink:#e4ecea; --muted:#93a3a5; --line:#28373a;
+  --accent:#3db49f; --accent-ink:#06211c; --accent-soft:#163430;
+  --ghost:#5e6d70; --naive:#8a7770; --c3:#8fa0e0; --c3-soft:#1d2440;
+  --good:#5cc28a; --warn:#e2aa4c; --bad:#ef6d5d;
+  --good-soft:#15301f; --warn-soft:#33270f; --bad-soft:#3a1914;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1618; --surface:#162124; --ink:#e4ecea; --muted:#93a3a5; --line:#28373a;
+  --accent:#3db49f; --accent-ink:#06211c; --accent-soft:#163430;
+  --ghost:#5e6d70; --naive:#8a7770; --c3:#8fa0e0; --c3-soft:#1d2440;
+  --good:#5cc28a; --warn:#e2aa4c; --bad:#ef6d5d;
+  --good-soft:#15301f; --warn-soft:#33270f; --bad-soft:#3a1914;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25); color-scheme:dark}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:20px 120px}
+.wrap{max-width:1120px;margin:0 auto}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+[hidden]{display:none!important}
+
+header.top{display:grid;gap:6px;margin-bottom:14px;max-width:48rem}
+.eyebrow{font-size:12px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+h1{font-family:var(--f-display);font-size:clamp(24px,4.4vw,36px);line-height:1.3;margin:0;text-wrap:balance}
+.lede{color:var(--muted);margin:0;max-width:42rem}
+
+/* scenario chips */
+.scbar{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 10px;margin:0 0 8px;scrollbar-width:thin}
+.sc{flex:none;appearance:none;border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:8px 12px;cursor:pointer;text-align:left;display:grid;gap:0;min-width:150px}
+.sc b{font-size:14px}
+.sc span{font-size:12px;color:var(--muted)}
+.sc[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.sc .k{font-family:var(--f-num);font-size:11px;color:var(--accent);font-weight:600}
+
+.grid{display:grid;gap:16px}
+@media (min-width:900px){
+  .grid{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);align-items:start}
+  .dash{position:sticky;top:16px;grid-column:2;grid-row:1 / span 3}
+  .left{grid-column:1}
+  body{padding-bottom:40px}
+  .cashbar{display:none!important}
+}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+.panel h2{font-size:16px;margin:0 0 4px}
+.panel .sub{color:var(--muted);font-size:13.5px;margin:0 0 14px}
+.left{display:grid;gap:16px;min-width:0}
+
+.mail{border-left:3px solid var(--warn);padding:2px 0 2px 12px;margin:0 0 14px;font-size:14.5px}
+.mail b{display:block;font-size:12.5px;color:var(--muted);font-weight:500}
+.slider-row{display:grid;gap:6px}
+.slider-row label{display:flex;justify-content:space-between;gap:8px;font-size:14px}
+.slider-row output{font-weight:600;color:var(--warn)}
+input[type=range]{width:100%;accent-color:var(--warn);height:28px}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.fact{background:var(--bg);border-radius:10px;padding:8px 10px;min-width:0}
+.fact span{display:block;font-size:11.5px;color:var(--muted)}
+.fact strong{font-family:var(--f-num);font-size:15px}
+.fact em{display:block;font-style:normal;font-size:11.5px;color:var(--muted)}
+.fact em.bad{color:var(--bad)} .fact em.good{color:var(--good)}
+
+.decision{display:grid;gap:10px}
+.decision + .decision{border-top:1px solid var(--line);padding-top:16px;margin-top:16px}
+.dhead{display:flex;align-items:baseline;gap:8px}
+.dhead .k{font-family:var(--f-num);font-size:12px;color:var(--accent);font-weight:600}
+.dhead h3{margin:0;font-size:15px}
+.choices{display:grid;gap:8px}
+.choice{position:relative}
+.choice input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.choice .card{display:grid;gap:2px;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;transition:border-color .15s,background .15s}
+.choice .t{font-weight:700;font-size:14.5px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.choice .d{font-size:13px;color:var(--muted)}
+.choice input:checked + .card{border-color:var(--accent);background:var(--accent-soft)}
+.choice input:focus-visible + .card{outline:2px solid var(--accent);outline-offset:2px}
+.choice:hover .card{border-color:var(--accent)}
+.tag{font-size:11px;font-weight:500;padding:1px 8px;border-radius:99px;white-space:nowrap}
+.tag.good{background:var(--good-soft);color:var(--good)}
+.tag.warn{background:var(--warn-soft);color:var(--warn)}
+.tag.bad{background:var(--bad-soft);color:var(--bad)}
+
+.toggle{display:flex;gap:12px;align-items:flex-start;border:1.5px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;position:relative}
+.toggle input{position:absolute;opacity:0;width:1px;height:1px}
+.sw{flex:none;width:44px;height:26px;border-radius:99px;background:var(--line);position:relative;transition:background .15s;margin-top:2px}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--surface);box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
+.toggle input:checked ~ .sw{background:var(--accent)}
+.toggle input:checked ~ .sw::after{transform:translateX(18px)}
+.toggle input:focus-visible ~ .sw{outline:2px solid var(--accent);outline-offset:2px}
+.toggle input:disabled ~ *{opacity:.45}
+.toggle:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.toggle .t{font-weight:700;font-size:14.5px}
+.toggle .d{font-size:13px;color:var(--muted)}
+
+.dash{display:grid;gap:14px;box-shadow:var(--shadow)}
+.verdict{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:end}
+.verdict .lab{font-size:12.5px;color:var(--muted);grid-column:1 / -1}
+.big{font-family:var(--f-num);font-size:clamp(30px,5vw,40px);font-weight:600;line-height:1.1;letter-spacing:-.01em}
+.pill{font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:99px;white-space:nowrap}
+.pill.good{background:var(--good-soft);color:var(--good)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.sentence{grid-column:1 / -1;font-size:14px;margin:4px 0 0}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:0;border-top:3px solid;vertical-align:middle;margin-right:6px}
+.legend s{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:6px;text-decoration:none}
+svg.chart{width:100%;height:auto;display:block;touch-action:pan-y}
+.readout{font-size:12.5px;color:var(--muted);min-height:1.6em}
+.readout b{color:var(--ink);font-family:var(--f-num);font-weight:600}
+.meters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.meter{border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:grid;gap:2px;min-width:0}
+.meter span{font-size:11.5px;color:var(--muted)}
+.meter strong{font-size:15px}
+.meter em{font-style:normal;font-size:11.5px;color:var(--muted);font-family:var(--f-num)}
+.good{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+.meter strong.good{color:var(--good)} .meter strong.warn{color:var(--warn)} .meter strong.bad{color:var(--bad)}
+.lesson{font-size:13px;background:var(--accent-soft);border-radius:10px;padding:10px 12px;margin:0}
+.lesson.warnbox{background:var(--warn-soft)}
+
+.compare{display:grid;gap:10px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;padding:10px 12px;border-radius:10px;border:1px solid var(--line)}
+.row .who{font-size:12px;color:var(--muted)}
+.row .what{font-size:14px;font-weight:500}
+.row .val{font-family:var(--f-num);font-weight:600;grid-row:1 / span 2;grid-column:2;align-self:center;text-align:right}
+.row.best{border-color:var(--accent)}
+.btn{appearance:none;border:0;background:var(--accent);color:var(--accent-ink);font-weight:700;border-radius:10px;padding:10px 16px;cursor:pointer;font-size:14px}
+.btn.ghost{background:transparent;color:var(--accent);border:1.5px solid var(--accent)}
+.btn.sm{padding:6px 12px;font-size:13px}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.note{font-size:12.5px;color:var(--muted);margin:0}
+
+/* B: levers */
+.lgroup{font-size:12px;color:var(--muted);letter-spacing:.08em;margin:14px 0 6px}
+.lgroup:first-child{margin-top:0}
+.levers{display:grid;gap:8px}
+.lcost{display:flex;flex-wrap:wrap;gap:4px 6px;margin-top:6px}
+.lcost .tag{font-family:var(--f-num)}
+.diag{font-size:14px;background:var(--bg);border-radius:10px;padding:10px 12px;margin:12px 0 0}
+.diag b{color:var(--accent)}
+
+/* B: lens tabs */
+.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);margin:0 -2px}
+.tab{appearance:none;border:0;background:none;padding:8px 10px;cursor:pointer;font-size:14px;color:var(--muted);border-bottom:2.5px solid transparent;white-space:nowrap;font-weight:500}
+.tab[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent);font-weight:700}
+.pane{display:grid;gap:12px}
+.pane h3{font-size:15px;margin:0}
+.explain{font-size:13.5px;margin:0}
+.explain li{margin-bottom:4px}
+.explain ul{margin:0;padding-left:1.2em}
+
+.force{display:grid;grid-template-columns:7.5em minmax(0,1fr) 2em;gap:8px;align-items:center;font-size:13.5px}
+.force input{accent-color:var(--accent)}
+.force output{font-family:var(--f-num);font-weight:600;text-align:right}
+.gauge{display:grid;gap:4px}
+.gauge .bar{height:10px;border-radius:99px;background:var(--bg);overflow:hidden}
+.gauge .bar i{display:block;height:100%;border-radius:99px}
+.gauge .lab{display:flex;justify-content:space-between;font-size:12.5px}
+
+.dupont{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;align-items:stretch}
+.dbox{border:1px solid var(--line);border-radius:10px;padding:8px;display:grid;gap:2px;text-align:center;min-width:0}
+.dbox.roe{border-color:var(--accent);background:var(--accent-soft)}
+.dbox span{font-size:11.5px;color:var(--muted)}
+.dbox strong{font-family:var(--f-num);font-size:16px}
+.dbox em{font-style:normal;font-family:var(--f-num);font-size:11.5px}
+.ops{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;font-size:11.5px;color:var(--muted);text-align:center;margin-top:-4px}
+
+.ctl{display:grid;gap:8px;background:var(--bg);border-radius:10px;padding:10px 12px}
+.ctl label{font-size:13.5px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg label{position:relative}
+.seg input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.seg span{display:block;border:1.5px solid var(--line);border-radius:99px;padding:3px 12px;font-size:13px;background:var(--surface)}
+.seg input:checked + span{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:700}
+.seg input:focus-visible + span{outline:2px solid var(--accent);outline-offset:2px}
+.cov{display:grid;gap:6px}
+.cov div{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;font-size:13.5px;align-items:center;border-bottom:1px dashed var(--line);padding-bottom:4px}
+.cov .num{font-weight:600}
+
+/* cost table */
+.costs{display:grid;gap:8px}
+.crow{display:grid;grid-template-columns:minmax(0,1fr);gap:4px;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.crow .h{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-weight:700;font-size:14px}
+.crow .r{font-size:13px;color:var(--muted)}
+.crow .who{font-size:12px}
+
+.cta{display:grid;gap:10px}
+.mailbox{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.mailbox code{font-family:var(--f-num);font-size:14px;background:var(--bg);padding:8px 10px;border-radius:8px;user-select:all;word-break:break-all}
+footer{max-width:1120px;margin:20px auto 0;font-size:12px;color:var(--muted)}
+
+.cashbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);
+  padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+  display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 -6px 18px rgba(0,0,0,.08)}
+.cashbar .l{font-size:12px;color:var(--muted);line-height:1.3}
+.cashbar .v{font-family:var(--f-num);font-weight:600;font-size:20px}
+.cashbar a{font-size:13px;color:var(--accent);font-weight:700;text-decoration:none}
+@media (max-width:520px){
+  .dupont,.ops{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ops{display:none}
+  .meters{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.mods{display:grid;gap:10px}
+.modgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.mod{display:grid;gap:2px;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;text-decoration:none;color:var(--ink);background:var(--surface);transition:border-color .15s}
+.mod:hover,.mod:focus-visible{border-color:var(--accent)}
+.mod .code{font-family:var(--f-num);font-size:11px;color:var(--accent);font-weight:600}
+.mod b{font-size:14.5px}
+.mod span.seg2{font-size:12.5px;color:var(--muted)}
+.mod.here{border-color:var(--accent);background:var(--accent-soft)}
+.backlink{color:var(--accent);font-weight:700;text-decoration:none;font-size:14px}
+.backlink:hover{text-decoration:underline}
+.nojs{background:var(--warn-soft);color:var(--ink);border:1px solid var(--warn);border-radius:12px;padding:12px 14px;margin:0 0 14px;font-size:14px}
+</style>
+</head>
+<body>
+<div style="background:#fbefd9;color:#6b4407;font:14px/1.5 system-ui,sans-serif;padding:8px max(16px,env(safe-area-inset-left,0px));text-align:center">網站版・測試版 2026-10-22：本頁所有數字皆由「規則試算」依公式即時計算，情境為虛構示範，不由 AI 決定。</div>
+<div class="wrap">
+  <p class="nojs" id="nojs"><b>這個頁面需要在瀏覽器中開啟才能互動。</b>LINE、郵件或檔案預覽視窗只會顯示版面，不會執行程式，所以看不到產業情境，也無法選擇。請直接開啟網址 lab.sinclairhuang.org/decision-lab/，或點右上角選單，選「用瀏覽器開啟」。</p>
+  <header class="top">
+    <a class="backlink" href="index.html">← 現金循環總覽</a>
+    <div class="eyebrow">AI Lab · 現金循環系列 05 · 綜合診斷</div>
+    <h1>現金卡在哪裡？<br>每一種解法，又是誰在付代價？</h1>
+    <p class="lede">先選一個情境。突發事件看 13 週現金能不能撐過去；結構診斷看 現金轉換週期（CCC）為什麼長、AI 時代的高成長為什麼「賺錢卻缺錢」，用五力、杜邦、財務結構與自由現金流四種角度拆解，並把每個改善動作的代價算出來。不需要登入或提供任何資料。</p>
+  </header>
+
+  <nav class="scbar" id="scbar" aria-label="選擇情境"></nav>
+
+  <!-- ===================== A：突發事件 ===================== -->
+  <div id="modeA">
+  <div class="grid">
+    <div class="left">
+      <section class="panel" aria-labelledby="s-sit">
+        <h2 id="s-sit">狀況：客戶延後拉貨，又要求延長帳期</h2>
+        <p class="mail"><b>來自前三大客戶 Y 的信</b>終端需求轉弱，接下來幾週拉貨量會降到原本的四分之一；同時希望自下月起，付款條件由月結 60 天改為 90 天。</p>
+        <div class="slider-row">
+          <label for="delay"><span>客戶延後拉貨幾週？</span><output id="delayOut" class="num">4 週</output></label>
+          <input id="delay" type="range" min="2" max="8" step="1" value="4">
+        </div>
+        <div class="facts">
+          <div class="fact"><span>期初現金</span><strong>3,200</strong></div>
+          <div class="fact"><span>安全水位</span><strong>1,500</strong></div>
+          <div class="fact"><span>客戶 Y 每週出貨</span><strong>1,200</strong></div>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="s-dec">
+        <h2 id="s-dec">你的三個決定</h2>
+        <p class="sub">硬性約束：不得損害前三大客戶的關係。其他都可以取捨。</p>
+
+        <div class="decision" role="radiogroup" aria-labelledby="d1">
+          <div class="dhead"><span class="k">決定 1</span><h3 id="d1">客戶要求的帳期</h3></div>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="term" value="90" id="term90" checked><span class="card"><span class="t">接受 90 天<span class="tag good">關係良好</span></span><span class="d">新發票的收款往後推一個月。</span></span></label>
+            <label class="choice"><input type="radio" name="term" value="75" id="term75"><span class="card"><span class="t">折衷 75 天<span class="tag warn">需要談判</span></span><span class="d">收款推後約兩週，客戶可能有意見。</span></span></label>
+            <label class="choice"><input type="radio" name="term" value="60" id="term60"><span class="card"><span class="t">堅持 60 天<span class="tag bad">關係緊張</span></span><span class="d">現金最好，但直接回絕前三大客戶。</span></span></label>
+          </div>
+        </div>
+
+        <div class="decision" role="radiogroup" aria-labelledby="d2">
+          <div class="dhead"><span class="k">決定 2</span><h3 id="d2">已下單的專用料（共 3,000）</h3></div>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="mat" value="normal" id="matN" checked><span class="card"><span class="t">照常進料<span class="tag good">供應穩定</span></span><span class="d">第 3–8 週每週付 500，料先堆在倉庫。</span></span></label>
+            <label class="choice"><input type="radio" name="mat" value="defer" id="matD"><span class="card"><span class="t">延後交貨<span class="tag warn">供應商要協調</span></span><span class="d">等客戶恢復拉貨再進料，付款跟著延後。</span></span></label>
+            <label class="choice"><input type="radio" name="mat" value="cancel" id="matC"><span class="card"><span class="t">取消未出貨部分<span class="tag bad">恢復時可能缺料</span></span><span class="d">只付已出貨的 1,000，加取消費 200。</span></span></label>
+          </div>
+        </div>
+
+        <div class="decision">
+          <div class="dhead"><span class="k">決定 3</span><h3>請客戶買回已到廠的專用料</h3></div>
+          <label class="toggle" for="buyback">
+            <input type="checkbox" id="buyback">
+            <span class="sw" aria-hidden="true"></span>
+            <span><span class="t">提出買回要求（1,000）</span><br><span class="d">客戶第 6 週同意，月結 30 天，第 10 週才入帳。會讓客戶關係降一級。</span></span>
+          </label>
+        </div>
+      </section>
+
+      <section class="panel compare" aria-labelledby="s-cmp">
+        <h2 id="s-cmp">事後解析：這是較好的做法嗎？</h2>
+        <p class="sub" style="margin:0">規則引擎把 18 種組合全部算過一次，只保留不損害客戶 Y 關係的做法，再比較 13 週最低現金。</p>
+        <div class="row" id="rowYou"><span class="who">你的做法</span><span class="what" id="youWhat"></span><span class="val" id="youVal"></span></div>
+        <div class="row best" id="rowBest"><span class="who">符合約束、最低現金最高</span><span class="what" id="bestWhat"></span><span class="val" id="bestVal"></span></div>
+        <p class="note" id="bestNote"></p>
+        <div class="btns">
+          <button class="btn" id="applyBest" type="button">套用這個組合</button>
+          <button class="btn ghost" id="reset" type="button">回到照單全收</button>
+        </div>
+      </section>
+    </div>
+
+    <section class="panel dash" id="dash" aria-labelledby="s-dash">
+      <h2 id="s-dash" class="eyebrow" style="margin:0">13 週現金流 · 新台幣萬元</h2>
+      <div class="verdict">
+        <span class="lab">13 週內最低現金</span>
+        <span class="big num" id="minVal">0</span>
+        <span class="pill" id="pill"></span>
+        <p class="sentence" id="sentence"></p>
+      </div>
+      <div class="legend">
+        <span><i style="border-color:var(--accent)"></i>你的做法</span>
+        <span><i style="border-color:var(--naive);border-top-style:dotted"></i>照單全收</span>
+        <span><i style="border-color:var(--ghost);border-top-style:dashed"></i>事件前計畫</span>
+      </div>
+      <div><svg class="chart" id="chart" viewBox="0 0 640 300" role="img" aria-label="13 週現金餘額折線圖"></svg></div>
+      <div class="readout" id="readout">點或滑過圖表，看每週數字。</div>
+      <div class="meters">
+        <div class="meter"><span>現金循環天數</span><strong class="num" id="ccc"></strong></div>
+        <div class="meter"><span>客戶 Y 關係</span><strong id="rel"></strong></div>
+        <div class="meter"><span>供應商關係</span><strong id="sup"></strong></div>
+      </div>
+      <p class="lesson" id="lesson" hidden>客戶同意買回是付款承諾，不是現金。圖上第 6 週是承諾，第 10 週才是入帳；在這之前的缺口還是要自己撐過去。</p>
+    </section>
+  </div>
+  </div>
+
+  <!-- ===================== B：結構診斷 ===================== -->
+  <div id="modeB" hidden>
+  <div class="grid">
+    <div class="left">
+      <section class="panel" aria-labelledby="bTitle">
+        <h2 id="bTitle"></h2>
+        <p class="mail" id="bStory"></p>
+        <div class="facts" id="bFacts"></div>
+        <div class="ctl" style="margin-top:12px">
+          <div class="slider-row">
+            <label for="bG"><span>今年營收成長率</span><output id="bGOut" class="num">0%</output></label>
+            <input type="range" id="bG" min="0" max="100" step="5" value="0">
+          </div>
+          <div class="slider-row">
+            <label for="bCx"><span>今年資本支出（擴產）</span><output id="bCxOut" class="num">0</output></label>
+            <input type="range" id="bCx" min="50" max="250" step="10" value="100">
+          </div>
+          <p class="note" id="bCxNote"></p>
+        </div>
+        <p class="diag" id="bDiag"></p>
+      </section>
+
+      <section class="panel" aria-labelledby="bLevH">
+        <h2 id="bLevH">可以拉的槓桿</h2>
+        <p class="sub">每一個都能縮短 現金轉換週期（CCC）或改善獲利，但都有人付代價。標籤是「單獨採用這一項」的效果：釋放多少現金、每年稅前損益變多少，以及換算成資金成本後跟銀行利率比。</p>
+        <div id="levers"></div>
+        <div class="btns" style="margin-top:12px"><button class="btn ghost sm" id="bClear" type="button">全部取消</button></div>
+      </section>
+    </div>
+
+    <section class="panel dash" id="bdash" aria-labelledby="bDashH">
+      <h2 id="bDashH" class="eyebrow" style="margin:0">年度財務 · 新台幣萬元 · 調整前 → 調整後</h2>
+      <div class="meters" id="bMeters"></div>
+      <div class="tabs" role="tablist" aria-label="分析視角">
+        <button class="tab" role="tab" data-lens="ccc" aria-selected="true">現金轉換週期拆解</button>
+        <button class="tab" role="tab" data-lens="five" aria-selected="false">五力</button>
+        <button class="tab" role="tab" data-lens="dupont" aria-selected="false">杜邦</button>
+        <button class="tab" role="tab" data-lens="struct" aria-selected="false">財務結構</button>
+        <button class="tab" role="tab" data-lens="fcf" aria-selected="false">自由現金流</button>
+        <button class="tab" role="tab" data-lens="future" aria-selected="false">未來 5 年</button>
+      </div>
+
+      <div class="pane" data-pane="ccc" role="tabpanel">
+        <div class="legend">
+          <span><s style="background:var(--warn)"></s>存貨天數 DIO</span>
+          <span><s style="background:var(--accent)"></s>收款天數 DSO</span>
+          <span><s style="background:var(--naive)"></s>付款天數 DPO</span>
+        </div>
+        <svg class="chart" id="cccChart" viewBox="0 0 640 250" role="img" aria-label="營業循環與現金循環天數比較"></svg>
+        <div class="explain" id="cccText"></div>
+      </div>
+
+      <div class="pane" data-pane="five" role="tabpanel" hidden>
+        <h3>五力會決定「誰能吸收這筆資金成本」</h3>
+        <p class="note">現金轉換週期（CCC）縮短，等於把資金壓力推給客戶或供應商。對方力量越大，推過去的代價越高。可以調整五力分數（1 弱 – 5 強），左邊每個槓桿的代價會跟著變。</p>
+        <div id="forces" style="display:grid;gap:6px"></div>
+        <div class="gauge" id="gCust"></div>
+        <div class="gauge" id="gSup"></div>
+        <div class="explain" id="fiveText"></div>
+        <div><button class="btn ghost sm" id="fReset" type="button">五力回到情境預設</button></div>
+      </div>
+
+      <div class="pane" data-pane="dupont" role="tabpanel" hidden>
+        <h3>杜邦拆解：ROE 是從哪裡變好的？</h3>
+        <div class="dupont" id="dupont"></div>
+        <div class="ops"><span>　</span><span>＝ 淨利率</span><span>× 資產周轉率</span><span>× 權益乘數</span></div>
+        <div class="explain" id="dupontText"></div>
+      </div>
+
+      <div class="pane" data-pane="struct" role="tabpanel" hidden>
+        <h3>財務結構：拉長的 現金轉換週期（CCC）由誰來出錢？</h3>
+        <div class="ctl">
+          <label for="bEq">現金增資 <output id="bEqOut" class="num">0</output> 萬</label>
+          <input type="range" id="bEq" min="0" max="10000" step="500" value="0" style="accent-color:var(--accent)">
+          <div class="seg" role="radiogroup" aria-label="借款期限">
+            <label><input type="radio" name="bLong" value="0" checked><span>短期銀行借款為主</span></label>
+            <label><input type="radio" name="bLong" value="0.5"><span>長短各半</span></label>
+            <label><input type="radio" name="bLong" value="1"><span>公司債／長期借款為主</span></label>
+          </div>
+        </div>
+        <div class="legend">
+          <span><s style="background:var(--ghost)"></s>現金</span><span><s style="background:var(--accent)"></s>應收</span><span><s style="background:var(--warn)"></s>存貨</span><span><s style="background:var(--line)"></s>固定資產</span>
+          <span><s style="background:var(--naive)"></s>應付</span><span><s style="background:var(--c3-soft);border:1px solid var(--c3)"></s>客戶預收款</span><span><s style="background:var(--bad)"></s>短期借款</span><span><s style="background:var(--c3)"></s>公司債／長借</span><span><s style="background:var(--good)"></s>權益</span>
+        </div>
+        <svg class="chart" id="bsChart" viewBox="0 0 640 260" role="img" aria-label="資產負債結構比較"></svg>
+        <div class="cov" id="cov"></div>
+        <div class="explain" id="structText"></div>
+      </div>
+
+      <div class="pane" data-pane="fcf" role="tabpanel" hidden>
+        <h3>自由現金流：賺的錢有沒有變成現金？</h3>
+        <svg class="chart" id="fcfChart" viewBox="0 0 640 270" role="img" aria-label="自由現金流瀑布圖"></svg>
+        <div class="explain" id="fcfText"></div>
+      </div>
+
+      <div class="pane" data-pane="future" role="tabpanel" hidden>
+        <h3>長期資金不是免費的，也不是解決，是把問題往後延</h3>
+        <p class="note">缺口每年都要有人出錢。能不能還，取決於這些投資何時、以多少報酬回收。以下用簡化模型把三種資金來源各推演 5 年。</p>
+        <div class="ctl">
+          <div class="slider-row">
+            <label for="fRoic"><span>新投資的稅前報酬率（兩年後開始回收）</span><output id="fRoicOut" class="num">10%</output></label>
+            <input type="range" id="fRoic" min="0" max="30" step="1" value="10" style="accent-color:var(--accent)">
+          </div>
+          <div class="slider-row">
+            <label for="fN"><span>擴產持續幾年（之後只做維修性資本支出）</span><output id="fNOut" class="num">3 年</output></label>
+            <input type="range" id="fN" min="1" max="5" step="1" value="3" style="accent-color:var(--accent)">
+          </div>
+          <div class="seg" role="radiogroup" aria-label="缺口用什麼補">
+            <label><input type="radio" name="fOpt" value="short" checked><span>短期銀行借款滾動</span></label>
+            <label><input type="radio" name="fOpt" value="bond"><span>發行公司債</span></label>
+            <label><input type="radio" name="fOpt" value="equity"><span>現金增資</span></label>
+          </div>
+        </div>
+        <div class="legend">
+          <span><s style="background:var(--good)"></s>當年自由現金流（正）</span>
+          <span><s style="background:var(--bad)"></s>當年自由現金流（負）</span>
+          <span><i style="border-color:var(--c3)"></i>為補缺口累積的新增資金</span>
+        </div>
+        <svg class="chart" id="futChart" viewBox="0 0 640 260" role="img" aria-label="未來五年自由現金流與新增融資"></svg>
+        <div class="cov" id="futTable"></div>
+        <div class="explain" id="futText"></div>
+      </div>
+    </section>
+
+    <section class="panel left" aria-labelledby="bCostH" style="display:grid;gap:10px">
+      <h2 id="bCostH">代價清單：沒有免費的現金</h2>
+      <p class="sub" style="margin:0">把你選的槓桿逐項攤開：釋放的現金是一次性的，損益影響卻是每年都在。</p>
+      <div class="costs" id="costs"></div>
+    </section>
+  </div>
+  </div>
+
+  <section class="panel mods" style="margin-top:16px" aria-labelledby="s-mods">
+    <h2 id="s-mods">現金循環系列：各模組</h2>
+    <p class="sub" style="margin:0">現金轉換週期＝收款天數＋存貨天數−付款天數。每個模組處理其中一段，點選會在新分頁開啟。</p>
+    <div class="modgrid">
+      <a class="mod" href="case-boss.html" ><span class="code">主案例</span><b>3 分鐘當老闆</b><span class="seg2">客戶延後拉貨、要求延長帳期</span></a>
+      <a class="mod" href="sop.html" ><span class="code">04 · 源頭</span><b>供需情報與 S&amp;OP</b><span class="seg2">需求預測，決定後面所有天數</span></a>
+      <a class="mod" href="mrp.html" ><span class="code">02 · 存貨天數</span><b>MRP 動態物控</b><span class="seg2">該買多少、何時買</span></a>
+      <a class="mod" href="sourcing.html" ><span class="code">02B · 存貨天數</span><b>關鍵料源策略</b><span class="seg2">寡占料、交期與安全庫存</span></a>
+      <a class="mod" href="production.html" ><span class="code">02C · 存貨天數</span><b>生管指揮中心</b><span class="seg2">在製品與排程</span></a>
+      <a class="mod" href="ap.html" ><span class="code">01 · 付款天數</span><b>AP 四單比對</b><span class="seg2">付款前的核對與時點</span></a>
+      <a class="mod" href="ar.html" ><span class="code">03 · 收款天數</span><b>AR 應收收款</b><span class="seg2">授信、催收與入帳</span></a>
+      <a class="mod" href="index.html" ><span class="code">總覽</span><b>現金循環實驗室</b><span class="seg2">系列首頁與案例說明</span></a>
+    </div>
+  </section>
+
+  <section class="panel cta" style="margin-top:16px" aria-labelledby="s-cta">
+    <h2 id="s-cta">你的公司最近也遇過類似的事嗎？</h2>
+    <p class="sub" style="margin:0">從一件真實發生的經營事件開始，一起看資料從哪裡來、誰負責確認、哪些事要誰核准。不需要先提供機密資料。</p>
+    <div class="mailbox"><code id="email">research@sinclairhuang.org</code><button class="btn ghost" id="copy" type="button">複製信箱</button></div>
+    <p class="note">主旨可寫「跨部門經營決策討論」。<a href="index.html" style="color:var(--accent)">看系列總覽</a></p>
+  </section>
+</div>
+
+<footer>本頁情境與數字為虛構示範，模型為簡化版：營業費用視為固定，進貨以銷貨成本估算，稅率 20%，期末固定資產＝期初＋資本支出−折舊，權益不含當年保留盈餘；「未來 5 年」假設原有業務營業利益持平、成長率逐年遞減三成、折舊維持不變、不配息，各槓桿的流失率與加價幅度為依五力分數調整的教學假設。所有數字由頁面規則計算，不由 AI 決定。與作者任職或服務的任何公司無關。</footer>
+
+<div class="cashbar" id="barA" aria-live="polite">
+  <div><div class="l">13 週最低現金</div><div class="v" id="barVal">0</div></div>
+  <span class="pill" id="barPill"></span>
+  <a href="#dash">看圖表 ↑</a>
+</div>
+<div class="cashbar" id="barB" aria-live="polite" hidden>
+  <div><div class="l">現金轉換週期（天）</div><div class="v" id="barBccc">0</div></div>
+  <div><div class="l">釋放現金</div><div class="v" id="barBcash" style="font-size:16px">0</div></div>
+  <a href="#bdash">看分析 ↑</a>
+</div>
+
+<script>
+/* ============ 共用 ============ */
+document.getElementById("nojs").hidden=true;
+const $=id=>document.getElementById(id);
+const fmt=n=>(n<0?"−":"")+Math.abs(Math.round(n)).toLocaleString("en-US");
+const sfmt=n=>(n>0?"+":"")+fmt(n);
+const pct=(x,d=1)=>(x<0?"−":"")+Math.abs(x*100).toFixed(d)+"%";
+const NS="http://www.w3.org/2000/svg";
+function mk(svg,t,a){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);svg.appendChild(e);return e;}
+function txt(svg,x,y,s,a={}){const e=mk(svg,"text",Object.assign({x,y,"font-size":11,fill:"var(--muted)"},a));e.textContent=s;return e;}
+
+/* ============ A：13 週突發事件（原模型） ============ */
+(function(){
+const C0=3200, SAFE=1500, WEEKS=13;
+const LAG={60:9,75:11,90:13};
+const TERM_REL={90:0,75:1,60:2};
+const MAT_SUP={normal:0,defer:1,cancel:2};
+const REL_TXT=[["良好","good"],["尚可","warn"],["緊張","bad"]];
+const TERM_NAME={90:"接受 90 天",75:"折衷 75 天",60:"堅持 60 天"};
+const MAT_NAME={normal:"照常進料",defer:"延後交貨",cancel:"取消未出貨"};
+
+function sim(p){
+  const L=LAG[p.term]; const out=[]; let c=C0;
+  const ship=s=>s<=p.delay?300:1200;
+  const matPay=w=>{
+    if(p.mat==="normal") return (w>=3&&w<=8)?500:0;
+    if(p.mat==="defer"){const st=p.delay+5;return (w>=st&&w<st+6)?500:0;}
+    return (w===3||w===4?500:0)+(w===3?200:0);
+  };
+  for(let w=1;w<=WEEKS;w++){
+    const yIn = w<=9 ? 1200 : (w-L>=1 ? ship(w-L) : 0);
+    const inflow = 1500 + yIn + (p.buyback&&w===10?1000:0);
+    const outflow = 2250 + ([4,8,13].includes(w)?900:0) + matPay(w);
+    c += inflow-outflow; out.push(c);
+  }
+  return out;
+}
+const rel=p=>Math.min(2,TERM_REL[p.term]+(p.buyback?1:0));
+const sup=p=>MAT_SUP[p.mat];
+function ccc(p){
+  const dso={60:60,75:75,90:90}[p.term];
+  const dio=45+{normal:12,defer:6,cancel:2}[p.mat]-(p.buyback?8:0);
+  return dso+dio-50;
+}
+const minOf=a=>{let m=Infinity,i=0;a.forEach((v,k)=>{if(v<m){m=v;i=k}});return {v:m,w:i+1}};
+function status(m){return m<0?["現金轉負","bad"]:m<SAFE?["低於安全水位","warn"]:["安全","good"]}
+
+function read(){
+  return {delay:+$("delay").value,
+    term:+document.querySelector('input[name=term]:checked').value,
+    mat:document.querySelector('input[name=mat]:checked').value,
+    buyback:$("buyback").checked};
+}
+function setP(p){
+  $("term"+p.term).checked=true;
+  $({normal:"matN",defer:"matD",cancel:"matC"}[p.mat]).checked=true;
+  $("buyback").checked=p.buyback; update();
+}
+const desc=p=>`${TERM_NAME[p.term]}・${MAT_NAME[p.mat]}${p.buyback?"・要求買回":""}`;
+
+function best(delay){
+  let b=null;
+  for(const term of [90,75,60]) for(const mat of ["normal","defer","cancel"]) for(const buyback of [false,true]){
+    const p={delay,term,mat,buyback}; if(rel(p)>=2) continue;
+    const m=minOf(sim(p)).v;
+    if(!b||m>b.m||(m===b.m&&sup(p)<sup(b.p))) b={p,m};
+  }
+  return b;
+}
+
+const W=640,H=300,PL=52,PR=14,PT=14,PB=30;
+const svg=$("chart");
+function el(t,a){return mk(svg,t,a);}
+function drawChart(cur,naive,base,p){
+  svg.innerHTML="";
+  const all=[...cur,...naive,...base,0,SAFE];
+  let lo=Math.min(...all), hi=Math.max(...all);
+  const step=1000; lo=Math.floor(lo/step)*step; hi=Math.ceil(hi/step)*step; if(hi-lo<4000) hi=lo+4000;
+  const x=w=>PL+(w-1)*(W-PL-PR)/(WEEKS-1);
+  const y=v=>PT+(hi-v)*(H-PT-PB)/(hi-lo);
+  const tickStep=(hi-lo)>8000?2000:1000;
+  for(let v=lo;v<=hi;v+=tickStep){
+    el("line",{x1:PL,x2:W-PR,y1:y(v),y2:y(v),stroke:"var(--line)","stroke-width":v===0?1.5:1});
+    txt(svg,PL-8,y(v)+4,fmt(v),{"text-anchor":"end","font-family":"IBM Plex Mono,monospace"});
+  }
+  for(let w=1;w<=WEEKS;w++){
+    if(w%2===1||w===WEEKS) txt(svg,x(w),H-10,"W"+w,{"text-anchor":"middle","font-family":"IBM Plex Mono,monospace"});
+  }
+  el("line",{x1:PL,x2:W-PR,y1:y(SAFE),y2:y(SAFE),stroke:"var(--warn)","stroke-width":1.5,"stroke-dasharray":"6 5"});
+  txt(svg,W-PR,y(SAFE)-6,"安全水位 1,500",{"text-anchor":"end",fill:"var(--warn)"});
+  if(lo<0){ el("rect",{x:PL,y:y(0),width:W-PL-PR,height:y(lo)-y(0),fill:"var(--bad-soft)",opacity:.6}); }
+  const path=a=>a.map((v,i)=>(i?"L":"M")+x(i+1).toFixed(1)+" "+y(v).toFixed(1)).join(" ");
+  el("path",{d:path(base),fill:"none",stroke:"var(--ghost)","stroke-width":2,"stroke-dasharray":"7 6"});
+  el("path",{d:path(naive),fill:"none",stroke:"var(--naive)","stroke-width":2.5,"stroke-dasharray":"2 5","stroke-linecap":"round"});
+  el("path",{d:path(cur)+` L${x(WEEKS)} ${y(lo)} L${x(1)} ${y(lo)} Z`,fill:"var(--accent)",opacity:.08});
+  el("path",{d:path(cur),fill:"none",stroke:"var(--accent)","stroke-width":3,"stroke-linejoin":"round","stroke-linecap":"round"});
+  if(p.buyback){
+    [[6,"承諾"],[10,"入帳"]].forEach(([w,lab])=>{
+      el("line",{x1:x(w),x2:x(w),y1:PT,y2:H-PB,stroke:"var(--accent)","stroke-width":1,"stroke-dasharray":"3 4",opacity:.7});
+      txt(svg,x(w)+4,PT+12,lab,{fill:"var(--accent)","font-weight":700});
+    });
+  }
+  const m=minOf(cur); const s=status(m.v)[1];
+  el("circle",{cx:x(m.w),cy:y(m.v),r:6,fill:`var(--${s})`,stroke:"var(--surface)","stroke-width":2});
+  const hl=el("line",{x1:0,x2:0,y1:PT,y2:H-PB,stroke:"var(--muted)","stroke-width":1,opacity:0});
+  const dot=el("circle",{r:4.5,fill:"var(--accent)",opacity:0});
+  for(let w=1;w<=WEEKS;w++){
+    const half=(W-PL-PR)/(WEEKS-1)/2;
+    const r=el("rect",{x:x(w)-half,y:PT,width:half*2,height:H-PT-PB,fill:"transparent"});
+    const show=()=>{hl.setAttribute("x1",x(w));hl.setAttribute("x2",x(w));hl.setAttribute("opacity",.5);
+      dot.setAttribute("cx",x(w));dot.setAttribute("cy",y(cur[w-1]));dot.setAttribute("opacity",1);
+      $("readout").innerHTML=`第 ${w} 週　你的做法 <b>${fmt(cur[w-1])}</b>　照單全收 <b>${fmt(naive[w-1])}</b>　事件前 <b>${fmt(base[w-1])}</b>`;};
+    r.addEventListener("pointerenter",show); r.addEventListener("pointerdown",show);
+  }
+}
+
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const shown={minVal:0,barVal:0};
+function tween(id,to){
+  const from=shown[id]; shown[id]=to;
+  if(reduce||from===to){$(id).textContent=fmt(to);return;}
+  const t0=performance.now(),d=380;
+  (function f(t){const k=Math.min(1,(t-t0)/d),e=1-Math.pow(1-k,3);$(id).textContent=fmt(from+(to-from)*e);if(k<1)requestAnimationFrame(f);})(t0);
+}
+
+function update(){
+  const p=read();
+  $("delayOut").textContent=p.delay+" 週";
+  const cur=sim(p);
+  const naive=sim({delay:p.delay,term:90,mat:"normal",buyback:false});
+  const base=sim({delay:0,term:60,mat:"normal",buyback:false});
+  const m=minOf(cur); const [stTxt,st]=status(m.v);
+  tween("minVal",m.v); tween("barVal",m.v);
+  ["pill","barPill"].forEach(id=>{$(id).textContent=stTxt;$(id).className="pill "+st;});
+  $("barVal").style.color=`var(--${st})`;
+  let s=`現金在第 ${m.w} 週降到最低。`;
+  if(m.v<0) s+=`會短缺 ${fmt(-m.v)} 萬，必須在那之前談好銀行額度或其他資金。`;
+  else if(m.v<SAFE) s+=`沒有轉負，但距離安全水位還差 ${fmt(SAFE-m.v)} 萬，建議先備妥短期額度。`;
+  else s+=`全程守住安全水位。`;
+  const nm=minOf(naive).v; if(m.v!==nm) s+=` 比照單全收${m.v>nm?"多保住":"少了"} ${fmt(Math.abs(m.v-nm))} 萬。`;
+  $("sentence").textContent=s;
+  $("ccc").textContent=ccc(p)+" 天";
+  const r=REL_TXT[rel(p)], u=REL_TXT[sup(p)];
+  $("rel").textContent=r[0]; $("rel").className=r[1];
+  $("sup").textContent=u[0]; $("sup").className=u[1];
+  $("lesson").hidden=!p.buyback;
+  drawChart(cur,naive,base,p);
+
+  const b=best(p.delay);
+  $("youWhat").textContent=desc(p)+(rel(p)>=2?"（違反約束）":"");
+  $("youVal").textContent=fmt(m.v); $("youVal").style.color=`var(--${st})`;
+  $("bestWhat").textContent=desc(b.p);
+  $("bestVal").textContent=fmt(b.m); $("bestVal").style.color=`var(--${status(b.m)[1]})`;
+  const same=b.p.term===p.term&&b.p.mat===p.mat&&b.p.buyback===p.buyback;
+  let n = same ? "你的做法就是規則引擎在約束內找到的最好組合。" : "";
+  if(b.m<SAFE) n+=(n?" ":"")+`即使是最好的組合，最低現金仍${b.m<0?"轉負":"低於安全水位"}，代表這個事件光靠營運調整不夠，還需要財務面的準備。`;
+  if(sup(b.p)===2) n+=(n?" ":"")+"這個組合的代價是供應商關係緊張，客戶恢復拉貨時可能缺料，要先和業務確認恢復時間。";
+  n+=" 參考方案只比較預設選項，真實評估還要加入客戶重要性與談判回饋。";
+  $("bestNote").textContent=n;
+  $("applyBest").disabled=same; $("applyBest").style.opacity=same?.5:1;
+  $("applyBest").onclick=()=>setP(b.p);
+}
+
+document.querySelectorAll("#modeA input").forEach(i=>i.addEventListener("input",update));
+$("reset").addEventListener("click",()=>setP({term:90,mat:"normal",buyback:false}));
+update();
+})();
+
+/* ============ B：結構診斷 ============ */
+(function(){
+const TAX=0.2;
+const FN={buyer:"買方議價力",supplier:"供應商議價力",subst:"替代品威脅",entrant:"新進者威脅",rivalry:"同業競爭強度"};
+const SC={
+  elec:{chip:"電子零組件廠",tag:"被大客戶壓帳期",
+    story:"前三大客戶占營收七成，都是國際品牌。客戶的付款條件一路從月結 60 天被拉到 90 天以上，業務說「不接就換人做」。帳上有獲利，但每到月底資金都很緊。",
+    R:50000,cogs:.82,opex:.10,DSO:105,DIO:60,DPO:45,bDSO:75,bDIO:50,bDPO:60,FA:18000,E:20000,cash:3000,DA:3000,capex:3500,rate:.028,g:.08,roic:.08,cxg:0,
+    f:{buyer:5,supplier:2,subst:3,entrant:2,rivalry:4}},
+  aisrv:{chip:"AI 伺服器組裝廠",tag:"營收創新高、超前備料",
+    story:"客戶是大型雲端業者，急單一張接一張，營收連續創新高。GPU 與記憶體供給吃緊、價格上漲，工廠用短期借款提前備料；客戶付款條件長，同時還要在海外擴廠。毛利率只有 5% 上下，帳面獲利創高，現金卻一直不夠用。",
+    R:200000,cogs:.94,opex:.025,DSO:90,DIO:85,DPO:75,bDSO:75,bDIO:50,bDPO:70,FA:30000,E:40000,cash:15000,DA:3000,capex:9000,rate:.022,g:.60,roic:.10,cxg:.30,
+    f:{buyer:5,supplier:5,subst:2,entrant:2,rivalry:4}},
+  semi:{chip:"先進製程／記憶體廠",tag:"擴產吃掉自由現金流",
+    story:"產品供不應求，客戶排隊、甚至願意預付款保產能，毛利率超過五成，現金轉換週期（CCC）和同業差不多。真正的壓力在擴產：資本支出是折舊的兩倍以上，營業現金流很強，扣掉資本支出後所剩無幾，需要靠公司債或增資支應下一輪投資。",
+    R:100000,cogs:.45,opex:.12,DSO:45,DIO:90,DPO:40,bDSO:45,bDIO:90,bDPO:40,FA:250000,E:200000,cash:10000,DA:25000,capex:55000,rate:.025,g:.35,roic:.15,cxg:.15,
+    f:{buyer:2,supplier:3,subst:1,entrant:1,rivalry:3}},
+  csp:{chip:"雲端巨頭（CSP）",tag:"先投資、後回收",
+    story:"雲端與 AI 服務營收年增兩成以上，營業利益率三成五，客戶先付錢、供應商後收錢，現金轉換週期（CCC）是負的。但 GPU 資料中心的資本支出是折舊的三倍，營業現金流再強也追不上，自由現金流掉到零附近甚至轉負，開始大量發行公司債，押注未來 AI 營收能回收。",
+    R:400000,cogs:.40,opex:.25,DSO:40,DIO:5,DPO:60,bDSO:45,bDIO:5,bDPO:55,FA:600000,E:500000,cash:80000,DA:60000,capex:180000,rate:.045,g:.15,roic:.12,cxg:.25,
+    f:{buyer:2,supplier:4,subst:2,entrant:2,rivalry:4}},
+  bio:{chip:"醫材公司",tag:"高成長吃掉現金",
+    story:"營收年增 30%，毛利率超過五成，但客戶是醫院與經銷商，收款慢；為了確保供貨與效期管理，存貨水位也高。損益表很漂亮，自由現金流卻是負的。",
+    R:12000,cogs:.45,opex:.35,DSO:120,DIO:150,DPO:60,bDSO:90,bDIO:120,bDPO:60,FA:6000,E:10000,cash:2500,DA:600,capex:2000,rate:.032,g:.30,roic:.18,cxg:.10,
+    f:{buyer:4,supplier:3,subst:2,entrant:2,rivalry:3}},
+  trade:{chip:"電子通路商",tag:"毛利薄、靠槓桿",
+    story:"代理原廠產品，毛利率只有 8%。上游原廠與下游客戶都很強勢，現金轉換週期（CCC）看起來不長，但營收規模大，一點點天數就是一大筆錢，主要靠銀行短期額度撐著。",
+    R:80000,cogs:.92,opex:.06,DSO:60,DIO:45,DPO:40,bDSO:55,bDIO:35,bDPO:45,FA:4000,E:6000,cash:2000,DA:300,capex:300,rate:.035,g:.05,roic:.06,cxg:0,
+    f:{buyer:4,supplier:4,subst:4,entrant:4,rivalry:5}}
+};
+const LV=[
+  {k:"tighten",grp:"客戶端",t:"縮短客戶帳期 15 天",d:"重新談付款條件、加強授信與催收。",who:"客戶"},
+  {k:"disc",grp:"客戶端",t:"提早付款折扣（10 天內付款折 1%）",d:"假設四成客戶採用。",who:"公司毛利"},
+  {k:"factor",grp:"客戶端",t:"應收帳款賣斷 30%（保理）",d:"無追索權賣給銀行，帳款提前入帳。",who:"公司（付給銀行）"},
+  {k:"price",grp:"客戶端",t:"要求客戶漲價 2%",d:"反映原料與資金成本。",who:"客戶"},
+  {k:"prepay",grp:"客戶端",t:"要求客戶預付款（三成訂單、提前 60 天）",d:"以預付款或長約訂金換取產能保證。",who:"客戶（或公司讓價）"},
+  {k:"lean",grp:"內部",t:"降低安全庫存、精簡料號（−15 天）",d:"改善需求預測，淘汰低周轉料號。",who:"服務水準"},
+  {k:"vmi",grp:"供應商端",t:"請供應商寄售（VMI），存貨 −35%",d:"料放在你的倉庫，領用才算買。",who:"供應商"},
+  {k:"extend",grp:"供應商端",t:"延長供應商帳期 20 天",d:"重新談付款條件。",who:"供應商"},
+  {k:"supdisc",grp:"供應商端",t:"改為 10 天內付款，換取 1.5% 折扣",d:"反向操作：拿現金換毛利。",who:"公司現金"}
+];
+const custP=f=>f.buyer*.5+f.rivalry*.3+f.subst*.2;
+const mult=x=>0.4+0.3*(x-1);
+
+function model(S,f,act,fin){
+  const cp=custP(f), sp=f.supplier, rv=f.rivalry;
+  let DSO=S.DSO, DIO=S.DIO, DPO=S.DPO;
+  let revLoss=0, price=0, cogsAdj=0, discShare=0;
+  if(act.has("price")){price+=.02; revLoss+=.03*mult(cp);}
+  if(act.has("tighten")){DSO-=15; revLoss+=.015*mult(cp);}
+  if(act.has("disc")){discShare=.4; DSO=DSO*(1-discShare)+10*discShare;}
+  if(act.has("lean")){DIO-=15; revLoss+=.01*mult(rv);}
+  if(act.has("vmi")){DIO*=.65; cogsAdj+=.008*mult(sp);}
+  if(act.has("extend")){DPO+=20; cogsAdj+=.006*mult(sp);}
+  if(act.has("supdisc")){DPO=10; cogsAdj-=.015;}
+  if(act.has("prepay")){price-=.005*mult(cp);}
+  const vol=S.R*(1-revLoss);
+  const gross=vol*(1+price);
+  const disc=gross*.01*discShare;
+  const rev=gross-disc;
+  const cogs=vol*S.cogs*(1+cogsAdj);
+  const opex=S.R*S.opex;
+  const EBIT=rev-cogs-opex;
+  const ARg=rev*DSO/365;
+  const factored=act.has("factor")?ARg*.3:0;
+  const AR=ARg-factored;
+  const finFee=factored*(S.rate+.02);
+  const Inv=cogs*DIO/365, AP=cogs*DPO/365;
+  const adv=act.has("prepay")?rev*.3*60/365:0;
+  const FA=S.FA+S.capex-S.DA;
+  const E=S.E+fin.eq;
+  let cash=S.cash;
+  let TA=cash+AR+Inv+FA;
+  let debt=TA-AP-adv-E;
+  if(debt<0){cash-=debt; TA-=debt; debt=0;}
+  const longD=debt*fin.long, shortD=debt-longD;
+  const interest=shortD*S.rate+longD*(S.rate+.006);
+  const NI=(EBIT-interest-finFee)*(1-TAX);
+  const NWC=AR+Inv-AP-adv;
+  // 去年（基準天數、營收 R/(1+g)）
+  const Rp=S.R/(1+S.g), Cp=Rp*S.cogs;
+  const pAR=Rp*S.DSO/365, pInv=Cp*S.DIO/365, pAP=Cp*S.DPO/365;
+  // 今年若天數不變
+  const sAR=S.R*S.DSO/365, sInv=S.R*S.cogs*S.DIO/365, sAP=S.R*S.cogs*S.DPO/365;
+  const dAR=AR-pAR, dInv=Inv-pInv, dAP=AP-pAP;
+  const NOPAT=EBIT*(1-TAX);
+  const FCF=NOPAT+S.DA-S.capex-(dAR+dInv-dAP-adv);
+  const effDSO=DSO*(factored?0.7:1);
+  return {adv,FA,capex:S.capex,DSO,DIO,DPO,effDSO,CCC:effDSO+DIO-DPO,trueCCC:DSO+DIO-DPO,rev,cogs,opex,EBIT,AR,Inv,AP,factored,finFee,cash,TA,E,debt,shortD,longD,interest,NI,NWC,
+    margin:NI/rev,turn:rev/TA,lev:TA/E,ROE:NI/E,ROA:NI/TA,
+    debtRatio:(AP+adv+debt)/TA,current:(cash+AR+Inv)/(AP+adv+shortD),cover:EBIT/Math.max(1,interest+finFee),
+    NOPAT,dAR,dInv,dAP,FCF,growthNWC:(sAR+sInv-sAP)-(pAR+pInv-pAP),daysNWC:NWC-(sAR+sInv-sAP),revLoss,cogsAdj,disc,price};
+}
+
+const st={sc:"elec",act:new Set(),fin:{eq:0,long:0},f:null,lens:"ccc",g:SC.elec.g,cx:1,roic:SC.elec.roic,N:3,fopt:"short"};
+const S=()=>({...SC[st.sc],g:st.g,capex:SC[st.sc].capex*st.cx});
+const NOFIN={eq:0,long:0};
+
+function single(k){
+  const b=model(S(),st.f,new Set(),NOFIN), m=model(S(),st.f,new Set([k]),NOFIN);
+  const cashRel=b.NWC-m.NWC;
+  const op=(m.EBIT-b.EBIT)-(m.finFee-b.finFee);
+  const rate=S().rate;
+  let label,cls;
+  if(cashRel>1&&op<0){const r=-op/cashRel; label=`資金成本 ${pct(r)}`; cls=r<rate?"good":r<rate*2?"warn":"bad";}
+  else if(cashRel>1&&op>=0){label="釋放現金且不傷損益"; cls="good";}
+  else if(cashRel<-1&&op>0){const r=op/-cashRel; label=`投入報酬 ${pct(r)}`; cls=r>rate?"good":"bad";}
+  else if(cashRel<-1&&op<=0){label="又吃現金又傷損益"; cls="bad";}
+  else {label=op>=0?"只改善損益":"只增加成本"; cls=op>=0?"good":"bad";}
+  return {cashRel,op,label,cls,m,b};
+}
+function risk(k){
+  const f=st.f, cp=custP(f), sp=f.supplier, rv=f.rivalry;
+  switch(k){
+    case "tighten": return cp>=3.8?"客戶議價力高：可能被要求降價、減量或轉單。模型估計流失 "+pct(.015*mult(cp))+" 營收，真實情況可能更多。":"客戶議價力不高，帳期長多半是內部授信與催收紀律問題，可以直接談。";
+    case "disc": return "折扣給的是所有提早付款的客戶，包括原本就準時付款的；換算年化成本常高於銀行借款。";
+    case "factor": return "帳面 現金轉換週期（CCC）變短、資產變少、周轉率變好，但本質是融資，費率高於借款；揭露時可能被解讀為資金吃緊。";
+    case "price": return cp>=3.8?"買方強勢、同業競爭激烈，漲價可能換來轉單，流失量估計 "+pct(.03*mult(cp))+"。":"具議價空間，可搭配規格、交期或服務調整一起談。";
+    case "lean": return rv>=4?"同業競爭激烈，缺貨一次就可能被替換；估計營收流失 "+pct(.01*mult(rv))+"。":"需要搭配需求預測與供應商交期改善，否則缺貨風險上升。";
+    case "vmi": return sp>=4?"供應商強勢，寄售多半要用較高單價或長約交換，估計進價 +"+pct(.008*mult(sp))+"。":"需要足夠採購量；料權、盤點與呆料責任要在合約寫清楚。";
+    case "extend": return sp>=4?"原料寡占：拉長帳期可能換來漲價（估計 +"+pct(.006*mult(sp))+"）、配額縮減或斷料。":"可以談，但對中小供應商是把資金壓力往上游推，長期關係與供貨優先順序會受影響。";
+    case "prepay": return cp>=3.8?"買方強勢：客戶通常不願預付，硬要會換來讓價（估計 "+pct(.005*mult(cp),2)+"）或轉單。":"供不應求時，客戶願意用預付款或長約換取產能保證，是上游關鍵零組件廠常見做法；代價是交貨承諾、違約責任，以及景氣反轉時客戶要求退款或延後。";
+    case "supdisc": return "毛利與淨利率變好，杜邦看起來更漂亮；但 現金轉換週期（CCC）拉長、要多準備營運資金。只有在資金成本低於折扣年化報酬時才划算。";
+  }
+}
+
+/* --- 畫面 --- */
+function renderLevers(){
+  const box=$("levers"); box.innerHTML="";
+  let g="";
+  LV.forEach(L=>{
+    if(L.grp!==g){g=L.grp;const h=document.createElement("div");h.className="lgroup";h.textContent=g;box.appendChild(h);}
+    const lab=document.createElement("label"); lab.className="toggle"; lab.htmlFor="lv-"+L.k; lab.style.marginBottom="8px";
+    lab.innerHTML=`<input type="checkbox" id="lv-${L.k}"><span class="sw" aria-hidden="true"></span><span style="min-width:0"><span class="t">${L.t}</span><br><span class="d">${L.d}</span><span class="lcost" id="lc-${L.k}"></span></span>`;
+    box.appendChild(lab);
+    lab.querySelector("input").addEventListener("change",e=>{
+      if(e.target.checked) st.act.add(L.k); else st.act.delete(L.k);
+      if(L.k==="supdisc"&&e.target.checked){st.act.delete("extend");$("lv-extend").checked=false;}
+      if(L.k==="extend"&&e.target.checked){st.act.delete("supdisc");$("lv-supdisc").checked=false;}
+      renderB();
+    });
+  });
+}
+function renderForces(){
+  const box=$("forces"); box.innerHTML="";
+  Object.keys(FN).forEach(k=>{
+    const d=document.createElement("div"); d.className="force";
+    d.innerHTML=`<label for="f-${k}">${FN[k]}</label><input type="range" id="f-${k}" min="1" max="5" step="1" value="${st.f[k]}"><output class="num" id="fo-${k}">${st.f[k]}</output>`;
+    box.appendChild(d);
+    d.querySelector("input").addEventListener("input",e=>{st.f[k]=+e.target.value;$("fo-"+k).textContent=e.target.value;renderB();});
+  });
+}
+function selectScenario(k){
+  st.sc=k; st.act.clear(); st.f={...SC[k].f}; st.fin={eq:0,long:0}; st.g=SC[k].g; st.cx=1;
+  $("bG").value=Math.round(st.g*100); $("bCx").value=100;
+  st.roic=SC[k].roic; st.N=3; $("fRoic").value=Math.round(st.roic*100); $("fN").value=3;
+  $("bEq").max=Math.round(SC[k].E*.5/500)*500; $("bEq").value=0;
+  document.querySelector('input[name=bLong][value="0"]').checked=true;
+  renderLevers(); renderForces(); renderB();
+}
+
+function meter(label,a,b,fmtf,better){
+  const d=b-a; const cls=Math.abs(d)<1e-9?"":((d>0)===(better==="up")?"good":"bad");
+  return `<div class="meter"><span>${label}</span><strong class="num ${cls}">${fmtf(b)}</strong><em>前 ${fmtf(a)}</em></div>`;
+}
+
+function renderB(){
+  const s=S(), base=model(s,st.f,new Set(),NOFIN), cur=model(s,st.f,st.act,st.fin);
+  $("bTitle").textContent=`${s.chip}：${s.tag}`;
+  $("bStory").innerHTML=`<b>情境</b>${s.story}`;
+  const g=(v,b,inv)=>{const d=v-b; if(Math.abs(d)<1) return `<em>同業 ${b}</em>`; const bad=inv?d<0:d>0; return `<em class="${bad?"bad":"good"}">同業 ${b}（${d>0?"+":"−"}${Math.abs(Math.round(d))}）</em>`;};
+  $("bFacts").innerHTML=
+    `<div class="fact"><span>收款天數 DSO</span><strong>${s.DSO}</strong>${g(s.DSO,s.bDSO)}</div>`+
+    `<div class="fact"><span>存貨天數 DIO</span><strong>${s.DIO}</strong>${g(s.DIO,s.bDIO)}</div>`+
+    `<div class="fact"><span>付款天數 DPO</span><strong>${s.DPO}</strong>${g(s.DPO,s.bDPO,true)}</div>`+
+    `<div class="fact"><span>現金轉換週期（CCC）</span><strong>${s.DSO+s.DIO-s.DPO}</strong>${g(s.DSO+s.DIO-s.DPO,s.bDSO+s.bDIO-s.bDPO)}</div>`+
+    `<div class="fact"><span>年營收</span><strong>${fmt(s.R)}</strong><em>年成長 ${pct(s.g,0)}</em></div>`+
+    `<div class="fact"><span>週期每 1 天</span><strong>${fmt(s.R/365)}</strong><em>萬元營運資金</em></div>`;
+  $("bGOut").textContent=pct(s.g,0);
+  $("bCxOut").textContent=fmt(s.capex)+" 萬";
+  $("bCxNote").textContent=`資本支出是折舊的 ${(s.capex/s.DA).toFixed(1)} 倍${s.capex>s.DA*1.5?"，處於擴產期：固定資產增加 "+fmt(s.capex-s.DA)+" 萬，需要新的資金來源。":"。"}`;
+  $("bDiag").innerHTML=diagnose(s);
+
+  LV.forEach(L=>{
+    const r=single(L.k);
+    $("lc-"+L.k).innerHTML=`<span class="tag ${r.cashRel>=0?"good":"bad"}">現金 ${sfmt(r.cashRel)}</span><span class="tag ${r.op>=0?"good":"bad"}">年損益 ${sfmt(r.op)}</span><span class="tag ${r.cls}">${r.label}</span>`;
+  });
+
+  const rel=base.NWC-cur.NWC;
+  $("bMeters").innerHTML=
+    meter("現金轉換週期（帳面）",base.CCC,cur.CCC,v=>Math.round(v)+" 天","down")+
+    `<div class="meter"><span>一次性釋放現金</span><strong class="num ${rel>0?"good":rel<0?"bad":""}">${sfmt(rel)}</strong><em>營運資金減少</em></div>`+
+    meter("年度淨利",base.NI,cur.NI,fmt,"up")+
+    meter("ROE",base.ROE,cur.ROE,v=>pct(v),"up")+
+    meter("自由現金流",base.FCF,cur.FCF,fmt,"up")+
+    meter("負債比",base.debtRatio,cur.debtRatio,v=>pct(v,0),"down");
+  $("barBccc").textContent=Math.round(cur.CCC);
+  $("barBcash").textContent=sfmt(rel);
+
+  drawCCC(s,base,cur); renderFive(s); renderDupont(base,cur); renderStruct(s,base,cur); drawFCF(s,base,cur); renderFuture(s,cur); renderCosts(s,base,cur);
+}
+
+function diagnose(s){
+  const gaps=[["DSO",s.DSO-s.bDSO],["DIO",s.DIO-s.bDIO],["DPO",s.bDPO-s.DPO]].sort((a,b)=>b[1]-a[1]);
+  const [k,d]=gaps[0]; const f=st.f;
+  const ccc0=s.DSO+s.DIO-s.DPO;
+  if(ccc0<0) return `現金轉換週期（CCC）是負的（${ccc0} 天）：客戶先付錢、供應商後收錢，營運資金本身就是資金來源，<b>現金轉換週期（CCC）完全不是問題</b>。壓力在資本支出：是折舊的 ${(s.capex/s.DA).toFixed(1)} 倍，營業現金流再強也被吃掉。請看自由現金流與「未來 5 年」分頁。`;
+  if(d<=5) return `三個天數都和同業差不多，現金轉換週期（CCC）不是主要問題。壓力來自<b>成長（${pct(s.g,0)}）與擴產（資本支出是折舊的 ${(s.capex/s.DA).toFixed(1)} 倍）</b>：帳面獲利高，但現金先被新產能和營運資金吃掉。請看自由現金流與財務結構分頁。`;
+  const cash=fmt(d*s.R/365*(k==="DSO"?1:s.cogs));
+  if(k==="DSO") return `最大缺口在<b>收款</b>：比同業多 ${d} 天，約卡住 ${cash} 萬。對應五力：買方議價力 ${f.buyer}/5。`+(custP(f)>=3.8?"客戶集中、你可被替代，硬縮帳期代價高；先看折扣或保理的資金成本，長期要分散客戶或提高不可替代性。":"買方不算強勢，多半是授信與催收紀律問題，可以直接處理。");
+  if(k==="DIO") return `最大缺口在<b>存貨</b>：比同業多 ${d} 天，約卡住 ${cash} 萬。對應五力：供應商議價力 ${f.supplier}/5。`+(f.supplier>=4?"關鍵原料或零組件掌握在少數供應商手上，交期長或價格上漲，被迫超前備料、囤安全庫存；降庫存的真正解法在供應端（第二供應來源、寄售、長約），單純砍庫存會增加斷料風險。":"供應端不算強勢，多半是預測與料號管理問題，屬內部可控。");
+  return `最大缺口在<b>付款</b>：比同業少 ${d} 天，約多墊 ${cash} 萬。對應五力：供應商議價力 ${f.supplier}/5。`+(f.supplier>=4?"供應商強勢，拉長帳期可能換來漲價或斷料，先算清楚代價。":"供應商不算強勢，有談判空間；但要注意對中小供應商的影響。");
+}
+
+/* 現金轉換週期（CCC）圖 */
+function drawCCC(s,base,cur){
+  const svg=$("cccChart"); svg.innerHTML="";
+  const rows=[["調整前",base.DSO,base.DIO,base.DPO,base.CCC],["調整後",cur.effDSO,cur.DIO,cur.DPO,cur.CCC],["同業",s.bDSO,s.bDIO,s.bDPO,s.bDSO+s.bDIO-s.bDPO]];
+  const max=Math.max(...rows.map(r=>r[1]+r[2]),...rows.map(r=>r[3]))+20;
+  const X0=64,X1=620,px=(X1-X0)/max, x=d=>X0+d*px;
+  for(let d=0;d<=max;d+=30){mk(svg,"line",{x1:x(d),x2:x(d),y1:8,y2:232,stroke:"var(--line)"});txt(svg,x(d),246,d,{"text-anchor":"middle","font-family":"IBM Plex Mono,monospace"});}
+  rows.forEach((r,i)=>{
+    const y=14+i*74;
+    txt(svg,X0-8,y+20,r[0],{"text-anchor":"end",fill:"var(--ink)","font-size":12,"font-weight":700});
+    mk(svg,"rect",{x:x(0),y,width:r[2]*px,height:20,rx:4,fill:"var(--warn)",opacity:i===2?.45:.9});
+    mk(svg,"rect",{x:x(r[2]),y,width:r[1]*px,height:20,rx:4,fill:"var(--accent)",opacity:i===2?.45:.9});
+    txt(svg,x(r[2]/2),y+14,Math.round(r[2]),{"text-anchor":"middle",fill:"#fff","font-family":"IBM Plex Mono,monospace"});
+    txt(svg,x(r[2]+r[1]/2),y+14,Math.round(r[1]),{"text-anchor":"middle",fill:"#fff","font-family":"IBM Plex Mono,monospace"});
+    mk(svg,"rect",{x:x(0),y:y+24,width:r[3]*px,height:8,rx:3,fill:"var(--naive)"});
+    txt(svg,x(r[3])+4,y+32,"付款 "+Math.round(r[3]),{"font-family":"IBM Plex Mono,monospace"});
+    const y2=y+46;
+    mk(svg,"line",{x1:x(r[3]),x2:x(r[1]+r[2]),y1:y2,y2:y2,stroke:i===1?"var(--accent)":"var(--ink)","stroke-width":2});
+    mk(svg,"line",{x1:x(r[3]),x2:x(r[3]),y1:y2-5,y2:y2+5,stroke:"var(--ink)"});
+    mk(svg,"line",{x1:x(r[1]+r[2]),x2:x(r[1]+r[2]),y1:y2-5,y2:y2+5,stroke:"var(--ink)"});
+    txt(svg,(x(r[3])+x(r[1]+r[2]))/2,y2-4,"現金轉換週期 "+Math.round(r[4])+" 天",{"text-anchor":"middle",fill:"var(--ink)","font-weight":700,"font-size":12});
+  });
+  let h=`<ul><li>現金轉換週期（CCC）＝收款天數＋存貨天數−付款天數。這家公司 現金轉換週期（CCC）每縮短 1 天，約釋放 <b>${fmt(s.R/365)}</b> 萬元（以營收估）。</li>`;
+  h+=`<li>改善 現金轉換週期（CCC）釋放的是<b>一次性</b>現金；之後每年的好處只有省下的利息。所以要看「換到這筆錢，每年付出多少」，也就是左邊標籤的資金成本。</li>`;
+  if(cur.factored) h+=`<li class="warn">有用保理：帳面 現金轉換週期（CCC）${Math.round(cur.CCC)} 天，但客戶實際付款還是 ${Math.round(cur.trueCCC+0)} 天的循環。問題沒被解決，只是換一個人墊錢。</li>`;
+  if(st.act.has("supdisc")) h+=`<li>拿提早付款折扣讓付款天數降到 10 天，現金轉換週期（CCC）反而變長，這是刻意用現金換毛利。</li>`;
+  $("cccText").innerHTML=h+"</ul>";
+}
+
+/* 五力 */
+function renderFive(s){
+  const f=st.f, cp=custP(f);
+  const room=v=>Math.max(0,Math.min(1,(5-v)/4));
+  const gauge=(id,title,v,src)=>{const r=room(v),c=r>.6?"good":r>.3?"warn":"bad";
+    $(id).innerHTML=`<div class="lab"><span>${title}</span><span class="${c}">${r>.6?"有空間":r>.3?"有限":"幾乎沒有"}</span></div><div class="bar"><i style="width:${Math.max(4,r*100)}%;background:var(--${c})"></i></div><span class="note">${src}</span>`;};
+  gauge("gCust","對客戶的議價空間（收款、漲價）",cp,`由買方議價力、同業競爭、替代品威脅加權：${cp.toFixed(1)}/5`);
+  gauge("gSup","對供應商的議價空間（帳期、寄售）",f.supplier,`供應商議價力：${f.supplier}/5`);
+  let h="<ul>";
+  h+=`<li><b>現金轉換週期（CCC）長，先問是誰的問題。</b>DSO 長對應買方議價力，DPO 短與 DIO 高常對應供應商議價力；兩者都不強時，才是內部管理問題。</li>`;
+  if(f.entrant>=4||f.subst>=4) h+=`<li>新進者或替代品威脅高（${f.entrant}/5、${f.subst}/5）：長期定價力會被侵蝕，用漲價解決資金問題的空間正在縮小。</li>`;
+  if(cp>=3.8&&f.supplier>=4) h+=`<li class="bad">上下游都強勢：營運面能擠出的現金很有限，重點會轉向財務結構（長期資金、額度）與提高自身不可替代性。</li>`;
+  else if(cp>=3.8) h+=`<li>客戶強勢、供應商不強：常見做法是把壓力往上游推。算得過，但要想清楚供應鏈的長期代價。</li>`;
+  else if(f.supplier>=4) h+=`<li>供應商強勢、客戶不強：收款與定價是較可行的槓桿；存貨問題要從供應來源著手。</li>`;
+  else h+=`<li>上下游都不算強勢，現金轉換週期（CCC）長主要是內部流程問題，改善代價相對低。</li>`;
+  $("fiveText").innerHTML=h+"</ul>";
+}
+
+/* 杜邦 */
+function renderDupont(b,c){
+  const box=(cls,lab,a,v,f)=>{const d=v-a; const k=Math.abs(d)<1e-6?"":d>0?"good":"bad";
+    return `<div class="dbox ${cls}"><span>${lab}</span><strong>${f(v)}</strong><em class="${k}">前 ${f(a)}</em></div>`;};
+  $("dupont").innerHTML=box("roe","ROE",b.ROE,c.ROE,v=>pct(v))+box("","淨利率",b.margin,c.margin,v=>pct(v,2))+box("","資產周轉率",b.turn,c.turn,v=>v.toFixed(2)+"×")+box("","權益乘數",b.lev,c.lev,v=>v.toFixed(2)+"×");
+  const lm=Math.log(c.margin/b.margin)||0, lt=Math.log(c.turn/b.turn)||0, ll=Math.log(c.lev/b.lev)||0;
+  let h="<ul>";
+  if(!st.act.size&&!st.fin.eq&&!st.fin.long) h+="<li>先在左邊選幾個槓桿，看 ROE 的三個因子怎麼動。</li>";
+  else{
+    const parts=[["淨利率",lm],["資產周轉率",lt],["權益乘數",ll]].filter(p=>Math.abs(p[1])>.002).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]));
+    if(parts.length) h+=`<li>ROE 變動主要來自 <b>${parts[0][0]}</b>（${parts[0][1]>0?"上升":"下降"}）。</li>`;
+    h+="<li>縮短 現金轉換週期（CCC）讓應收與存貨變少、資產變小，<b>資產周轉率</b>上升；同時借款減少，<b>權益乘數</b>下降。兩者會部分抵銷。</li>";
+    if(lm<-.002) h+="<li class=\"warn\">淨利率下降：你用毛利或費用換了現金，這就是代價的所在。</li>";
+    if(st.act.has("supdisc")) h+="<li>提早付款折扣讓淨利率上升，但存貨與現金需求不變、應付變少、借款變多，權益乘數上升。ROE 變好有一部分是靠槓桿。</li>";
+    if(st.act.has("factor")) h+="<li class=\"warn\">保理讓應收「消失」，資產周轉率看起來大幅改善，但這是財務安排造成的，不代表營運變好。</li>";
+    if(ll>.05&&lt<.02) h+="<li class=\"bad\">ROE 主要靠權益乘數撐起來，屬於高風險的 ROE。</li>";
+    if(st.fin.eq) h+="<li>現金增資讓權益變大，權益乘數下降、ROE 被稀釋，但財務結構更安全。</li>";
+  }
+  $("dupontText").innerHTML=h+"</ul>";
+}
+
+/* 財務結構 */
+function renderStruct(s,b,c){
+  $("bEqOut").textContent=fmt(st.fin.eq);
+  const svg=$("bsChart"); svg.innerHTML="";
+  const max=Math.max(b.TA,c.TA);
+  const top=14,bot=226,hpx=(bot-top)/max;
+  const cols=[["調整前",b,90],["調整後",c,370]];
+  cols.forEach(([lab,m,x0])=>{
+    const stack=(x,items)=>{let y=bot;items.forEach(([v,col,name])=>{if(v<=0)return;const h=v*hpx;y-=h;
+      mk(svg,"rect",{x,y,width:110,height:h,fill:col,stroke:"var(--surface)","stroke-width":1});
+      if(h>14) txt(svg,x+55,y+h/2+4,name+" "+fmt(v),{"text-anchor":"middle",fill:(col==="var(--line)"||col==="var(--c3-soft)")?"var(--ink)":"#fff","font-size":10.5});});};
+    stack(x0,[[m.FA,"var(--line)","固定"],[m.Inv,"var(--warn)","存貨"],[m.AR,"var(--accent)","應收"],[m.cash,"var(--ghost)","現金"]]);
+    stack(x0+116,[[m.E,"var(--good)","權益"],[m.longD,"var(--c3)","長借"],[m.shortD,"var(--bad)","短借"],[m.adv,"var(--c3-soft)","預收"],[m.AP,"var(--naive)","應付"]]);
+    txt(svg,x0+113,bot+18,lab+"　總資產 "+fmt(m.TA),{"text-anchor":"middle",fill:"var(--ink)","font-weight":700,"font-size":12});
+  });
+  const row=(lab,v,ok,f,th)=>`<div><span>${lab}</span><span class="num ${ok?"good":"bad"}">${f(v)}</span><span class="tag ${ok?"good":"bad"}">${ok?"符合":"未達"} ${th}</span></div>`;
+  $("cov").innerHTML=
+    row("負債比（調整後）",c.debtRatio,c.debtRatio<=.6,v=>pct(v,0),"≤ 60%")+
+    row("流動比率",c.current,c.current>=1.2,v=>v.toFixed(2)+"×","≥ 1.2×")+
+    row("利息保障倍數",c.cover,c.cover>=4,v=>v.toFixed(1)+"×","≥ 4×");
+  let h="<ul>";
+  h+=`<li>這家公司的營運資金（應收＋存貨−應付）約 <b>${fmt(c.NWC)}</b> 萬，其中大部分是「長期都會在」的永久性營運資金。用短期借款支應，等於<b>以短支長</b>：銀行抽額度時，就會變成流動性危機。</li>`;
+  if(st.fin.long>0) h+=`<li>改用公司債或長期借款：流動比率改善、不怕銀行抽額度，代價是利率較高（模型假設 +0.6 個百分點），每年多付約 ${fmt(c.longD*.006)} 萬利息；公司債還有發行成本、信用評等與財務承諾的約束。</li>`;
+  if(c.adv>0) h+=`<li>客戶預收款 ${fmt(c.adv)} 萬是不用付利息的負債，等於客戶出錢幫你擴產；但它也是交貨承諾，景氣反轉時可能變成退款壓力。</li>`;
+  if(s.capex>s.DA*1.5) h+=`<li>擴產期每年固定資產淨增加 ${fmt(s.capex-s.DA)} 萬。這是長期資產，應該用公司債、長期借款或增資支應；用短期借款撐擴產，風險比營運資金更高。</li>`;
+  if(st.fin.eq>0) h+=`<li>現金增資 ${fmt(st.fin.eq)} 萬：負債比與利息負擔下降，代價是股權稀釋、ROE 下降，以及股東要求的報酬通常高於借款利率。</li>`;
+  if(c.debtRatio>.6) h+=`<li class="bad">負債比偏高。光靠營運面縮短 現金轉換週期（CCC）不夠，要搭配增資或處分資產。</li>`;
+  h+=`<li>課本說永久性營運資金用長期資金支應「最穩妥」，指的是<b>不會被銀行抽銀根</b>，不是沒有成本，也不是問題解決了。公司債要付息、到期要還或再融資；增資沒有利息，但股東要求的報酬通常高於借款利率，還會稀釋每股盈餘。請看「未來 5 年」分頁。</li>`;
+  h+=`<li>縮短 現金轉換週期（CCC）是「減少需要的資金」，調整財務結構是「換一種資金來源」。前者有營運代價，後者有資金成本，通常要兩者並用。</li>`;
+  $("structText").innerHTML=h+"</ul>";
+}
+
+/* 自由現金流瀑布 */
+function drawFCF(s,b,c){
+  const svg=$("fcfChart"); svg.innerHTML="";
+  const items=[["稅後營業利益",c.NOPAT,"start"],["＋折舊",s.DA],["−資本支出",-s.capex],["應收變動",-c.dAR],["存貨變動",-c.dInv],["應付變動",c.dAP],...(c.adv?[["預收款",c.adv]]:[]),["自由現金流",c.FCF,"end"]];
+  let run=0; const bars=[];
+  items.forEach(([n,v,t])=>{if(t==="start"){bars.push([n,0,v,t]);run=v;}else if(t==="end"){bars.push([n,0,v,t]);}else{bars.push([n,run,run+v,t]);run+=v;}});
+  const vals=bars.flatMap(b=>[b[1],b[2]]).concat(0);
+  let lo=Math.min(...vals),hi=Math.max(...vals); const pad=(hi-lo)*.12||100; lo-=pad; hi+=pad;
+  const X0=44,X1=630,T=16,B=220,bw=(X1-X0)/items.length;
+  const y=v=>T+(hi-v)*(B-T)/(hi-lo);
+  mk(svg,"line",{x1:X0,x2:X1,y1:y(0),y2:y(0),stroke:"var(--muted)","stroke-width":1});
+  bars.forEach(([n,a,z,t],i)=>{
+    const x=X0+i*bw+bw*.15, w=bw*.7, up=z>=a;
+    const col=t==="start"?"var(--accent)":t==="end"?(z>=0?"var(--good)":"var(--bad)"):(up?"var(--good)":"var(--bad)");
+    mk(svg,"rect",{x,y:y(Math.max(a,z)),width:w,height:Math.max(1.5,Math.abs(y(a)-y(z))),rx:3,fill:col,opacity:t?1:.85});
+    const v=t?z:z-a;
+    txt(svg,x+w/2,(up?y(Math.max(a,z))-5:y(Math.min(a,z))+13),(t?fmt(v):sfmt(v)),{"text-anchor":"middle",fill:"var(--ink)","font-family":"IBM Plex Mono,monospace","font-weight":600});
+    const lab=n.length>4?[n.slice(0,n.length-2),n.slice(-2)]:[n];
+    lab.forEach((l,j)=>txt(svg,x+w/2,B+16+j*13,l,{"text-anchor":"middle"}));
+    if(i<bars.length-1&&!t) {}
+  });
+  let h="<ul>";
+  h+=`<li>自由現金流＝稅後營業利益＋折舊−資本支出−營運資金增加。調整前 <b>${fmt(b.FCF)}</b>，調整後 <b>${fmt(c.FCF)}</b>。</li>`;
+  h+=`<li>營運資金增加可拆成兩部分：<b>成長效果</b> ${fmt(c.growthNWC)} 萬（營收成長 ${pct(s.g,0)}，天數不變也要多墊的錢），<b>天數效果</b> ${sfmt(c.daysNWC)} 萬（現金轉換週期（CCC）變動造成）。</li>`;
+  if(c.FCF<0) h+=`<li class="bad">自由現金流為負 ${fmt(-c.FCF)} 萬：帳面淨利 ${fmt(c.NI)} 萬，但現金不夠支應擴產與營運資金。缺口（還沒算配息）要靠銀行借款、發行公司債或增資補足。</li>`;
+  else if(c.FCF<c.NI*.5) h+=`<li class="warn">淨利 ${fmt(c.NI)} 萬，自由現金流只有 ${fmt(c.FCF)} 萬：獲利只有一部分變成可自由運用的現金，要特別留意配息與還債能力。</li>`;
+  h+=`<li>資本支出 ${fmt(s.capex)} 萬、折舊 ${fmt(s.DA)} 萬：資本支出大於折舊越多，代表越處於擴產期，未來折舊也會跟著上升、壓縮毛利。</li>`;
+  if(s.g>=.2) h+=`<li class="warn">高成長公司的負自由現金流不一定是壞事，但要確認：現金轉換週期（CCC）不變的情況下，成長每多 10%，就要多準備約 ${fmt(c.growthNWC/s.g*.1)} 萬營運資金。</li>`;
+  if(c.factored) h+=`<li class="warn">保理讓應收減少、自由現金流變好，但那 ${fmt(c.factored)} 萬其實是融資，費用 ${fmt(c.finFee)} 萬記在營業利益之下，不會出現在這張圖上。</li>`;
+  h+=`<li>現金轉換週期（CCC）改善帶來的自由現金流增加只發生在<b>這一年</b>；明年起只剩利息節省，以及（若有）每年的毛利損失。</li>`;
+  $("fcfText").innerHTML=h+"</ul>";
+}
+
+/* 未來 5 年 */
+const KE=.10, PE=15;
+function project(s,c,opt){
+  const Y=5, k=c.NWC/c.rev, rows=[];
+  let rev=c.rev, nwc=c.NWC, pool=[c.capex-s.DA+(c.dAR+c.dInv-c.dAP-c.adv)];
+  let DA=s.DA, prevCx=c.capex; const cxg=SC[st.sc].cxg||0;
+  let peak=0, bal=0, cumGap=0, cumCost=0, cumEq=0, payback=null, rate=s.rate+(opt==="bond"?.008:0), cover=c.cover;
+  const baseInt=c.interest+c.finFee;
+  for(let t=1;t<=Y;t++){
+    const g=s.g*Math.pow(.7,t);
+    rev*=1+g; const nn=k*rev, dN=nn-nwc; nwc=nn;
+    DA+=Math.max(0,prevCx-DA)/8;
+    const capex=t<=st.N?c.capex*Math.pow(1+cxg,t):DA; prevCx=capex;
+    pool.push(capex-DA+dN);
+    const invested=pool.slice(0,Math.max(0,t-1)).reduce((a,b)=>a+b,0);
+    const EBIT=c.EBIT+st.roic*Math.max(0,invested);
+    const FCF=EBIT*(1-TAX)+DA-capex-dN;
+    let cost=0;
+    if(opt==="equity"){
+      if(FCF<0){cumEq+=-FCF;} else {bal-=Math.min(bal,0);}
+      cost=KE*cumEq; bal=cumEq;
+    }else{
+      if(opt==="short"&&cover<3) rate=s.rate+.015; else if(opt==="short") rate=s.rate;
+      const it=bal*rate; cost=it*(1-TAX);
+      bal=Math.max(0,bal-FCF+it*(1-TAX));
+      cover=EBIT/Math.max(1,baseInt+bal*rate);
+    }
+    cumCost+=cost; if(FCF<0) cumGap+=-FCF;
+    if(payback===null&&FCF>0) payback=t;
+    peak=Math.max(peak,bal); rows.push({t,FCF,bal,EBIT,cost,cover});
+  }
+  const mcap=Math.max(c.NI,1)*PE;
+  return {peak,rows,cumGap,cumCost,bal,payback,dil:cumEq/(mcap+cumEq),cover,rate};
+}
+function renderFuture(s,c){
+  $("fRoicOut").textContent=pct(st.roic,0);
+  $("fNOut").textContent=st.N+" 年";
+  const P={short:project(s,c,"short"),bond:project(s,c,"bond"),equity:project(s,c,"equity")};
+  const sel=P[st.fopt];
+  const svg=$("futChart"); svg.innerHTML="";
+  const fcfs=[c.FCF,...sel.rows.map(r=>r.FCF)], bals=[0,...sel.rows.map(r=>r.bal)];
+  let lo=Math.min(0,...fcfs), hi=Math.max(0,...fcfs,...bals); const pad=(hi-lo)*.1||100; lo-=pad; hi+=pad;
+  const X0=56,X1=630,T=14,B=226, bw=(X1-X0)/6, x=i=>X0+bw*i+bw/2, y=v=>T+(hi-v)*(B-T)/(hi-lo);
+  mk(svg,"line",{x1:X0,x2:X1,y1:y(0),y2:y(0),stroke:"var(--muted)"});
+  fcfs.forEach((v,i)=>{
+    mk(svg,"rect",{x:x(i)-bw*.28,y:y(Math.max(0,v)),width:bw*.56,height:Math.max(1.5,Math.abs(y(v)-y(0))),rx:3,fill:v>=0?"var(--good)":"var(--bad)",opacity:i?1:.6});
+    txt(svg,x(i),v>=0?y(v)-5:y(v)+13,fmt(v),{"text-anchor":"middle",fill:"var(--ink)","font-family":"IBM Plex Mono,monospace"});
+    txt(svg,x(i),B+18,i?"第 "+i+" 年":"今年",{"text-anchor":"middle"});
+  });
+  mk(svg,"path",{d:bals.map((v,i)=>(i?"L":"M")+x(i)+" "+y(v)).join(" "),fill:"none",stroke:"var(--c3)","stroke-width":3,"stroke-linejoin":"round"});
+  bals.forEach((v,i)=>{ if(i) { mk(svg,"circle",{cx:x(i),cy:y(v),r:4,fill:"var(--c3)"}); } });
+  const last=bals[5]; if(last>1) txt(svg,x(5)-6,y(last)-8,(st.fopt==="equity"?"累計增資 ":"新增負債 ")+fmt(last),{"text-anchor":"end",fill:"var(--c3)","font-weight":700});
+
+  const row=(name,o,costTxt,deferTxt)=>`<div style="grid-template-columns:minmax(0,1fr)"><span><b>${name}</b>　最高 <span class="num">${fmt(o.peak)}</span>　第 5 年 <span class="num">${fmt(o.bal)}</span>　5 年資金成本 <span class="num">${fmt(o.cumCost)}</span>${costTxt}<br><span class="note">${deferTxt}</span></span></div>`;
+  $("futTable").innerHTML=P.short.cumGap<1?'<p class="note">在目前假設下，未來 5 年自由現金流都是正的，沒有需要外部補的缺口。試著提高資本支出或成長率。</p>':
+    row("短期銀行借款滾動",P.short,"（稅後利息）",`利率最低，但每年要續約；利息保障倍數跌破 3 倍時模型假設利率加碼 1.5 個百分點。問題延到：<b>下一次銀行審查額度</b>。景氣反轉時最先被抽。`)+
+    row("發行公司債",P.bond,"（稅後利息）",`利率鎖定（模型假設 +0.8 個百分點），不怕抽銀根。問題延到：<b>到期日</b>。${P.bond.bal>1?`5 年後還有 ${fmt(P.bond.bal)} 萬要還，或用當時的利率再融資，這就是「到期牆」。`:`這個假設下投資如期回收、債可以還清；回收若延後，到期時就要用當時的利率再融資，這就是「到期牆」。`}`)+
+    row("現金增資",P.equity,"（股東要求的 10% 報酬）",`沒有利息、沒有到期日，看起來最輕鬆。代價是股權稀釋約 ${pct(P.equity.dil,0)}（以本益比 15 倍估算），每股盈餘下降；股東要求的報酬高於借款利率。問題延到：<b>股東失去耐心的那一天</b>。`);
+
+  const cxg=SC[st.sc].cxg||0;
+  const wd=c.debt/(c.debt+c.E), kd=(s.rate+(st.fopt==="bond"?.008:0))*(1-TAX);
+  const cap=wd*kd+(1-wd)*KE, rA=st.roic*(1-TAX);
+  let h="<ul>";
+  h+=`<li>未來 5 年累計資金缺口 <b>${fmt(sel.cumGap)}</b> 萬。${sel.payback?`自由現金流在第 ${sel.payback} 年轉正。`:`<span class="bad">5 年內自由現金流都沒有轉正。</span>`}</li>`;
+  if(cxg) h+=`<li>擴產期間資本支出每年再成長 ${pct(cxg,0)}，新增的折舊以 8 年攤提。</li>`;
+  h+=`<li>比較基準要用<b>加權平均資金成本</b>（約 ${pct(cap,1)}，股東要求報酬以 10% 計），不是只看借款利率：借錢便宜，但負債越多、股東承擔的風險越高，要求的報酬也越高。</li>`;
+  if(rA<cap-.01) h+=`<li class="bad">新投資稅後報酬約 ${pct(rA,1)}，低於資金成本：借越多、虧越多。長期資金沒有解決問題，只是讓問題在到期日或下一輪增資時更大。</li>`;
+  else if(rA<cap+.01) h+=`<li class="warn">新投資稅後報酬約 ${pct(rA,1)}，和資金成本差不多：只是在幫資金提供者賺錢，股東沒有多得到什麼。</li>`;
+  else h+=`<li class="good">新投資稅後報酬約 ${pct(rA,1)}，高於資金成本：長期資金是在「買時間」，讓投資有機會回收。前提是報酬真的如期實現。</li>`;
+  h+=`<li>把報酬率往下拉，或把擴產年數往上推，就能看到「押注未來回收」失準時，缺口和負債怎麼滾大。這正是目前市場對大型雲端業者與 AI 供應鏈的主要疑慮。</li>`;
+  $("futText").innerHTML=h+"</ul>";
+}
+
+/* 代價清單 */
+function renderCosts(s,b,c){
+  const box=$("costs");
+  if(!st.act.size){box.innerHTML='<p class="note">左邊還沒選任何槓桿。</p>';return;}
+  let h="";
+  LV.filter(L=>st.act.has(L.k)).forEach(L=>{
+    const r=single(L.k);
+    h+=`<div class="crow"><div class="h"><span>${L.t}</span><span class="tag ${r.cls}">${r.label}</span></div>
+      <div class="r num">一次性現金 ${sfmt(r.cashRel)}　每年稅前損益 ${sfmt(r.op)}　銀行利率 ${pct(s.rate)}</div>
+      <div class="r">${risk(L.k)}</div><div class="who">誰付代價：<b>${L.who}</b></div></div>`;
+  });
+  const rel=b.NWC-c.NWC, dNI=c.NI-b.NI;
+  h+=`<p class="lesson ${dNI<0?"warnbox":""}">合計：一次釋放 <b class="num">${sfmt(rel)}</b> 萬，每年淨利 <b class="num">${sfmt(dNI)}</b> 萬（已含利息節省）。${rel>0&&dNI<0?`等於每年花 ${fmt(-dNI)} 萬，換來 ${fmt(rel)} 萬不用借。`:""}各項合計不等於逐項相加，因為槓桿之間會互相影響。</p>`;
+  box.innerHTML=h;
+}
+
+/* 事件 */
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
+  st.lens=t.dataset.lens;
+  document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected",x===t));
+  document.querySelectorAll(".pane").forEach(p=>p.hidden=p.dataset.pane!==st.lens);
+}));
+$("bEq").addEventListener("input",e=>{st.fin.eq=+e.target.value;renderB();});
+$("fRoic").addEventListener("input",e=>{st.roic=+e.target.value/100;renderB();});
+$("fN").addEventListener("input",e=>{st.N=+e.target.value;renderB();});
+document.querySelectorAll('input[name=fOpt]').forEach(i=>i.addEventListener("change",e=>{st.fopt=e.target.value;renderB();}));
+$("bG").addEventListener("input",e=>{st.g=+e.target.value/100;renderB();});
+$("bCx").addEventListener("input",e=>{st.cx=+e.target.value/100;renderB();});
+document.querySelectorAll('input[name=bLong]').forEach(i=>i.addEventListener("change",e=>{st.fin.long=+e.target.value;renderB();}));
+$("fReset").addEventListener("click",()=>{st.f={...S().f};renderForces();renderB();});
+$("bClear").addEventListener("click",()=>{st.act.clear();document.querySelectorAll("#levers input").forEach(i=>i.checked=false);renderB();});
+
+/* 情境列 */
+const chips=[["event","突發事件","客戶延後拉貨・13 週現金"],...Object.entries(SC).map(([k,v])=>[k,v.chip,v.tag])];
+const bar=$("scbar");
+chips.forEach(([k,n,t],i)=>{
+  const b=document.createElement("button"); b.type="button"; b.className="sc"; b.dataset.k=k;
+  b.setAttribute("aria-pressed",i===0);
+  b.innerHTML=`<span class="k">情境 ${i+1}${i?"・結構診斷":"・突發事件"}</span><b>${n}</b><span>${t}</span>`;
+  b.addEventListener("click",()=>{
+    bar.querySelectorAll(".sc").forEach(x=>x.setAttribute("aria-pressed",x===b));
+    const isA=k==="event";
+    $("modeA").hidden=!isA; $("modeB").hidden=isA; $("barA").hidden=!isA; $("barB").hidden=isA;
+    if(!isA) selectScenario(k);
+  });
+  bar.appendChild(b);
+});
+st.f={...SC.elec.f};
+})();
+
+/* 複製信箱 */
+$("copy").addEventListener("click",()=>{
+  const t=$("email").textContent;
+  const done=()=>{$("copy").textContent="已複製";setTimeout(()=>$("copy").textContent="複製信箱",1800);};
+  function sel(){const r=document.createRange();r.selectNodeContents($("email"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("copy").textContent="已選取，請按複製";}
+  try{navigator.clipboard.writeText(t).then(done,sel);}catch(e){sel();}
+});
+</script>
+</body>
+</html>
