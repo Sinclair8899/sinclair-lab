@@ -125,7 +125,7 @@ details>div{margin-top:12px;display:flex;flex-direction:column;gap:10px}
 </style>
 </head>
 <body>
-<div style="background:#fbefd9;color:#6b4407;font:14px/1.5 system-ui,sans-serif;padding:8px max(16px,env(safe-area-inset-left,0px));text-align:center">網站版・測試版 2026-10-21：「規則試算」依公式即時計算；「情境示範」為預設結果或重播；標示「本版未提供即時 AI」的區塊需要連接 AI 模型，網站版不開放操作。</div>
+<div style="background:#fbefd9;color:#6b4407;font:14px/1.5 system-ui,sans-serif;padding:8px max(16px,env(safe-area-inset-left,0px));text-align:center">網站版・測試版 2026-10-22：「規則試算」依公式即時計算；「情境示範」為預設結果或重播；「拜訪紀錄」區塊由開源 AI 模型即時分析。</div>
 
 <div class="wrap">
   <header>
@@ -137,7 +137,7 @@ details>div{margin-top:12px;display:flex;flex-direction:column;gap:10px}
       <div><b>情境示範</b><span>AI agents 的處理結果為預設情境，可與人工流程對照</span></div>
       <div><a href="index.html"><b>← 現金循環總覽</b></a><span>預測準不準，決定存貨天數；條件談得好不好，決定應收與應付天數</span></div>
     </div>
-    <p class="note modeline" style="margin-top:12px;padding:8px 12px;border:1px dashed var(--line);border-radius:6px">本頁說明（網站版）：<b>情境示範</b>是依實務整理的預設結果或重播；<b>規則試算</b>是依公式即時計算；標示「本版未提供即時 AI」的區塊需要連接 AI 模型，網站版不開放操作。</p>
+    <p class="note modeline" style="margin-top:12px;padding:8px 12px;border:1px dashed var(--line);border-radius:6px">本頁說明（網站版）：<b>情境示範</b>是依實務整理的預設結果或重播；<b>規則試算</b>是依公式即時計算；<b>即時 AI</b> 區塊由 Cloudflare 代管的開源模型分析你送出的文字，只用於產生這次結果。</p>
   </header>
 
   <section class="ports" aria-label="兩個端口">
@@ -155,9 +155,9 @@ details>div{margin-top:12px;display:flex;flex-direction:column;gap:10px}
       <div class="bw" id="bw"></div>
       <p class="note">終端市場只變動 5%，傳到我方採購可能變成 50%。越早、越直接掌握客戶端的真實需求，就越能壓低這條長鞭。</p>
     </div>
-    <div class="panel console" data-live>
-      <div><span class="eyebrow">本版未提供即時 AI · 拜訪紀錄更新客戶資料</span><h3 style="margin-top:2px">貼上業務的拜訪紀錄，AI 整理成情報並提出內部待辦</h3>
-      <p class="note" style="margin-top:4px" id="vHint">業務常把重要訊息寫在拜訪紀錄裡，卻沒有人整理。AI 會抽出需求變化、規格變更、客戶供應鏈動向與風險，並列出生管、採購、研發、財務各自該做什麼。本版未提供即時 AI；請勿貼上機密資料。</p></div>
+    <div class="panel console">
+      <div><span class="eyebrow">即時 AI · 開源模型 · 拜訪紀錄更新客戶資料</span><h3 style="margin-top:2px">貼上業務的拜訪紀錄，AI 整理成情報並提出內部待辦</h3>
+      <p class="note" style="margin-top:4px" id="vHint">業務常把重要訊息寫在拜訪紀錄裡，卻沒有人整理。AI 會抽出需求變化、規格變更、客戶供應鏈動向與風險，並列出生管、採購、研發、財務各自該做什麼。這一區由開源模型即時分析，可以改寫下面的範例再試；請勿貼上真實客戶或公司機密資料。</p></div>
       <label for="vTxt" class="note">拜訪紀錄</label>
       <textarea id="vTxt" style="min-height:140px">10/16 拜訪雲端客戶 Y 硬體採購經理與 PM。對方提到明年第二季要推新一代 AI 伺服器主機板，目前在 EVT 階段，預計 3 月 DVT。新機種會改用新一代記憶體，散熱方案還沒定。目前舊機種 Q4 出貨可能比預測少兩成，因為終端客戶延後部署。對方採購說明年會導入第二家組裝廠分散風險，付款條件希望從月結 60 天改為 90 天。PM 私下透露他們老闆對交期很在意，上次我們延遲兩天被記了一筆。</textarea>
       <button class="btn ai" id="vBtn" type="button">交給 AI 整理</button>
@@ -240,30 +240,31 @@ document.addEventListener("click",e=>{
 });
 render();
 
-/* 真 AI：拜訪紀錄 */
-const samp=window.claude?.use?window.claude.use("sample").catch(()=>null):Promise.resolve(null);
-samp.then(s=>{if(!s){$("vHint").textContent="本版未提供即時 AI。";$("vBtn").disabled=true}});
+/* 即時 AI：拜訪紀錄（網站 Worker → Cloudflare Workers AI 開源模型） */
 const L=x=>Array.isArray(x)?x:[];
+const track=(e,d)=>{try{window.labTrack&&window.labTrack(e,d)}catch(_){}};
+const AI_ERR={rate_limited:"你這段時間已經試了好幾次，請 10 分鐘後再試。",daily_cap:"今天的 AI 使用次數已達上限，請明天再來。",too_short:"拜訪紀錄太短，請至少輸入一兩句內容。",ai_unavailable:"AI 服務目前沒有啟用，請稍後再試。",no_result:"這次 AI 沒有產生完整結果，請再按一次。"};
 $("vBtn").addEventListener("click",async()=>{
-  const s=await samp,btn=$("vBtn"),out=$("vOut"),txt=$("vTxt").value.trim().slice(0,5000);
-  if(!s||!txt)return;btn.disabled=true;out.innerHTML='<p class="note">AI 整理中，約需 30–60 秒……</p>';
-  const prompt=`你是電子製造公司的客戶情報 agent。請把下面的業務拜訪紀錄整理成可以更新到 CRM 的結構化情報，並列出內部各部門應啟動的配合。只依紀錄內容判斷，不要捏造；推測的部分要標明「推測」。用繁體中文（台灣用語），精簡。
-
-拜訪紀錄：
-${txt}
-
-只回覆一個 JSON 物件：
-{"summary":"一句話重點（40 字內）","signals":[{"type":"需求變化|規格變更|客戶供應鏈|商務條件|關係與風險","content":"內容，40 字內","impact":"高|中|低"}],"actions":[{"dept":"生管|採購|研發|品保|財務|業務","action":"具體行動，30 字內","when":"時間點"}],"risks":["需要注意的風險，最多 3 項"],"next_visit":["下次拜訪要追問的問題，最多 3 項"]}`;
-  try{const d=await s.json(prompt);
-    const lv={"高":"p-bad","中":"p-warn","低":"p-ok"};
+  const btn=$("vBtn"),out=$("vOut"),txt=$("vTxt").value.trim().slice(0,3000);
+  if(!txt)return;
+  if(location.protocol==="file:"){out.innerHTML='<p class="note">即時 AI 只能在網站上使用，本機開啟的檔案無法連線。</p>';return}
+  btn.disabled=true;out.innerHTML='<p class="note">AI 整理中，通常約 10–30 秒……</p>';track("ai_run","visit-notes");
+  try{
+    const r=await fetch("/api/ai/visit-notes",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({text:txt})});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok||!j.ok){out.innerHTML=`<p class="note">${AI_ERR[j.error]||"這次沒有取得完整結果，請再按一次。"}</p>`;track("ai_fail",j.error||String(r.status));return}
+    const d=j.result,lv={"高":"p-bad","中":"p-warn","低":"p-ok"};
     out.innerHTML=`<h3 style="margin-top:4px">${esc(d.summary)}</h3>
      <div class="tablebox" style="background:var(--panel);border-radius:6px;margin-top:8px"><table style="min-width:520px"><thead><tr><th>類型</th><th>情報</th><th>影響</th></tr></thead><tbody>${L(d.signals).map(x=>`<tr><td>${esc(x.type)}</td><td style="white-space:normal">${esc(x.content)}</td><td><span class="pill ${lv[x.impact]||"p-warn"}">${esc(x.impact)}</span></td></tr>`).join("")}</tbody></table></div>
      <div class="tablebox" style="background:var(--panel);border-radius:6px;margin-top:8px"><table style="min-width:520px"><thead><tr><th>部門</th><th>要做的事</th><th>時間點</th></tr></thead><tbody>${L(d.actions).map(x=>`<tr><td><b>${esc(x.dept)}</b></td><td style="white-space:normal">${esc(x.action)}</td><td>${esc(x.when)}</td></tr>`).join("")}</tbody></table></div>
-     <div class="res" style="margin-top:8px"><div class="r-me" style="background:var(--panel)"><b>風險</b><ul style="margin:4px 0 0;padding-left:1.1em">${L(d.risks).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div><div class="r-me" style="background:var(--panel)"><b>下次拜訪要追問</b><ul style="margin:4px 0 0;padding-left:1.1em">${L(d.next_visit).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></div>`;
-  }catch(e){const HIDE=["not_granted","sampling_disabled","not_declared","capability_disabled","capability_removed"];out.innerHTML=`<p class="note">${HIDE.includes(e.code)?"目前無法使用 AI（本版未提供即時 AI）。":e.code==="rate_limited"?"使用次數暫時達上限，請稍後再試。":e.code==="cancelled"?"":"這次沒有取得完整結果，請再按一次。"}</p>`}
+     <div class="res" style="margin-top:8px"><div class="r-me" style="background:var(--panel)"><b>風險</b><ul style="margin:4px 0 0;padding-left:1.1em">${L(d.risks).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div><div class="r-me" style="background:var(--panel)"><b>下次拜訪要追問</b><ul style="margin:4px 0 0;padding-left:1.1em">${L(d.next_visit).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></div>
+     <p class="note" style="margin-top:8px">由開源模型 ${esc(j.model)} 即時產生。AI 只負責整理與建議；是否採用、由誰執行，仍由各部門主管決定。</p>`;
+    track("ai_ok","visit-notes");
+  }catch(e){out.innerHTML='<p class="note">連線中斷，請再按一次。</p>';track("ai_fail","network")}
   finally{btn.disabled=false}
 });
 </script>
 
+<script src="track.js" defer></script>
 </body>
 </html>
