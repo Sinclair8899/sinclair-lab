@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>四方比對付款模擬器</title>
+<title>AP 四單比對</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+TC:wght@700&display=swap">
 <style>
 /* Layout: AI Lab showcase — thesis + ERP-vs-AI contrast, triangle map + controls, case queue | cross-system match sheet with AI read-out, payment & intercompany run */
@@ -207,12 +207,12 @@ td.wrap{white-space:normal;min-width:160px}
 <div class="wrap">
   <header>
     <span class="eyebrow">AI LAB · 現金循環系列 01 · 應付天數</span>
-    <h1>四方比對付款模擬器</h1>
+    <h1>AP 四單比對</h1>
     <p class="sub">2008 年到 2011 年，我們花了約三年，讓大型 EMS 廠的應付帳款從人工核對走向系統比對。這個模擬器讓你在 5 分鐘內親身體驗那段過程：先當一天 AP 人員，再看 AI 如何處理同一批發票。</p>
     <div class="opener">
       <div><b>5 分鐘</b><span>選交易模式 → 查核 6 張發票 → 對照 AI</span></div>
       <div><b>情境示範</b><span>AI agents 的處理結果為預設情境，可與人工流程對照</span></div>
-      <div><a href="index.html"><b>← 現金循環總覽</b></a><span>AP 影響的是應付天數，回總覽看現金轉換循環（CCC）全貌</span></div>
+      <div><a href="index.html"><b>← 現金循環總覽</b></a><span>AP 影響的是應付天數，回總覽看現金轉換週期（CCC）全貌</span></div>
     </div>
     <p class="note modeline" style="margin-top:12px;padding:8px 12px;border:1px dashed var(--line);border-radius:6px">本頁說明（網站版）：<b>情境示範</b>是依實務整理的預設結果或重播；<b>規則試算</b>是依公式即時計算；標示「本版未提供即時 AI」的區塊需要連接 AI 模型，網站版不開放操作。</p>
   </header>
@@ -233,7 +233,7 @@ td.wrap{white-space:normal;min-width:160px}
       <div class="panel mdetail" id="mdetail"></div>
     </section>
     <section>
-      <span class="label">第二步</span><h2 style="font-size:1.15rem">回到 2008 年，當一天 AP 人員</h2>
+      <span class="label">第二步</span><h2 style="font-size:1.15rem">回到 2009 年，當一天 AP 人員</h2>
       <p class="note" style="margin:4px 0 10px">桌上有 6 張發票。系統還沒整合，供應商有的傳真、有的手寫，大陸廠的收料單要等快遞寄回。你可以調單據、打電話給各部門，查清楚後再判定。每個動作都會花時間。</p>
       <div class="panel clock" id="clock"></div>
       <div class="game">
@@ -322,8 +322,8 @@ td.wrap{white-space:normal;min-width:160px}
       <div class="ctl"><div class="row"><label for="tq">數量容差</label><span class="num" id="tqv"></span></div><input id="tq" type="range" min="0" max="5" step="0.5" value="0"></div>
       <div class="ctl"><div class="row"><label for="ta">差異金額上限 (TWD)</label><span class="num" id="tav"></span></div><input id="ta" type="range" min="0" max="50000" step="5000" value="10000"></div>
       <div class="ctl"><div class="row"><label for="mk">內部轉撥加成</label><span class="num" id="mkv"></span></div><input id="mk" type="range" min="0" max="10" step="0.5" value="3"></div>
-      <div class="ctl"><label for="fx1">USD/TWD</label><input id="fx1" type="number" step="0.01" value="32.40"></div>
-      <div class="ctl"><label for="fx2">RMB/TWD</label><input id="fx2" type="number" step="0.01" value="4.50"></div>
+      <div class="ctl"><label for="fx1">USD/TWD</label><input id="fx1" type="number" min="0.01" step="0.01" value="32.40"></div>
+      <div class="ctl"><label for="fx2">RMB/TWD</label><input id="fx2" type="number" min="0.01" step="0.01" value="4.50"></div>
     </section>
   </section>
 
@@ -361,7 +361,7 @@ td.wrap{white-space:normal;min-width:160px}
     </section>
 
     <section class="panel">
-      <div class="h2pad"><span class="label">步驟 ②</span><h2>付款批次與分層簽核・2026-09-10 付款日</h2><p class="note" style="margin:4px 0 0">到期且比對通過的應付帳款，依付款主體與帳戶分組：境外供應商由台灣 OBU 美元帳戶付款，台灣供應商由 DBU 台幣帳戶，大陸當地供應商由大陸廠人民幣帳戶。</p></div>
+      <div class="h2pad"><span class="label">步驟 ②</span><h2>付款批次與分層簽核・2026-09-30 付款日</h2><p class="note" style="margin:4px 0 0">只付 9/30 前到期（發票月份月底 + 月結天數）且比對通過的應付帳款；未到期的不提前付款，列在表格下方。金額取自「02 多對多比對」的比對結果，調整該頁參數會同步更新，並需重新簽核；立帳匯率固定以 USD 32.40、RMB 4.50 計算，不隨「03 付款決策」的匯率欄變動。依付款主體與帳戶分組：境外供應商由台灣 OBU 美元帳戶付款，台灣供應商由 DBU 台幣帳戶，大陸當地供應商由大陸廠人民幣帳戶。</p></div>
       <div class="tablebox"><table id="pbatch"></table></div>
       <div class="ainotes" id="pbnotes"></div>
       <div class="h2pad" style="padding-top:0"><span class="label">簽核（依金額決定層級，經辦不得自行簽核）</span><div class="appr" id="appr"></div></div>
@@ -383,47 +383,48 @@ td.wrap{white-space:normal;min-width:160px}
 <script>
 const BASE=[
  {id:1,tag:"美系 SoC・預付款沖銷",ent:"TW",vendor:"美系 SoC 晶片原廠",item:"手機 SoC 應用處理器",unit:"pcs",terms:30,cur:"USD",tax:{type:"免稅（境外供應商）",rate:0},
-  pr:{no:"PR-TW-2406-102",qty:40000,budget:38.5},po:{no:"PO-TW-2406-0310",qty:40000,price:38.0,vendor:"美系 SoC 晶片原廠",shipTo:"鄭州廠",note:"終端客戶指定料・指定價"},
-  grn:{no:"GR-ZZ-240702-05",rec:40000,rej:0,plant:"鄭州廠",sys:"鄭州廠 Oracle",synced:true},inv:{no:"US-5508812",vendor:"美系 SoC 晶片原廠",qty:40000,price:38.0,taxAmt:0,date:"2026-07-02"},prior:0,prepaid:456000},
+  pr:{no:"PR-TW-2606-102",qty:40000,budget:38.5},po:{no:"PO-TW-2606-0310",qty:40000,price:38.0,vendor:"美系 SoC 晶片原廠",shipTo:"鄭州廠",note:"終端客戶指定料・指定價"},
+  grn:{no:"GR-ZZ-260702-05",rec:40000,rej:0,plant:"鄭州廠",sys:"鄭州廠 Oracle",synced:true},inv:{no:"US-5508812",vendor:"美系 SoC 晶片原廠",qty:40000,price:38.0,taxAmt:0,date:"2026-07-02"},prior:0,prepaid:456000},
  {id:2,tag:"韓系 DRAM・季度換價",ent:"TW",vendor:"韓系 DRAM 原廠",item:"LPDDR5 12GB",unit:"pcs",terms:30,cur:"USD",tax:{type:"免稅（境外供應商）",rate:0},
-  pr:{no:"PR-TW-2406-115",qty:60000,budget:22.0},po:{no:"PO-TW-2406-0322",qty:60000,price:19.8,vendor:"韓系 DRAM 原廠",shipTo:"深圳廠"},
-  grn:{no:"GR-SZ-240703-12",rec:60000,rej:0,plant:"深圳廠",sys:"深圳廠 SAP",synced:true},inv:{no:"KR-24Q3-01877",vendor:"韓系 DRAM 原廠",qty:60000,price:21.6,taxAmt:0,date:"2026-07-03"},prior:0,
+  pr:{no:"PR-TW-2606-115",qty:60000,budget:22.0},po:{no:"PO-TW-2606-0322",qty:60000,price:19.8,vendor:"韓系 DRAM 原廠",shipTo:"深圳廠"},
+  grn:{no:"GR-SZ-260703-12",rec:60000,rej:0,plant:"深圳廠",sys:"深圳廠 SAP",synced:true},inv:{no:"KR-26Q3-01877",vendor:"韓系 DRAM 原廠",qty:60000,price:21.6,taxAmt:0,date:"2026-07-03"},prior:0,
   contract:{q:"2026 Q3",price:21.6,prev:19.8}},
  {id:3,tag:"韓系 DRAM・價格保護",ent:"TW",vendor:"韓系 DRAM 原廠",item:"DDR5 16Gb 顆粒",unit:"pcs",terms:30,cur:"USD",tax:{type:"免稅（境外供應商）",rate:0},
-  pr:{no:"PR-TW-2406-119",qty:100000,budget:4.2},po:{no:"PO-TW-2406-0333",qty:100000,price:4.05,vendor:"韓系 DRAM 原廠",shipTo:"昆山廠"},
-  grn:{no:"GR-KS-240705-03",rec:100000,rej:0,plant:"昆山廠",sys:"昆山廠 Tiptop",synced:true},inv:{no:"KR-24Q3-01902",vendor:"韓系 DRAM 原廠",qty:100000,price:3.82,taxAmt:0,date:"2026-07-05"},prior:0,
+  pr:{no:"PR-TW-2606-119",qty:100000,budget:4.2},po:{no:"PO-TW-2606-0333",qty:100000,price:4.05,vendor:"韓系 DRAM 原廠",shipTo:"昆山廠"},
+  grn:{no:"GR-KS-260705-03",rec:100000,rej:0,plant:"昆山廠",sys:"昆山廠 Tiptop",synced:true},inv:{no:"KR-26Q3-01902",vendor:"韓系 DRAM 原廠",qty:100000,price:3.82,taxAmt:0,date:"2026-07-05"},prior:0,
   pp:{onHand:180000,oldPrice:4.05}},
  {id:4,tag:"三角貿易・完全吻合",ent:"TW",vendor:"Apex Semiconductor (SG)",item:"PMIC 電源管理 IC",unit:"pcs",terms:60,cur:"USD",tax:{type:"免稅（境外供應商）",rate:0},
-  pr:{no:"PR-TW-2406-118",qty:200000,budget:0.42},po:{no:"PO-TW-2406-0331",qty:200000,price:0.41,vendor:"Apex Semiconductor (SG)",shipTo:"深圳廠"},
-  grn:{no:"GR-SZ-240702-17",rec:200000,rej:0,plant:"深圳廠",sys:"深圳廠 SAP",synced:true},inv:{no:"AS-24-07781",vendor:"Apex Semiconductor (SG)",qty:200000,price:0.41,taxAmt:0,date:"2026-07-03"},prior:0},
+  pr:{no:"PR-TW-2606-118",qty:200000,budget:0.42},po:{no:"PO-TW-2606-0331",qty:200000,price:0.41,vendor:"Apex Semiconductor (SG)",shipTo:"深圳廠"},
+  grn:{no:"GR-SZ-260702-17",rec:200000,rej:0,plant:"深圳廠",sys:"深圳廠 SAP",synced:true},inv:{no:"AS-26-07781",vendor:"Apex Semiconductor (SG)",qty:200000,price:0.41,taxAmt:0,date:"2026-07-03"},prior:0},
  {id:5,tag:"台灣供應商・單方漲價",ent:"TW",vendor:"東昇機構件",item:"M1.4 精密螺絲",unit:"千顆",terms:90,cur:"TWD",tax:{type:"零稅率（貨物直接出口）",rate:0},
-  pr:{no:"PR-TW-2406-125",qty:8000,budget:120},po:{no:"PO-TW-2406-0344",qty:8000,price:115,vendor:"東昇機構件",shipTo:"深圳廠"},
-  grn:{no:"GR-SZ-240706-08",rec:8000,rej:0,plant:"深圳廠",sys:"深圳廠 SAP",synced:true},inv:{no:"TS-20483310",vendor:"東昇機構件",qty:8000,price:122,taxAmt:0,date:"2026-07-06"},prior:0},
+  pr:{no:"PR-TW-2606-125",qty:8000,budget:120},po:{no:"PO-TW-2606-0344",qty:8000,price:115,vendor:"東昇機構件",shipTo:"深圳廠"},
+  grn:{no:"GR-SZ-260706-08",rec:8000,rej:0,plant:"深圳廠",sys:"深圳廠 SAP",synced:true},inv:{no:"TS-20483310",vendor:"東昇機構件",qty:8000,price:118,taxAmt:0,date:"2026-07-06"},prior:0},
  {id:6,tag:"三角貿易・分批到貨",ent:"TW",vendor:"榮達精密",item:"鋁合金中框",unit:"pcs",terms:90,cur:"TWD",tax:{type:"零稅率（貨物直接出口）",rate:0},
-  pr:{no:"PR-TW-2406-133",qty:80000,budget:48},po:{no:"PO-TW-2406-0358",qty:80000,price:46.5,vendor:"榮達精密",shipTo:"鄭州廠"},
-  grn:{no:"GR-ZZ-240708-21",rec:60000,rej:0,plant:"鄭州廠",sys:"鄭州廠 Oracle",synced:true},inv:{no:"RD-30019922",vendor:"榮達精密",qty:80000,price:46.5,taxAmt:0,date:"2026-07-09"},prior:0},
+  pr:{no:"PR-TW-2606-133",qty:80000,budget:48},po:{no:"PO-TW-2606-0358",qty:80000,price:46.5,vendor:"榮達精密",shipTo:"鄭州廠"},
+  grn:{no:"GR-ZZ-260708-21",rec:60000,rej:0,plant:"鄭州廠",sys:"鄭州廠 Oracle",synced:true},inv:{no:"RD-30019922",vendor:"榮達精密",qty:80000,price:46.5,taxAmt:0,date:"2026-07-09"},prior:0},
  {id:7,tag:"三角貿易・入庫資料未回傳",ent:"TW",vendor:"Apex Semiconductor (SG)",item:"LDO 穩壓 IC",unit:"pcs",terms:60,cur:"USD",tax:{type:"免稅（境外供應商）",rate:0},
-  pr:{no:"PR-TW-2407-007",qty:150000,budget:0.12},po:{no:"PO-TW-2407-0015",qty:150000,price:0.115,vendor:"Apex Semiconductor (SG)",shipTo:"昆山廠"},
-  grn:{no:"GR-KS-240710-14",rec:150000,rej:0,plant:"昆山廠",sys:"昆山廠 Tiptop",synced:false},inv:{no:"AS-24-07902",vendor:"Apex Semiconductor (SG)",qty:150000,price:0.115,taxAmt:0,date:"2026-07-10"},prior:0},
+  pr:{no:"PR-TW-2607-007",qty:150000,budget:0.12},po:{no:"PO-TW-2607-0015",qty:150000,price:0.115,vendor:"Apex Semiconductor (SG)",shipTo:"昆山廠"},
+  grn:{no:"GR-KS-260710-14",rec:150000,rej:0,plant:"昆山廠",sys:"昆山廠 Tiptop",synced:false},inv:{no:"AS-26-07902",vendor:"Apex Semiconductor (SG)",qty:150000,price:0.115,taxAmt:0,date:"2026-07-10"},prior:0},
  {id:8,tag:"三角貿易・收貨廠別不符",ent:"TW",vendor:"Kinwa Connector Ltd. (HK)",item:"Type-C 連接器",unit:"pcs",terms:60,cur:"USD",tax:{type:"免稅（境外供應商）",rate:0},
-  pr:{no:"PR-TW-2407-011",qty:300000,budget:0.09},po:{no:"PO-TW-2407-0022",qty:300000,price:0.088,vendor:"Kinwa Connector Ltd. (HK)",shipTo:"深圳廠"},
-  grn:{no:"GR-KS-240712-04",rec:300000,rej:0,plant:"昆山廠",sys:"昆山廠 Tiptop",synced:true},inv:{no:"KW-H-55120",vendor:"Kinwa Connector Ltd. (HK)",qty:300000,price:0.088,taxAmt:0,date:"2026-07-12"},prior:0},
+  pr:{no:"PR-TW-2607-011",qty:300000,budget:0.09},po:{no:"PO-TW-2607-0022",qty:300000,price:0.088,vendor:"Kinwa Connector Ltd. (HK)",shipTo:"深圳廠"},
+  grn:{no:"GR-KS-260712-04",rec:300000,rej:0,plant:"昆山廠",sys:"昆山廠 Tiptop",synced:true},inv:{no:"KW-H-55120",vendor:"Kinwa Connector Ltd. (HK)",qty:300000,price:0.088,taxAmt:0,date:"2026-07-12"},prior:0},
  {id:9,tag:"台灣供應商誤開 5% 稅額",ent:"TW",vendor:"台鉅電子",item:"晶片電阻 0201",unit:"千顆",terms:90,cur:"TWD",tax:{type:"零稅率（貨物直接出口）",rate:0},
-  pr:{no:"PR-TW-2407-014",qty:5000,budget:9},po:{no:"PO-TW-2407-0030",qty:5000,price:8.8,vendor:"台鉅電子",shipTo:"深圳廠"},
-  grn:{no:"GR-SZ-240714-11",rec:5000,rej:0,plant:"深圳廠",sys:"深圳廠 SAP",synced:true},inv:{no:"QA-20482090",vendor:"台鉅電子",qty:5000,price:8.8,taxAmt:2200,date:"2026-07-15"},prior:0},
+  pr:{no:"PR-TW-2607-014",qty:5000,budget:9},po:{no:"PO-TW-2607-0030",qty:5000,price:8.8,vendor:"台鉅電子",shipTo:"深圳廠"},
+  grn:{no:"GR-SZ-260714-11",rec:5000,rej:0,plant:"深圳廠",sys:"深圳廠 SAP",synced:true},inv:{no:"QA-20482090",vendor:"台鉅電子",qty:5000,price:8.8,taxAmt:2200,date:"2026-07-15"},prior:0},
  {id:10,tag:"重複請款",ent:"TW",vendor:"Apex Semiconductor (SG)",item:"PMIC 電源管理 IC",unit:"pcs",terms:60,cur:"USD",tax:{type:"免稅（境外供應商）",rate:0},
-  pr:{no:"PR-TW-2406-118",qty:200000,budget:0.42},po:{no:"PO-TW-2406-0331",qty:200000,price:0.41,vendor:"Apex Semiconductor (SG)",shipTo:"深圳廠"},
-  grn:{no:"GR-SZ-240702-17",rec:200000,rej:0,plant:"深圳廠",sys:"深圳廠 SAP",synced:true},inv:{no:"AS-24-07781",vendor:"Apex Semiconductor (SG)",qty:200000,price:0.41,taxAmt:0,date:"2026-07-18"},prior:0},
+  pr:{no:"PR-TW-2606-118",qty:200000,budget:0.42},po:{no:"PO-TW-2606-0331",qty:200000,price:0.41,vendor:"Apex Semiconductor (SG)",shipTo:"深圳廠"},
+  grn:{no:"GR-SZ-260702-17",rec:200000,rej:0,plant:"深圳廠",sys:"深圳廠 SAP",synced:true},inv:{no:"AS-26-07781",vendor:"Apex Semiconductor (SG)",qty:200000,price:0.41,taxAmt:0,date:"2026-07-18"},prior:0},
  {id:11,tag:"大陸當地購料",ent:"CN",vendor:"東莞匯聯包裝",item:"防靜電包材",unit:"箱",terms:60,cur:"RMB",tax:{type:"增值稅專用發票 13%",rate:0.13},
-  pr:{no:"PR-SZ-2407-052",qty:1200,budget:85},po:{no:"PO-SZ-2407-0198",qty:1200,price:82,vendor:"東莞匯聯包裝",shipTo:"深圳廠"},
-  grn:{no:"GR-SZ-240716-30",rec:1200,rej:0,plant:"深圳廠",sys:"深圳廠 SAP",synced:true},inv:{no:"44031987",vendor:"東莞匯聯包裝",qty:1200,price:82,taxAmt:12792,date:"2026-07-17"},prior:0},
+  pr:{no:"PR-SZ-2607-052",qty:1200,budget:85},po:{no:"PO-SZ-2607-0198",qty:1200,price:82,vendor:"東莞匯聯包裝",shipTo:"深圳廠"},
+  grn:{no:"GR-SZ-260716-30",rec:1200,rej:0,plant:"深圳廠",sys:"深圳廠 SAP",synced:true},inv:{no:"44031987",vendor:"東莞匯聯包裝",qty:1200,price:82,taxAmt:12792,date:"2026-07-17"},prior:0},
 ];
 let cases=structuredClone(BASE),sel=1,fixed=new Set();
 const $=id=>document.getElementById(id);
 const fmt=n=>Math.round(n).toLocaleString("zh-TW");
 const fmtP=n=>(+n).toLocaleString("zh-TW",{maximumFractionDigits:4});
 const fmtC=(n,cur)=>cur==="TWD"?fmt(n):(+n).toLocaleString("zh-TW",{minimumFractionDigits:2,maximumFractionDigits:2});
-const P=()=>({p:+$("tp").value/100,q:+$("tq").value/100,a:+$("ta").value,mk:+$("mk").value/100,fx:{TWD:1,USD:+$("fx1").value||0,RMB:+$("fx2").value||0}});
+const posOr=(v,d)=>(+v>0?+v:d);
+const P=()=>({p:+$("tp").value/100,q:+$("tq").value/100,a:+$("ta").value,mk:+$("mk").value/100,fx:{TWD:1,USD:posOr($("fx1").value,32.40),RMB:posOr($("fx2").value,4.50)}});
 const dueDate=(d,n)=>{const t=new Date(d+"T00:00:00");const e=new Date(t.getFullYear(),t.getMonth()+1,0);e.setDate(e.getDate()+n);return `${e.getFullYear()}-${String(e.getMonth()+1).padStart(2,"0")}-${String(e.getDate()).padStart(2,"0")}`};
 const payer=c=>c.ent==="TW"?"台灣主體":c.po.shipTo;
 
@@ -438,15 +439,17 @@ function evaluate(c,seen,T){
     add("收貨廠別",c.grn.plant===c.po.shipTo?"pass":"fail",c.grn.plant===c.po.shipTo?`PO 送貨地與收貨廠皆為 ${c.po.shipTo}`:`PO 送 ${c.po.shipTo}，實際由 ${c.grn.plant} 收貨`);
     add("跨系統入庫回傳",c.grn.synced?"pass":"warn",c.grn.synced?`${c.grn.sys} 入庫單已回傳台灣`:`${c.grn.sys} 尚無入庫資料`);
   }
+  if(!(iv.qty>0&&iv.price>0)) add("發票數值","fail","數量與單價必須大於 0");
   const acc=c.grn.rec-c.grn.rej,open=acc-c.prior;let payQty=iv.qty,qS="pass",qM;
   if(!c.grn.synced){qS="warn";payQty=0;qM="無入庫資料，暫不比對數量"}
-  else if(iv.qty<=open*(1+T.q))qM=`發票 ${fmt(iv.qty)} ≤ 可請款量 ${fmt(open)}`;
+  else if(iv.qty<=open)qM=`發票 ${fmt(iv.qty)} ≤ 可請款量 ${fmt(open)}`;
+  else if(iv.qty<=open*(1+T.q)){payQty=Math.max(open,0);qM=`發票 ${fmt(iv.qty)} 超過可請款量 ${fmt(open)}，在容差 ${(T.q*100).toFixed(1)}% 內；依可請款量 ${fmt(payQty)} 付款`}
   else if(c.grn.rej>0){qS="fail";payQty=0;qM=`含驗退 ${fmt(c.grn.rej)}，需供應商開立折讓`}
   else{qS="warn";payQty=Math.max(open,0);qM=`僅收貨 ${fmt(open)}，餘 ${fmt(iv.qty-open)} 待到貨`}
   add("數量 (GRN → 發票)",qS,qM);
   const pv=(iv.price-c.po.price)/c.po.price;
   add("單價 (PO → 發票)",pv<=T.p+1e-9?"pass":"fail",`發票 ${fmtP(iv.price)}／PO ${fmtP(c.po.price)} ${c.cur}，差異 ${(pv*100).toFixed(2)}%（容差 ${(T.p*100).toFixed(1)}%）`);
-  const exp=Math.round(net*c.tax.rate*100)/100,tOk=Math.abs(iv.taxAmt-exp)<=1;
+  const exp=Math.round(net*c.tax.rate*100)/100,tOk=Math.abs(iv.taxAmt-exp)<=(c.cur==="TWD"?1:0.01);
   add("稅別與稅額",tOk?"pass":"fail",`${c.tax.type}：應為 ${fmtC(exp,c.cur)}，發票為 ${fmtC(iv.taxAmt,c.cur)}`);
   if(c.prepaid) add("預付款沖銷",c.prepaid<=net+iv.taxAmt?"pass":"fail",`已預付 ${fmtC(c.prepaid,c.cur)}，本次付款扣除`);
   const va=Math.max(0,(iv.price-c.po.price)*iv.qty)*fx;
@@ -455,10 +458,10 @@ function evaluate(c,seen,T){
   if(dup){disp="拒付";cls="bad";route="退回供應商"}
   else if(fails.length){disp="例外待審";cls="warn";route="轉人工處理"}
   else if(!c.grn.synced){disp="暫扣";cls="warn";route="等待入庫回傳"}
-  else if(qS==="warn"){disp="部分付款";cls="warn";route="已收部分進付款，餘額暫扣";pay=payQty*iv.price*(1+c.tax.rate)}
-  else{disp="自動核准";cls="ok";route="進付款批次";pay=net+iv.taxAmt-(c.prepaid||0)}
+  else if(qS==="warn"){disp="部分付款";cls="warn";route="已收部分進付款，餘額暫扣";pay=Math.max(0,payQty*iv.price*(1+c.tax.rate)-(c.prepaid||0))}
+  else{disp="自動核准";cls="ok";route="進付款批次";pay=payQty*iv.price+iv.taxAmt*(payQty/iv.qty)-(c.prepaid||0)}
   if(fixed.has(c.id)&&disp==="自動核准"){disp="AI 協助放行";cls="ai"}
-  const ic=(c.ent==="TW"&&pay>0)?((pay+(disp.includes("核准")||disp.includes("放行")?(c.prepaid||0):0))*fx)*(1+T.mk):0;
+  const ic=(c.ent==="TW"&&pay>0)?((pay+(disp.includes("核准")||disp.includes("放行")||disp==="部分付款"?(c.prepaid||0):0))*fx)*(1+T.mk):0;
   return{ch,disp,cls,route,pay,payTWD:pay*fx,gross:net+iv.taxAmt,due:dueDate(iv.date,c.terms),ic,pv,dup,qS,fails};
 }
 
@@ -479,7 +482,8 @@ function insight(c,r,T){
   if(c.ent==="CN") return{cause:"大陸廠就地採購，增值稅專票稅額正確。",action:"由大陸主體付款，不經台灣，也不需開內部轉撥。",exp:"實務經驗：就地採購要回到大陸主體的帳上，避免混入三角貿易流程。"};
   return{cause:"四份單據全部吻合。",action:"直接進付款批次，無須人工。",exp:"這類案件應占多數，AI 層不介入，讓人力集中在例外。"};
 }
-const evalAll=()=>{const T=P(),seen=new Set();return cases.map(c=>{const r=evaluate(c,seen,T);seen.add(c.inv.vendor+"|"+c.inv.no);r.ai=insight(c,r,T);return r})};
+const evalList=list=>{const T=P(),seen=new Set();return list.map(c=>{const r=evaluate(c,seen,T);seen.add(c.inv.vendor+"|"+c.inv.no);r.ai=insight(c,r,T);return r})};
+const evalAll=()=>evalList(cases);
 
 function render(){
   const T=P();$("tpv").textContent=(T.p*100).toFixed(1)+"%";$("tqv").textContent=(T.q*100).toFixed(1)+"%";$("tav").textContent="NT$ "+fmt(T.a);$("mkv").textContent=(T.mk*100).toFixed(1)+"%";
@@ -489,7 +493,7 @@ function render(){
   $("s1h").textContent=fixable?`另有 ${fixable} 張可由 AI 建議放行`:`其中 ${fixed.size} 張由 AI 協助放行`;
   $("s2").textContent="NT$ "+fmt(R.reduce((a,r)=>a+r.payTWD,0));
   $("s3").textContent="NT$ "+fmt(R.reduce((a,r)=>a+(r.ai.found||0),0));
-  const exc=R.filter(r=>!(r.cls==="ok"||r.cls==="ai")).length,manual=(exc*25+auto*1),assisted=(exc*5+auto*1);
+  const exc=R.filter(r=>!(r.cls==="ok"||r.cls==="ai")).length,aiRel=R.filter(r=>r.cls==="ai").length,manual=((exc+aiRel)*25+(auto-aiRel)*1),assisted=(exc*5+auto*1);
   $("s4").textContent=`${manual} → ${assisted} 分`;$("s4h").textContent=`純人工 vs. AI 判讀後確認`;
   $("queue").innerHTML=cases.map((c,i)=>`<button type="button" data-id="${c.id}" aria-current="${c.id===sel}"><span class="t">${c.vendor}<span class="ent e-${c.ent}">${c.ent==="TW"?"台灣付款":"大陸付款"}</span></span><span class="pill p-${R[i].cls}">${R[i].disp}</span><span class="s">${c.tag}${R[i].ai.found?" · AI 發現價保":""}</span></button>`).join("");
   const i=cases.findIndex(c=>c.id===sel),c=cases[i],r=R[i],a=r.ai;
@@ -500,9 +504,9 @@ function render(){
     <div class="doc"><span class="label">採購單 PO</span><span class="mono">${c.po.no}</span><span class="sys">${c.ent==="TW"?"台灣 Tiptop":c.grn.sys}</span><div class="k"><span>數量</span><span class="num">${fmt(c.po.qty)}</span></div><div class="k"><span>單價</span><span class="num">${fmtP(c.po.price)}</span></div><div class="k"><span>送貨地</span><span>${c.po.shipTo}</span></div><div class="k"><span>條件</span><span>月結 ${c.terms} 天</span></div></div>
     <div class="doc cn"><span class="label">驗收入庫單 GRN</span><span class="mono">${c.grn.no}</span><span class="sys">${c.grn.sys}${c.ent==="TW"?(c.grn.synced?" → 已回傳":" → 未回傳"):""}</span><div class="k"><span>收貨廠</span><span>${c.grn.plant}</span></div><div class="k"><span>實收</span><span class="num">${fmt(c.grn.rec)}</span></div><div class="k"><span>驗退</span><span class="num">${fmt(c.grn.rej)}</span></div></div>
     <div class="doc inv"><span class="label">發票（可修改）</span><span class="mono">${c.inv.no}</span><span class="sys">寄${payer(c)}</span>
-     <div class="k"><label for="iq">數量</label><input id="iq" type="number" value="${c.inv.qty}"></div>
-     <div class="k"><label for="ip">單價</label><input id="ip" type="number" step="0.001" value="${c.inv.price}"></div>
-     <div class="k"><label for="it">稅額</label><input id="it" type="number" step="0.01" value="${c.inv.taxAmt}"></div>
+     <div class="k"><label for="iq">數量</label><input id="iq" type="number" min="1" value="${c.inv.qty}"></div>
+     <div class="k"><label for="ip">單價</label><input id="ip" type="number" min="0.001" step="0.001" value="${c.inv.price}"></div>
+     <div class="k"><label for="it">稅額</label><input id="it" type="number" min="0" step="0.01" value="${c.inv.taxAmt}"></div>
      <div class="k"><span>含稅 ${c.cur}</span><span class="num">${fmtC(r.gross,c.cur)}</span></div></div>
    </div>
    <div class="checks">${r.ch.map(x=>`<div class="chk"><span class="dot d-${x.s}"></span><span class="n">${x.n}</span><span class="m">${x.m}</span></div>`).join("")}</div>
@@ -536,7 +540,7 @@ render();
 const FMTS=[
  {title:"Apex Semiconductor (SG)",src:"EDI 810（ANSI X12）",then:"只有大型供應商有 EDI，雙方 IT 對測常需數月",
   raw:`ST*810*0001~
-BIG*20260815*AS-24-08110*20260801*PO-TW-2408-0103~
+BIG*20260815*AS-26-08110*20260801*PO-TW-2608-0103~
 CUR*SE*USD~
 ITD*01*3*****60~
 FOB*PP*OR*SINGAPORE*01*FCA~
@@ -544,12 +548,12 @@ IT1*1*10500*EA*0.41**BP*PMIC-88*VP*APX-PM88-QFN~
 IT1*2*10500*EA*0.115**BP*LDO-33*VP*APX-LDO33-SOT~
 TDS*551250~
 SE*9*0001~`,
-  rows:[["發票號碼","AS-24-08110","BIG02",1],["PO 號碼","PO-TW-2408-0103","BIG04",1],["幣別","USD","CUR02",1],["交易條件","FCA 新加坡","FOB 段",1],["付款條件","月結 60 天","ITD 段 net 60",1],
+  rows:[["發票號碼","AS-26-08110","BIG02",1],["PO 號碼","PO-TW-2608-0103","BIG04",1],["幣別","USD","CUR02",1],["交易條件","FCA 新加坡","FOB 段",1],["付款條件","月結 60 天","ITD 段 net 60",1],
    ["明細 1","PMIC-88 × 10,500 @ 0.41","IT1，以我方料號 BP 為準",1],["明細 2","LDO-33 × 10,500 @ 0.115","IT1；供應商料號 VP 存入對照表",1],["總額","USD 5,512.50","TDS 以分計，已驗算",1]]},
  {title:"台鉅電子",src:"Excel／CSV（供應商自訂欄位）",then:"要求供應商改欄位、加我方料號，往返多次仍常漏填",
   raw:`發票號碼,開立日,貴公司訂單,品名規格,廠內料號,數量,單位,單價(NT$),金額,交貨條件
 TJ-20485521,2026/08/07,4500-0104,MLCC 0402 X7R 104K 10V,TJ-0402-104K,184,Reel(10K),600,110400,DAP SZ`,
-  rows:[["發票號碼","TJ-20485521","欄位名稱不同，語意對應",0.99],["PO 號碼","PO-TW-2408-0104","供應商只填流水號 0104，以供應商＋料號＋金額比對補全",0.93,"已補正"],["我方料號","C0402-104K","「廠內料號」是供應商料號，經料號對照表轉換",0.97,"已轉換"],
+  rows:[["發票號碼","TJ-20485521","欄位名稱不同，語意對應",0.99],["PO 號碼","PO-TW-2608-0104","供應商只填流水號 0104，以供應商＋料號＋金額比對補全",0.93,"已補正"],["我方料號","C0402-104K","「廠內料號」是供應商料號，經料號對照表轉換",0.97,"已轉換"],
    ["數量","1,840,000 pcs","184 Reel × 10,000",0.99,"單位換算"],["單價","TWD 0.06 / pcs","每捲 600 ÷ 10,000",0.99,"單位換算"],["交易條件","DAP 深圳廠","「DAP SZ」縮寫",0.96],["付款條件","月結 90 天","發票未載明，取自供應商主檔",0.95,"已補全"]]},
  {title:"Kinwa Connector Ltd. (HK)",src:"PDF 掃描檔（OCR）",then:"由 AP 人員手動 key in，月底常加班趕單",
   raw:`KINWA CONNECTOR LTD.       COMMERCIAL INVOICE
@@ -557,12 +561,12 @@ Invoice No.: KW-H-55488    Date: 15-Aug-2026
 Bill To: 台灣主體, Taipei
 Ship To: Shenzhen Plant
 Terms: FOB Hong Kong   Payment: O/A 60 days
-Your Ref: P0-TW-2408-O1O5
+Your Ref: P0-TW-2608-O1O5
 
 Item Description           Qty   U/P(USD/K)  Amount
 1    USB TYPE-C 24P RCPT  12,000    88.00   1,056.00
                               TOTAL USD   1,056.00`,
-  rows:[["發票號碼","KW-H-55488","OCR",0.98],["PO 號碼","PO-TW-2408-0105","OCR 把 0 讀成 O，比對既有 PO 後更正",0.93,"已更正"],["我方料號","USBC-24P","品名相似度＋該 PO 只有一行",0.94,"推定"],
+  rows:[["發票號碼","KW-H-55488","OCR",0.98],["PO 號碼","PO-TW-2608-0105","OCR 把 0 讀成 O，比對既有 PO 後更正",0.93,"已更正"],["我方料號","USBC-24P","品名相似度＋該 PO 只有一行",0.94,"推定"],
    ["單價","USD 0.088 / pcs","每千顆 88.00 ÷ 1,000",0.99,"單位換算"],["交易條件","FOB 香港","與 PO 的 DAP 深圳廠不符，帶入比對階段處理",0.98,"不符"],["付款條件","月結 60 天","O/A 60 days",0.97],["總額","USD 1,056.00","12,000 × 0.088 已驗算",0.99]]},
 ];
 document.getElementById("fmts").innerHTML=FMTS.map(f=>`<article class="panel fmt"><div><span class="label">${f.src}</span><h3>${f.title}</h3><span class="note">當年：${f.then}</span></div>
@@ -570,40 +574,40 @@ document.getElementById("fmts").innerHTML=FMTS.map(f=>`<article class="panel fmt
  <table class="map2"><tbody>${f.rows.map(r=>`<tr><td>${r[0]}</td><td><b>${r[1]}</b> <span class="conf ${r[3]>=0.95?"c-hi":"c-mid"}">${r[3].toFixed(2)}</span><span class="note" style="display:block">${r[2]}</span>${r[4]?`<span class="fix">AI ${r[4]}</span>`:""}</td></tr>`).join("")}</tbody></table></article>`).join("");
 
 /* ===== 02 多對多比對 ===== */
-const MB={model:"T-11 平板主機板",build:10000,pr:"PR-TW-2408-001"};
+const MB={model:"T-11 平板主機板",build:10000,pr:"PR-TW-2608-001"};
 const BOM=[
- {pn:"SOC-A78",desc:"SoC 應用處理器",use:1,attr:0,mpq:1000,po:"PO-TW-2408-0101",note:"高單價料不加損耗"},
- {pn:"LP5-12G",desc:"LPDDR5 12GB",use:2,attr:0,mpq:1000,po:"PO-TW-2408-0102",note:"高單價料不加損耗"},
- {pn:"PMIC-88",desc:"PMIC 電源管理 IC",use:1,attr:0.002,mpq:500,po:"PO-TW-2408-0103"},
- {pn:"LDO-33",desc:"LDO 穩壓 IC",use:2,attr:0.005,mpq:3000,po:"PO-TW-2408-0103"},
- {pn:"C0402-104K",desc:"積層陶瓷電容 0402",use:180,attr:0.02,mpq:10000,po:"PO-TW-2408-0104",note:"被動元件 SMT 拋料多"},
- {pn:"USBC-24P",desc:"Type-C 連接器",use:1,attr:0.01,mpq:2000,po:"PO-TW-2408-0105"},
+ {pn:"SOC-A78",desc:"SoC 應用處理器",use:1,attr:0,mpq:1000,po:"PO-TW-2608-0101",note:"高單價料不加損耗"},
+ {pn:"LP5-12G",desc:"LPDDR5 12GB",use:2,attr:0,mpq:1000,po:"PO-TW-2608-0102",note:"高單價料不加損耗"},
+ {pn:"PMIC-88",desc:"PMIC 電源管理 IC",use:1,attr:0.002,mpq:500,po:"PO-TW-2608-0103"},
+ {pn:"LDO-33",desc:"LDO 穩壓 IC",use:2,attr:0.005,mpq:3000,po:"PO-TW-2608-0103"},
+ {pn:"C0402-104K",desc:"積層陶瓷電容 0402",use:180,attr:0.02,mpq:10000,po:"PO-TW-2608-0104",note:"被動元件 SMT 拋料多"},
+ {pn:"USBC-24P",desc:"Type-C 連接器",use:1,attr:0.01,mpq:2000,po:"PO-TW-2608-0105"},
 ];
 const MPO=[
- {no:"PO-TW-2408-0101",vendor:"美系 SoC 晶片原廠",cur:"USD",inco:"FCA 新加坡",basis:"ship",pay:"月結 30 天",lines:[{ln:1,pn:"SOC-A78",qty:10000,price:38.0,sched:[{d:"2026-08-12",q:10000}]}]},
- {no:"PO-TW-2408-0102",vendor:"韓系 DRAM 原廠",cur:"USD",inco:"DAP 深圳廠",basis:"arrive",pay:"月結 30 天",lines:[{ln:1,pn:"LP5-12G",qty:20000,price:21.6,sched:[{d:"2026-08-10",q:10000},{d:"2026-08-24",q:10000}]}]},
- {no:"PO-TW-2408-0103",vendor:"Apex Semiconductor (SG)",cur:"USD",inco:"FCA 新加坡",basis:"ship",pay:"月結 60 天",lines:[{ln:1,pn:"PMIC-88",qty:10500,price:0.41,sched:[{d:"2026-08-08",q:10500}]},{ln:2,pn:"LDO-33",qty:21000,price:0.115,sched:[{d:"2026-08-08",q:10500},{d:"2026-08-22",q:10500}]}]},
- {no:"PO-TW-2408-0104",vendor:"台鉅電子",cur:"TWD",inco:"DAP 深圳廠",basis:"arrive",pay:"月結 90 天",lines:[{ln:1,pn:"C0402-104K",qty:1840000,price:0.06,sched:[{d:"2026-08-06",q:1840000}]}]},
- {no:"PO-TW-2408-0105",vendor:"Kinwa Connector Ltd. (HK)",cur:"USD",inco:"DAP 深圳廠",basis:"arrive",pay:"月結 60 天",lines:[{ln:1,pn:"USBC-24P",qty:12000,price:0.088,sched:[{d:"2026-08-09",q:12000}]}]},
+ {no:"PO-TW-2608-0101",vendor:"美系 SoC 晶片原廠",cur:"USD",inco:"FCA 新加坡",basis:"ship",pay:"月結 30 天",lines:[{ln:1,pn:"SOC-A78",qty:10000,price:38.0,sched:[{d:"2026-08-12",q:10000}]}]},
+ {no:"PO-TW-2608-0102",vendor:"韓系 DRAM 原廠",cur:"USD",inco:"DAP 深圳廠",basis:"arrive",pay:"月結 30 天",lines:[{ln:1,pn:"LP5-12G",qty:20000,price:21.6,sched:[{d:"2026-08-10",q:10000},{d:"2026-08-24",q:10000}]}]},
+ {no:"PO-TW-2608-0103",vendor:"Apex Semiconductor (SG)",cur:"USD",inco:"FCA 新加坡",basis:"ship",pay:"月結 60 天",lines:[{ln:1,pn:"PMIC-88",qty:10500,price:0.41,sched:[{d:"2026-08-08",q:10500}]},{ln:2,pn:"LDO-33",qty:21000,price:0.115,sched:[{d:"2026-08-08",q:10500},{d:"2026-08-22",q:10500}]}]},
+ {no:"PO-TW-2608-0104",vendor:"台鉅電子",cur:"TWD",inco:"DAP 深圳廠",basis:"arrive",pay:"月結 90 天",lines:[{ln:1,pn:"C0402-104K",qty:1840000,price:0.06,sched:[{d:"2026-08-06",q:1840000}]}]},
+ {no:"PO-TW-2608-0105",vendor:"Kinwa Connector Ltd. (HK)",cur:"USD",inco:"DAP 深圳廠",basis:"arrive",pay:"月結 60 天",lines:[{ln:1,pn:"USBC-24P",qty:12000,price:0.088,sched:[{d:"2026-08-09",q:12000}]}]},
 ];
 const MGRN=[
- {no:"GR-SZ-240814-02",po:"PO-TW-2408-0101",ln:1,ship:"2026-08-12",arr:"2026-08-17",qty:10000,acc:10000,spec:0,rej:0},
- {no:"GR-SZ-240810-05",po:"PO-TW-2408-0102",ln:1,arr:"2026-08-10",qty:10000,acc:10000,spec:0,rej:0},
- {no:"GR-SZ-240829-01",po:"PO-TW-2408-0102",ln:1,arr:"2026-08-29",qty:10000,acc:10000,spec:0,rej:0},
- {no:"GR-SZ-240811-07",po:"PO-TW-2408-0103",ln:1,ship:"2026-08-08",arr:"2026-08-11",qty:10500,acc:10500,spec:0,rej:0},
- {no:"GR-SZ-240811-08",po:"PO-TW-2408-0103",ln:2,ship:"2026-08-08",arr:"2026-08-11",qty:10500,acc:10500,spec:0,rej:0},
- {no:"GR-SZ-240825-03",po:"PO-TW-2408-0103",ln:2,ship:"2026-08-22",arr:"2026-08-25",qty:10500,acc:10500,spec:0,rej:0},
- {no:"GR-SZ-240806-11",po:"PO-TW-2408-0104",ln:1,arr:"2026-08-06",qty:1840000,acc:1640000,spec:200000,rej:0,iqc:"200,000 pcs 端電極輕微氧化，品保判定特採"},
- {no:"GR-SZ-240811-04",po:"PO-TW-2408-0105",ln:1,arr:"2026-08-11",qty:12000,acc:11700,spec:0,rej:300,iqc:"300 pcs 插拔力不足，退貨"},
+ {no:"GR-SZ-260814-02",po:"PO-TW-2608-0101",ln:1,ship:"2026-08-12",arr:"2026-08-17",qty:10000,acc:10000,spec:0,rej:0},
+ {no:"GR-SZ-260810-05",po:"PO-TW-2608-0102",ln:1,arr:"2026-08-10",qty:10000,acc:10000,spec:0,rej:0},
+ {no:"GR-SZ-260829-01",po:"PO-TW-2608-0102",ln:1,arr:"2026-08-29",qty:10000,acc:10000,spec:0,rej:0},
+ {no:"GR-SZ-260811-07",po:"PO-TW-2608-0103",ln:1,ship:"2026-08-08",arr:"2026-08-11",qty:10500,acc:10500,spec:0,rej:0},
+ {no:"GR-SZ-260811-08",po:"PO-TW-2608-0103",ln:2,ship:"2026-08-08",arr:"2026-08-11",qty:10500,acc:10500,spec:0,rej:0},
+ {no:"GR-SZ-260825-03",po:"PO-TW-2608-0103",ln:2,ship:"2026-08-22",arr:"2026-08-25",qty:10500,acc:10500,spec:0,rej:0},
+ {no:"GR-SZ-260806-11",po:"PO-TW-2608-0104",ln:1,arr:"2026-08-06",qty:1840000,acc:1640000,spec:200000,rej:0,iqc:"200,000 pcs 端電極輕微氧化，品保判定特採"},
+ {no:"GR-SZ-260811-04",po:"PO-TW-2608-0105",ln:1,arr:"2026-08-11",qty:12000,acc:11700,spec:0,rej:300,iqc:"300 pcs 插拔力不足，退貨"},
 ];
 const MINV=[
- {no:"AS-24-08110",vendor:"Apex Semiconductor (SG)",src:"EDI",inco:"FCA 新加坡",pay:"月結 60 天",lines:[{po:"PO-TW-2408-0103",ln:1,qty:10500,price:0.41},{po:"PO-TW-2408-0103",ln:2,qty:10500,price:0.115}]},
- {no:"AS-24-08236",vendor:"Apex Semiconductor (SG)",src:"EDI",inco:"FCA 新加坡",pay:"月結 60 天",lines:[{po:"PO-TW-2408-0103",ln:2,qty:10500,price:0.115}]},
- {no:"KR-24Q3-02210",vendor:"韓系 DRAM 原廠",src:"EDI",inco:"DAP 深圳廠",pay:"月結 30 天",lines:[{po:"PO-TW-2408-0102",ln:1,qty:10000,price:21.6}]},
- {no:"KR-24Q3-02388",vendor:"韓系 DRAM 原廠",src:"EDI",inco:"DAP 深圳廠",pay:"月結 30 天",lines:[{po:"PO-TW-2408-0102",ln:1,qty:10000,price:21.6}]},
- {no:"TJ-20485521",vendor:"台鉅電子",src:"CSV",inco:"DAP 深圳廠",pay:"月結 90 天",lines:[{po:"PO-TW-2408-0104",ln:1,qty:1840000,price:0.06}]},
- {no:"US-5509930",vendor:"美系 SoC 晶片原廠",src:"PDF",inco:"FCA 新加坡",pay:"月結 30 天",lines:[{po:"PO-TW-2408-0101",ln:1,qty:10000,price:38.0}]},
- {no:"KW-H-55488",vendor:"Kinwa Connector Ltd. (HK)",src:"PDF 掃描",inco:"FOB 香港",pay:"月結 60 天",lines:[{po:"PO-TW-2408-0105",ln:1,qty:12000,price:0.088}]},
+ {no:"AS-26-08110",vendor:"Apex Semiconductor (SG)",src:"EDI",inco:"FCA 新加坡",pay:"月結 60 天",lines:[{po:"PO-TW-2608-0103",ln:1,qty:10500,price:0.41},{po:"PO-TW-2608-0103",ln:2,qty:10500,price:0.115}]},
+ {no:"AS-26-08236",vendor:"Apex Semiconductor (SG)",src:"EDI",inco:"FCA 新加坡",pay:"月結 60 天",lines:[{po:"PO-TW-2608-0103",ln:2,qty:10500,price:0.115}]},
+ {no:"KR-26Q3-02210",vendor:"韓系 DRAM 原廠",src:"EDI",inco:"DAP 深圳廠",pay:"月結 30 天",lines:[{po:"PO-TW-2608-0102",ln:1,qty:10000,price:21.6}]},
+ {no:"KR-26Q3-02388",vendor:"韓系 DRAM 原廠",src:"EDI",inco:"DAP 深圳廠",pay:"月結 30 天",lines:[{po:"PO-TW-2608-0102",ln:1,qty:10000,price:21.6}]},
+ {no:"TJ-20485521",vendor:"台鉅電子",src:"CSV",inco:"DAP 深圳廠",pay:"月結 90 天",lines:[{po:"PO-TW-2608-0104",ln:1,qty:1840000,price:0.06}]},
+ {no:"US-5509930",vendor:"美系 SoC 晶片原廠",src:"PDF",inco:"FCA 新加坡",pay:"月結 30 天",lines:[{po:"PO-TW-2608-0101",ln:1,qty:10000,price:38.0}]},
+ {no:"KW-H-55488",vendor:"Kinwa Connector Ltd. (HK)",src:"PDF 掃描",inco:"FOB 香港",pay:"月結 60 天",lines:[{po:"PO-TW-2608-0105",ln:1,qty:12000,price:0.088}]},
 ];
 const MFX={USD:32.4,TWD:1};
 const mfmt=n=>Math.round(n).toLocaleString("zh-TW");
@@ -650,10 +654,11 @@ function runMatch(){
   g("bom").innerHTML=`<thead><tr><th>料號</th><th>品名</th><th class="num">單機用量</th><th class="num">損耗率</th><th class="num">MPQ</th><th class="num">PR 數量</th><th>拆單至 PO</th><th>說明</th></tr></thead><tbody>${BOM.map(b=>`<tr><td class="mono">${b.pn}</td><td>${b.desc}</td><td class="num">${b.use}</td><td class="num">${(b.attr*100).toFixed(1)}%</td><td class="num">${mfmt(b.mpq)}</td><td class="num">${mfmt(prQty(b))}</td><td class="mono">${b.po}</td><td class="note">${b.note||""}</td></tr>`).join("")}</tbody>`;
   // tiles
   const pass=res.filter(r=>r.cls==="ok").length,payT=res.reduce((s,r)=>s+r.payTWD,0),gross=res.reduce((s,r)=>s+r.gross,0);
+  window.MRES=res;if(window.__bankReady){B.appr=[];B.sent=false;renderBank()}
   g("mtiles").innerHTML=`<div class="panel tile"><span class="label">發票／行</span><span class="v">${MINV.length} 張／${res.length} 行</span><span class="h">對應 ${MPO.length} 張 PO、${MGRN.length} 筆收料</span></div>
    <div class="panel tile"><span class="label">一次比對通過</span><span class="v">${pass} 行</span><span class="h">其餘由 AI 判讀原因與處理方式</span></div>
    <div class="panel tile"><span class="label">本批可付 (TWD)</span><span class="v">${mfmt(payT)}</span><span class="h">USD 以 ${MFX.USD} 換算</span></div>
-   <div class="panel tile"><span class="label">暫扣／待決 (TWD)</span><span class="v">${mfmt(gross-payT)}</span><span class="h">含罰款、退貨、特採、條件不符</span></div>`;
+   <div class="panel tile"><span class="label">未付（暫扣＋扣減）(TWD)</span><span class="v">${mfmt(gross-payT)}</span><span class="h">含罰款、退貨、特採、條件不符</span></div>`;
   // table
   const dot=ok=>`<i style="background:var(${ok===true?"--ok":ok===false?"--bad":"--warn"})"></i>`;
   g("mtab").innerHTML=`<thead><tr><th>發票／行</th><th>來源</th><th>PO／行</th><th>料號</th><th class="num">數量</th><th>分配到收料批</th><th>檢查</th><th>結果</th><th class="num">可付 (原幣)</th></tr></thead><tbody>${res.map(r=>`<tr>
@@ -698,7 +703,7 @@ const DEF={po:"PO 數量、單價與發票相符。",grn:"收料單數量與發�
 const DEC={pay:"全額付款",partial:"部分付款",hold:"暫扣待查",reject:"退件"};
 const LIB={
  clean_us:{vendor:"Apex Semiconductor (SG)",item:"PMIC 電源管理 IC",form:"傳真＋正本郵寄",no:"AS-09-08110",date:"2009-08-15",po:"PO-TW-0908-0117",qty:"10,500 pcs",price:"USD 0.41",amt:"USD 4,305.00",tax:"免稅（境外）",
-  clues:{},ans:"pay",cause:null,ai:"pay",aiSec:3,aiWhy:"PO、收料、發票三方自動吻合，直接放行。"},
+  clues:{},ans:"pay",cause:null,ai:"pay",aiSec:3,aiWhy:"PO、收料、發票等單據自動吻合，直接放行。"},
  clean_cn:{vendor:"東莞匯聯包裝",item:"防靜電包材",form:"紙本增值稅專票",no:"44031987",date:"2009-08-12",po:"PO-SZ-0908-0198",qty:"1,200 箱",price:"RMB 82.00",amt:"RMB 98,400＋稅 12,792",tax:"增值稅專票 13%",
   clues:{customs:"這是當地採購，沒有報關單。"},ans:"pay",cause:null,ai:"pay",aiSec:3,aiWhy:"專票驗證通過，數量單價吻合，直接放行。"},
  grn_paper:{vendor:"Kinwa Connector Ltd. (HK)",item:"USB 連接器",form:"傳真",no:"KW-H-09-0488",date:"2009-08-16",po:"PO-TW-0908-0105",qty:"12,000 pcs",price:"USD 0.088",amt:"USD 1,056.00",tax:"免稅（境外）",
@@ -718,9 +723,9 @@ const LIB={
   ans:"hold",cause:"關務（報關行建檔錯誤）",risk:0,riskTxt:"報關數量錯誤未更正前付款，日後海關稽核與進口增值稅抵扣都會出問題",ai:"hold",aiSec:5,aiWhy:"讀取報關電子資料發現數量少一個零，通知關務請報關行更正，付款暫扣。"},
  qa_reject:{vendor:"Kinwa Connector Ltd. (HK)",item:"Type-C 連接器",form:"傳真",no:"KW-H-09-0512",date:"2009-08-22",po:"PO-SZ-0908-0105",qty:"12,000 pcs",price:"USD 0.088",amt:"USD 1,056.00",tax:"免稅（境外）",
   clues:{grn:"收料單：實收 12,000 pcs，IQC 欄註記退 300。",qa:"品保：300 pcs 插拔力不良，已退回供應商。",vendor:"供應商：退貨收到了，折讓單下個月開。"},
-  ans:"partial",cause:"品保／供應商品質",risk:850,riskTxt:"多付退貨的 300 pcs",ai:"partial",aiSec:3,aiWhy:"讀取 IQC 結果，只付允收 11,700 pcs，退貨 300 pcs 等折讓單。"},
+  ans:"partial",cause:"品保／供應商品質",risk:855,riskTxt:"多付退貨的 300 pcs",ai:"partial",aiSec:3,aiWhy:"讀取 IQC 結果，只付允收 11,700 pcs，退貨 300 pcs 等折讓單。"},
  wrong_vat:{vendor:"惠州盛達電子",item:"線材組件",form:"紙本增值稅普通發票",no:"44120065",date:"2009-08-25",po:"PO-SZ-0908-0233",qty:"5,000 條",price:"RMB 12.00",amt:"RMB 60,000＋稅 7,800",tax:"增值稅普票 13%",
-  clues:{vendor:"供應商：我們開普票比較方便，不都一樣嗎？",buyer:"採購：合約有寫要開專票。"},ans:"reject",cause:"供應商（發票種類錯誤）",risk:34000,riskTxt:"普票進項稅不能抵扣，等於多付 RMB 7,800",ai:"reject",aiSec:2,aiWhy:"辨識為普通發票，與合約要求的專用發票不符，自動退件並說明原因。"},
+  clues:{vendor:"供應商：我們開普票比較方便，不都一樣嗎？",buyer:"採購：合約有寫要開專票。"},ans:"reject",cause:"供應商（發票種類錯誤）",risk:35100,riskTxt:"普票進項稅不能抵扣，等於多付 RMB 7,800",ai:"reject",aiSec:2,aiWhy:"辨識為普通發票，與合約要求的專用發票不符，自動退件並說明原因。"},
  wh_missed:{vendor:"深圳德興塑膠",item:"塑膠外殼",form:"紙本增值稅專票",no:"44102231",date:"2009-08-26",po:"PO-SZ-0908-0241",qty:"20,000 pcs",price:"RMB 3.20",amt:"RMB 64,000＋稅 8,320",tax:"增值稅專票 13%",
   clues:{grn:"系統查無收料記錄。",mat:{t:"倉庫找了一下：有收，8/20 到貨，忘了入系統，今天補登。",x:20}},ans:"hold",cause:"物料（倉庫漏登）",risk:0,riskTxt:"系統無收料就付款，屬控制缺失",ai:"hold",aiSec:4,aiWhy:"發現有發票、無收料，比對門禁與送貨單記錄後，通知倉庫補登，補登後自動放行。"},
 };
@@ -730,7 +735,7 @@ function buildBatch(){
   G.cases=BATCH[G.mode].map((k,i,arr)=>{let c=structuredClone(LIB[k]);
     if(k==="dup"){const o=structuredClone(LIB[arr[0]]);
       c={...o,form:c.form,clues:{vendor:LIB.dup.clues.vendor},ans:"reject",cause:LIB.dup.cause,ai:"reject",aiSec:1,aiWhy:LIB.dup.aiWhy,
-         date:"2009-08-28",risk:arr[0]==="clean_cn"?500400:139500,riskTxt:"同一張發票付兩次"};}
+         date:"2009-08-28",risk:arr[0]==="clean_cn"?500364:139482,riskTxt:"同一張發票付兩次"};}
     return {...c,key:k,seen:{},dec:null}});
   G.cur=0;G.min=0;G.calls=0;G.done=false;
 }
@@ -743,7 +748,7 @@ function renderModes(){
 function actCfg(a){return {...a,...(MODES[G.mode].acts[a.id]||{})}}
 function renderGame(){
   const n=G.cases.filter(c=>c.dec).length,days=Math.floor(G.min/540);
-  document.getElementById("clock").innerHTML=`<div><span class="label">時鐘</span><br><span class="v">${days?`第 ${days+1} 天 `:""}${clockStr(G.min%540)}</span> ${G.min>=540?`<span class="ot">已超過下班時間</span>`:""}</div>
+  document.getElementById("clock").innerHTML=`<div><span class="label">時鐘</span><br><span class="v">${days?`第 ${days+1} 天 `:""}${clockStr(G.min%540)}</span> ${G.min>=540?`<span class="ot">已超過一個工作天（9 小時）</span>`:""}</div>
    <div><span class="label">已花時間</span><br><span class="v">${Math.floor(G.min/60)} 小時 ${G.min%60} 分</span></div>
    <div><span class="label">電話</span><br><span class="v">${G.calls} 通</span></div>
    <div><span class="label">已判定</span><br><span class="v">${n} / ${G.cases.length}</span></div>
@@ -768,7 +773,7 @@ function renderAI(){
   const mx=Math.max(1,...Object.values(causes));
   document.getElementById("aiout").innerHTML=`
    <div class="score">
-    <div><span class="label">你（2008 年人工）</span>${played?`<dl><dt>花費時間</dt><dd>${Math.floor(G.min/60)} 小時 ${G.min%60} 分</dd><dt>電話</dt><dd>${G.calls} 通</dd><dt>判定正確</dt><dd>${right} / ${C.length}</dd><dt>錯付風險金額</dt><dd>NT$ ${fmt(loss)}</dd></dl>`:`<p class="note">尚未完成第二步。</p>`}</div>
+    <div><span class="label">你（2009 年人工）</span>${played?`<dl><dt>花費時間</dt><dd>${Math.floor(G.min/60)} 小時 ${G.min%60} 分</dd><dt>電話</dt><dd>${G.calls} 通</dd><dt>判定正確</dt><dd>${right} / ${C.length}</dd><dt>錯付風險金額</dt><dd>NT$ ${fmt(loss)}</dd></dl>`:`<p class="note">尚未完成第二步。</p>`}</div>
     <div class="ai2"><span class="label">AI 協助</span><dl><dt>花費時間</dt><dd>${aiSec} 秒＋人工確認約 ${C.filter(c=>c.ai!=="pay").length*2} 分</dd><dt>電話</dt><dd>0 通（自動通知相關部門）</dd><dt>判定</dt><dd>${C.length} / ${C.length} 有依據</dd><dt>錯付風險金額</dt><dd>NT$ 0</dd></dl></div>
    </div>
    <div class="panel" style="margin-top:12px"><div class="tablebox"><table><thead><tr><th>發票</th><th>正確處理</th>${played?"<th>你的判定</th>":""}<th>AI 處理</th><th>問題出在哪個環節</th><th class="wrap">AI 怎麼判斷</th></tr></thead><tbody>${C.map(c=>`<tr><td>${c.vendor}<br><span class="note mono">${c.no}</span></td><td>${DEC[c.ans]}</td>${played?`<td><span class="pill ${c.dec===c.ans?"p-ok":"p-bad"}">${DEC[c.dec]}</span></td>`:""}<td><span class="pill p-ai">${DEC[c.ai]}</span> <span class="note mono">${c.aiSec} 秒</span></td><td>${c.cause||"無問題"}</td><td class="wrap">${c.aiWhy}${c.dec&&c.dec!==c.ans&&c.riskTxt?`<br><span style="color:var(--bad)">若照你的判定：${c.riskTxt}</span>`:""}</td></tr>`).join("")}</tbody></table></div></div>
@@ -790,23 +795,35 @@ buildBatch();renderModes();renderGame();
 /* ===== 04 對帳與銀行作業 ===== */
 const u2=n=>(+n).toLocaleString("zh-TW",{minimumFractionDigits:2,maximumFractionDigits:2});
 const STMT=[
- {no:"AS-24-07650",sup:20.00,our:0,cat:"手續費短收",cls:"warn",ai:"7 月已付 USD 12,400.00，費用條件 SHA，供應商端被中轉行扣了 20 元，所以帳上留尾差。依合約各自負擔手續費，回覆供應商不補付，並附匯款水單。"},
- {no:"AS-24-07781",sup:82000,our:0,cat:"付款在途",cls:"ok",ai:"8/28 已由 OBU 帳戶匯出，供應商 8/31 結帳時尚未入帳。屬時間差，附上匯款水單即可，不需調整。"},
- {no:"AS-24-07902",sup:17250,our:17250,cat:"相符",cls:"ok",ai:"雙方一致。原因入庫資料延遲回傳而暫扣，現已回傳，排入 9/10 付款批次。"},
- {no:"AS-24-08110",sup:5512.5,our:5512.5,cat:"相符",cls:"ok",ai:"雙方一致，已排入 9/10 付款批次。"},
- {no:"AS-24-08236",sup:1207.5,our:1207.5,cat:"相符",cls:"ok",ai:"雙方一致，已排入 9/10 付款批次。"},
- {no:"AS-24-08301",sup:3690,our:0,cat:"我方未收到發票",cls:"bad",ai:"我方查無此發票。比對 PO 與收料：8/29 已收 LDO 32,087 pcs，但發票寄到了採購個人信箱，未進 AP 收件流程。已轉入擷取流程，比對通過後列入下一批付款。"},
- {no:"CM-24-0112",sup:0,our:-410,cat:"對方未列折讓",cls:"warn",ai:"我方已登錄的價格保護折讓 USD 410，供應商尚未入帳。附上原廠業務的折讓同意郵件，請對方在 9 月對帳單列入。"},
+ {no:"AS-26-07650",sup:20.00,our:0,cat:"手續費短收",cls:"warn",ai:"7 月已付 USD 12,400.00，費用條件 SHA，供應商端被中轉行扣了 20 元，所以帳上留尾差。依合約各自負擔手續費，回覆供應商不補付，並附匯款水單。"},
+ {no:"AS-26-06620",sup:61500,our:0,cat:"付款在途",cls:"ok",ai:"6 月發票（PMIC 150,000 pcs），月結 60 天、8/29 到期；8/28 已由 OBU 帳戶匯出，供應商 8/31 結帳時尚未入帳。屬時間差，附上匯款水單即可，不需調整。"},
+ {no:"AS-26-07781",sup:82000,our:82000,cat:"相符",cls:"ok",ai:"雙方一致。7/03 開立、月結 60 天，9/29 到期，排入 9/30 付款批次。"},
+ {no:"AS-26-07902",sup:17250,our:17250,cat:"相符",cls:"ok",ai:"雙方一致。原因入庫資料延遲回傳而暫扣，現已回傳；7/10 開立、9/29 到期，排入 9/30 付款批次。"},
+ {no:"AS-26-08110",sup:5512.5,our:5512.5,cat:"相符",cls:"ok",ai:"雙方一致。8 月開立、月結 60 天，10/30 到期，不提前付款。"},
+ {no:"AS-26-08236",sup:1207.5,our:1207.5,cat:"相符",cls:"ok",ai:"雙方一致。8 月開立、月結 60 天，10/30 到期，不提前付款。"},
+ {no:"AS-26-08301",sup:3680,our:0,cat:"我方未收到發票",cls:"bad",ai:"我方查無此發票。比對 PO 與收料：8/29 已收 LDO 32,000 pcs（× USD 0.115 = 3,680.00），但發票寄到了採購個人信箱，未進 AP 收件流程。已轉入擷取流程，比對通過後依到期日排入付款。"},
+ {no:"CM-26-0112",sup:0,our:-410,cat:"對方未列折讓",cls:"warn",ai:"我方已登錄的價格保護折讓 USD 410，供應商尚未入帳。附上原廠業務的折讓同意郵件，請對方在 9 月對帳單列入。"},
 ];
 const PB=[
- {id:"dram",v:"韓系 DRAM 原廠",ent:"台灣主體",acct:"OBU 美元戶",cur:"USD",amt:426600,inv:"KR-24Q3-02210、02388（已扣遲交罰款 5,400）",swift:"BANKKRSEXXX",ac:"****-**-7731",fee:"SHA"},
+ {id:"dram",v:"韓系 DRAM 原廠",ent:"台灣主體",acct:"OBU 美元戶",cur:"USD",amt:426600,inv:"KR-26Q3-02210、02388",swift:"BANKKRSEXXX",ac:"****-**-7731",fee:"SHA"},
  {id:"soc",v:"美系 SoC 晶片原廠",ent:"台灣主體",acct:"OBU 美元戶",cur:"USD",amt:380000,inv:"US-5509930",swift:"BANKUS33XXX",ac:"****4410",fee:"SHA"},
- {id:"apex",v:"Apex Semiconductor (SG)",ent:"台灣主體",acct:"OBU 美元戶",cur:"USD",amt:23970,inv:"AS-24-07902、08110、08236",swift:"BANKSGSGXXX",ac:"***-***-552-1",fee:"SHA",swiftErr:1},
- {id:"tj",v:"台鉅電子",ent:"台灣主體",acct:"DBU 台幣戶",cur:"TWD",amt:98400,inv:"TJ-20485521（允收部分）",swift:"台灣○○銀行 竹科分行",ac:"****-***-3307",fee:"—"},
- {id:"ts",v:"東昇機構件",ent:"台灣主體",acct:"DBU 台幣戶",cur:"TWD",amt:920000,inv:"TS-20484102",swift:"台灣○○銀行 新莊分行",ac:"****-***-9918",fee:"—",bankChange:1},
- {id:"dg",v:"東莞匯聯包裝",ent:"深圳廠",acct:"深圳廠人民幣戶",cur:"RMB",amt:111192,inv:"44031987",swift:"○○銀行 東莞分行",ac:"****8862",fee:"—"},
+ {id:"apex",v:"Apex Semiconductor (SG)",ent:"台灣主體",acct:"OBU 美元戶",cur:"USD",amt:99250,inv:"AS-26-07781、07902",swift:"BANKSGSGXXX",ac:"***-***-552-1",fee:"SHA",swiftErr:1},
+ {id:"ts",v:"東昇機構件",ent:"台灣主體",acct:"DBU 台幣戶",cur:"TWD",amt:920000,inv:"TS-20484102（6 月開立，月結 90 天，9/28 到期）",swift:"台灣○○銀行 新莊分行",ac:"****-***-9918",fee:"—",bankChange:1},
+ {id:"dg",v:"東莞匯聯包裝",ent:"深圳廠",acct:"深圳廠人民幣戶",cur:"RMB",amt:111192,inv:"44031987（7/17 開立，月結 60 天，9/29 到期）",swift:"○○銀行 東莞分行",ac:"****8862",fee:"—"},
 ];
-const HELD=[{v:"Kinwa Connector Ltd. (HK)",why:"交易條件不符（發票 FOB 香港 vs PO DAP 深圳），等供應商重開"},{v:"台鉅電子・特採部分",why:"特採 200,000 pcs 待品保簽核與議價"}];
+/* 由「02 多對多比對」結果推導本批金額 */
+function syncBank(){if(!window.MRES)return;const M=window.MRES;
+  const by=f=>M.filter(f),sum=(a,k)=>a.reduce((s,r)=>s+r[k],0);
+  const dr=by(r=>r.po.no==="PO-TW-2608-0102"),pen=sum(dr,"pen");
+  const pd=PB.find(p=>p.id==="dram");pd.amt=sum(dr,"pay");pd.inv=`KR-26Q3-02210、02388（${pen>0?`已扣遲交罰款 ${u2(pen)}`:"未扣遲交罰款"}）`;
+  PB.find(p=>p.id==="soc").amt=sum(by(r=>r.iv.no==="US-5509930"),"pay");
+  const tj=by(r=>r.iv.no==="TJ-20485521"),ap=by(r=>r.iv.no==="AS-26-08110"||r.iv.no==="AS-26-08236"),kw=by(r=>r.iv.no==="KW-H-55488");
+  NOTDUE=[{v:"Apex Semiconductor (SG)",why:`AS-26-08110、08236 共 USD ${u2(sum(ap,"pay"))}，8 月開立、月結 60 天，10/30 到期`},
+          {v:"台鉅電子",why:`TJ-20485521 ${tj[0].specQ&&tj[0].st==="部分付款"?"允收部分":"含特採折讓後"} TWD ${fmt(sum(tj,"pay"))}，8/07 開立、月結 90 天，11/29 到期`}];
+  HELD=[];if(!kw[0].termsOK)HELD.push({v:"Kinwa Connector Ltd. (HK)",why:"交易條件不符（發票 FOB 香港 vs PO DAP 深圳），等供應商重開"});
+  if(tj[0].specQ&&tj[0].st==="部分付款")HELD.push({v:"台鉅電子・特採部分",why:`特採 ${fmt(tj[0].specQ)} pcs 待品保簽核與議價`});
+}
+let HELD=[],NOTDUE=[];
 const BFX={USD:32.40,TWD:1,RMB:4.50},PFX=32.15;
 let B={verified:false,appr:[],sent:false};
 const twd=p=>p.amt*BFX[p.cur];
@@ -816,7 +833,7 @@ function levels(){const tot=batch().filter(p=>p.ent==="台灣主體").reduce((s,
   if(tot>1e6)L.push({k:"cfo",n:"財務長",d:"批次 > NT$100 萬"});
   if(big)L.push({k:"ceo",n:"總經理",d:"單筆 > NT$1,000 萬"});return L}
 function renderBank(){
-  const g=id=>document.getElementById(id);
+  syncBank();const g=id=>document.getElementById(id);
   // ① statement
   const sT=STMT.reduce((s,r)=>s+r.sup,0),oT=STMT.reduce((s,r)=>s+r.our,0);
   g("stmt").innerHTML=`<thead><tr><th>單據</th><th class="num">供應商對帳單</th><th class="num">我方應付帳</th><th class="num">差異</th><th>差異類型</th><th class="wrap">AI 判讀與處理</th></tr></thead><tbody>${STMT.map(r=>`<tr><td class="mono">${r.no}</td><td class="num">${r.sup?u2(r.sup):"—"}</td><td class="num">${r.our?u2(r.our):"—"}</td><td class="num">${r.sup-r.our?u2(r.sup-r.our):"0"}</td><td><span class="pill p-${r.cls}">${r.cat}</span></td><td class="wrap">${r.ai}</td></tr>`).join("")}</tbody><tfoot><tr><td>合計 (USD)</td><td class="num">${u2(sT)}</td><td class="num">${u2(oT)}</td><td class="num">${u2(sT-oT)}</td><td colspan="2"></td></tr></tfoot>`;
@@ -824,10 +841,10 @@ function renderBank(){
   g("bridge").innerHTML=`<span class="label" style="flex-basis:100%">餘額調節</span><span>供應商餘額 <b>${u2(sT)}</b></span><span class="eq">−</span><span>付款在途 <b>${u2(part("付款在途"))}</b></span><span class="eq">−</span><span>我方未收發票 <b>${u2(part("我方未收到發票"))}</b></span><span class="eq">−</span><span>手續費短收 <b>${u2(part("手續費短收"))}</b></span><span class="eq">−</span><span>對方未列折讓 <b>${u2(part("對方未列折讓"))}</b></span><span class="eq">=</span><span>我方應付餘額 <b>${u2(oT)}</b></span>`;
   // ② batch
   const bt=batch();
-  g("pbatch").innerHTML=`<thead><tr><th>付款主體</th><th>付款帳戶</th><th>受款人</th><th>沖銷發票</th><th>幣別</th><th class="num">金額</th><th class="num">TWD 約當</th><th>狀態</th></tr></thead><tbody>${PB.map(p=>{const inB=bt.includes(p);return `<tr><td>${p.ent}</td><td>${p.acct}</td><td>${p.v}</td><td class="wrap">${p.inv}</td><td>${p.cur}</td><td class="num">${p.cur==="TWD"?fmt(p.amt):u2(p.amt)}</td><td class="num">${fmt(twd(p))}</td><td>${inB?`<span class="pill p-ok">列入批次</span>`:`<span class="pill p-bad">AI 攔下</span>`}</td></tr>`}).join("")}${HELD.map(h=>`<tr class="ic"><td colspan="3">${h.v}</td><td colspan="4" class="wrap">${h.why}</td><td><span class="pill p-warn">暫扣</span></td></tr>`).join("")}</tbody><tfoot><tr><td colspan="6">本批合計（台灣主體＋深圳廠，TWD 約當）</td><td class="num">${fmt(bt.reduce((s,p)=>s+twd(p),0))}</td><td></td></tr></tfoot>`;
-  g("pbnotes").innerHTML=`<div><b>AI 判讀 · 東昇機構件：受款帳戶 3 天前變更</b><br>供應商主檔的銀行帳戶在 9/07 依一封 email 申請變更，變更後第一筆付款就是 NT$920,000，且新帳戶戶名與統一編號登記名稱不一致。這是典型的商業電子郵件詐騙手法。建議依主檔原有電話（不是 email 裡的電話）回撥供應商財務主管確認後再付。
+  g("pbatch").innerHTML=`<thead><tr><th>付款主體</th><th>付款帳戶</th><th>受款人</th><th>沖銷發票</th><th>幣別</th><th class="num">金額</th><th class="num">TWD 約當</th><th>狀態</th></tr></thead><tbody>${PB.map(p=>{const inB=bt.includes(p);return `<tr><td>${p.ent}</td><td>${p.acct}</td><td>${p.v}</td><td class="wrap">${p.inv}</td><td>${p.cur}</td><td class="num">${p.cur==="TWD"?fmt(p.amt):u2(p.amt)}</td><td class="num">${fmt(twd(p))}</td><td>${inB?`<span class="pill p-ok">列入批次</span>`:`<span class="pill p-bad">AI 攔下</span>`}</td></tr>`}).join("")}${HELD.map(h=>`<tr class="ic"><td colspan="3">${h.v}</td><td colspan="4" class="wrap">${h.why}</td><td><span class="pill p-warn">暫扣</span></td></tr>`).join("")}${NOTDUE.map(h=>`<tr class="ic"><td colspan="3">${h.v}</td><td colspan="4" class="wrap">${h.why}</td><td><span class="pill p-ai">未到期</span></td></tr>`).join("")}</tbody><tfoot><tr><td colspan="6">本批合計（台灣主體＋深圳廠，TWD 約當）</td><td class="num">${fmt(bt.reduce((s,p)=>s+twd(p),0))}</td><td></td></tr></tfoot>`;
+  g("pbnotes").innerHTML=`<div><b>AI 判讀 · 東昇機構件：受款帳戶 5 天前變更</b><br>供應商主檔的銀行帳戶在 9/25 依一封 email 申請變更，變更後第一筆付款就是 NT$920,000，且新帳戶戶名與統一編號登記名稱不一致。這是典型的商業電子郵件詐騙手法。建議依主檔原有電話（不是 email 裡的電話）回撥供應商財務主管確認後再付。
     <br><label style="display:inline-flex;gap:6px;margin-top:6px;align-items:center"><input type="checkbox" id="verify" ${B.verified?"checked":""} ${B.appr.length?"disabled":""}> 已依主檔電話回撥，確認變更屬實</label></div>
-    <div><b>AI 判讀 · 資金與費用</b><br>本批 OBU 美元付款約 USD ${u2(bt.filter(p=>p.cur==="USD").reduce((s,p)=>s+p.amt,0))}，9/10 OBU 帳戶需留足餘額；費用條件依合約採 SHA（各自負擔）。台灣主體對境外供應商以 OBU 付款，貨物未在台灣通關，不涉及營業稅。</div>`;
+    <div><b>AI 判讀 · 資金與費用</b><br>本批 OBU 美元付款約 USD ${u2(bt.filter(p=>p.cur==="USD").reduce((s,p)=>s+p.amt,0))}，9/30 OBU 帳戶需留足餘額；費用條件依合約採 SHA（各自負擔）。台灣主體對境外供應商以 OBU 付款，貨物未在台灣通關，不涉及營業稅。</div>`;
   const L=levels();
   g("appr").innerHTML=L.map((l,i)=>{const done=B.appr.includes(l.k),can=!done&&B.appr.length===i;return `${i?'<span class="arrow">→</span>':""}<button type="button" data-appr="${l.k}" class="${done?"done":""}" ${can?"":"disabled"}>${done?"✓ ":""}${l.n}<small>${l.d}</small></button>`}).join("")+(B.appr.length===L.length?`<span class="pill p-ok" style="margin-left:8px">簽核完成</span>`:"");
   // ③ bank
@@ -838,8 +855,8 @@ function renderBank(){
     const file=(title,rows)=>`<p class="sub2">${title}</p><pre class="raw">${rows.join("\n")}</pre>`;
     g("bankout").innerHTML=
       file("OBU 美元匯款檔（台灣主體）",["付款帳號|受款人|SWIFT|受款帳號|幣別|金額|費用|附言",...obu.map(p=>`OBU-****-0021|${p.v}|${p.swift}|${p.ac}|USD|${p.amt.toFixed(2)}|${p.fee}|INV ${p.inv.split("（")[0]}`)])+
-      file("DBU 台幣整批匯款檔（台灣主體）",["付款帳號|受款銀行|受款帳號|受款人|金額|附言",...dbu.map(p=>`DBU-****-0087|${p.swift}|${p.ac}|${p.v}|${p.amt}|${p.inv.split("（")[0]}`)])+
-      file("人民幣付款（深圳廠，由大陸主體在當地銀行執行）",["付款帳號|受款銀行|受款帳號|受款人|金額|附言",...cn.map(p=>`CNY-****-1150|${p.swift}|${p.ac}|${p.v}|${p.amt.toFixed(2)}|${p.inv}`)])+
+      file("DBU 台幣整批匯款檔（台灣主體）",["付款帳號|受款銀行|受款帳號|受款人|金額|附言",...(dbu.length?dbu.map(p=>`DBU-****-0087|${p.swift}|${p.ac}|${p.v}|${p.amt}|${p.inv.split("（")[0]}`):["（本批無台幣付款）"])])+
+      file("人民幣付款（深圳廠，由大陸主體在當地銀行執行）",["付款帳號|受款銀行|受款帳號|受款人|金額|附言",...cn.map(p=>`CNY-****-1150|${p.swift}|${p.ac}|${p.v}|${p.amt.toFixed(2)}|${p.inv.split("（")[0]}`)])+
       (B.sent?`<p class="sub2">銀行回覆</p><div class="checks">${bt.map(p=>`<div class="chk"><span class="dot d-${p.swiftErr?"fail":"pass"}"></span><span class="n">${p.v}</span><span class="m">${p.swiftErr?"退匯：受款銀行 SWIFT 代碼無效。AI 比對發現主檔 SWIFT 少一碼分行代碼，與發票上印的不同；已更正並排入隔日重送，退匯手續費 USD 25 記入手續費。":`成功・${p.cur} ${p.cur==="TWD"?fmt(p.amt):u2(p.amt)}${p.cur==="USD"?`・成交匯率 ${PFX}`:""}`}</span></div>`).join("")}</div>`
        :`<button class="btn ai-btn" id="send" type="button" style="margin-top:10px">加密傳送銀行</button>`);
   }
@@ -859,7 +876,7 @@ function renderBank(){
    <div class="checks">
     ${usd.map(p=>`<div class="chk"><span class="dot d-pass"></span><span class="n">USD −${u2(p.amt)}</span><span class="m">對到付款 ${p.v}，沖銷完成</span></div>`).join("")}
     <div class="chk"><span class="dot d-pass"></span><span class="n">USD −${u2(usd.length*15)}</span><span class="m">電匯手續費 ${usd.length} 筆，各 USD 15，自動入手續費科目</span></div>
-    <div class="chk"><span class="dot d-warn"></span><span class="n">USD −23,970.00 / +23,945.00</span><span class="m">Apex 匯出後退回，扣退匯費 USD 25；兩筆配對為同一筆退匯，不列為未達帳</span></div>
+    <div class="chk"><span class="dot d-warn"></span><span class="n">USD −${u2(PB.find(p=>p.id==="apex").amt)} / +${u2(PB.find(p=>p.id==="apex").amt-25)}</span><span class="m">Apex 匯出後退回，扣退匯費 USD 25；兩筆配對為同一筆退匯，不列為未達帳</span></div>
     ${tws.map(p=>`<div class="chk"><span class="dot d-pass"></span><span class="n">TWD −${fmt(p.amt+30)}</span><span class="m">${p.v} ${fmt(p.amt)}＋跨行手續費 30</span></div>`).join("")}
    </div>
    <p class="sub2">集團內部往來沖銷（9 月，USD）</p>
@@ -875,7 +892,7 @@ document.addEventListener("click",e=>{
   if(e.target.id==="send"){B.sent=true;renderBank()}
 });
 document.addEventListener("change",e=>{if(e.target.id==="verify"){B.verified=e.target.checked;B.appr=[];B.sent=false;renderBank()}});
-renderBank();
+window.__bankReady=true;renderBank();
 
 /* tabs */
 const TABS=["play","ingest","match","pay","bank"];

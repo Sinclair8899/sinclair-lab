@@ -230,7 +230,7 @@ const DAILY=1000;
 const EV=[
  {title:"發票被客戶入口網站拒收",amt:4800,what:"一張 USD 148 萬的發票，因 PO 行號與客戶系統不符被自動拒收。拒收通知寄到業務的信箱，沒有人注意到。",
   lag:"人工：到了付款日沒收到錢，才開始查。",
-  opts:[{t:"照常等付款日",d:"付款日沒到錢再查",cd:4800*45,L:0},{t:"付款日過後一週再查",d:"每月固定檢查逾期",cd:4800*30,L:0},{t:"每張發票都上入口網站確認",d:"50 個客戶入口網站，每週要 2 人天",cd:4800*7,L:0}],
+  opts:[{t:"等月底對帳才查",d:"月底對帳時才發現被拒收",cd:4800*45,L:0},{t:"付款日當天沒到錢就查",d:"每天檢查到期未入帳",cd:4800*30,L:0},{t:"每張發票都上入口網站確認",d:"50 個客戶入口網站，每週要 2 人天",cd:4800*7,L:0}],
   ag:{who:"開票 agent",how:"上傳前先比對客戶 PO 與出貨通知，送出後每天檢查入口網站狀態，拒收當天就更正重送。",cd:4800*1,L:0}},
  {title:"Hub 倉已拉料，還沒開票",amt:3600,what:"客戶從 Hub 倉陸續拉料，依合約拉料後才能開票。拉料報表要月底才整理對帳。",
   lag:"人工：月底對帳時，月初拉的料已經放了三週。",
@@ -348,7 +348,7 @@ function renderCredit(){
    <fieldset><legend>付款條件</legend>${Object.entries(TERMS).map(([k,t])=>`<label for="t-${k}"><input type="radio" name="terms" id="t-${k}" value="${k}" ${C.terms===k?"checked":""}> ${t.n} <small>客戶接受度：${t.acc}</small></label>`).join("")}</fieldset>
    <fieldset><legend>風險轉移工具</legend>
     <label for="c-ins"><input type="checkbox" id="c-ins" ${C.ins?"checked":""} ${C.terms==="lc"?"disabled":""}> 應收帳款保險 <small>保險公司核定上限 ${wn(c.insCap)}，理賠 90%，保費約 0.25%</small></label>
-    <label for="c-fac"><input type="checkbox" id="c-fac" ${C.fac&&r.canFac?"checked":""} ${r.canFac?"":"disabled"}> 應收帳款買斷（無追索權） <small>${c.factCap?`銀行額度 ${wn(c.factCap)}，需先投保，約 5 天收到現金`:"此案例不適用"}</small></label>
+    <label for="c-fac"><input type="checkbox" id="c-fac" ${C.fac&&r.canFac?"checked":""} ${r.canFac?"":"disabled"}> 應收帳款買斷（無追索權） <small>${c.factCap?`銀行額度 ${wn(c.factCap)}，需先投保，約 5 天收到現金；手續費約 0.8%（月結 60 天）／1.2%（月結 90 天），年化約 4.9%`:"此案例不適用"}</small></label>
     <label for="c-col"><input type="checkbox" id="c-col" ${C.col?"checked":""} ${c.coll?"":"disabled"}> 擔保品或銀行保證 <small>${c.coll?`可提供 ${wn(c.coll)}`:"此案例不適用"}</small></label>
    </fieldset>`;
   const E=c.E||1,seg=[["--ok",r.lcBank,"信用狀（銀行承擔）"],["--accent",r.pre,"預付已收"],["--ai",r.factored,"已買斷（風險轉給銀行）"],["--warn",r.covered,"保險保障（未買斷部分）"],["--inv",r.col,"擔保品"],["--bad",r.unc,"無保障曝險"]];
@@ -370,7 +370,7 @@ renderCredit();
 /* ===== 責任分工與付款習慣 ===== */
 const RACI=[["新客戶徵信與額度申請","提出申請、提供資料","審核核准","—","蒐集財報、新聞與付款紀錄"],["出貨放行","確認訂單","超過額度即擋單","—","即時檢查額度餘額"],["開票與上傳客戶系統","—","—","主責","檢查格式、追蹤狀態"],["催收與取得付款承諾","主責","監督逾期","提供對帳資料","排定提醒、擬催收信"],["收款沖帳與對帳","—","—","主責","自動比對、找出沖錯帳"],["扣款爭議","與客戶溝通","核准接受或爭議","查證資料","分類扣款、整理證據"]];
 $("raci").innerHTML=`<thead><tr><th>工作</th><th>業務</th><th>Credit Control</th><th>AR 會計</th><th>AI agents</th></tr></thead><tbody>${RACI.map(r=>`<tr><td><b>${r[0]}</b></td>${r.slice(1).map((x,i)=>`<td style="white-space:normal${x==="主責"?";font-weight:700;color:var(--accent)":""}">${x}</td>`).join("")}</tr>`).join("")}</tbody>`;
-const HAB=[["美系品牌客戶 X","業務 A",[2,3,2,1,2,2],"ok","穩定準時。"],["雲端服務商 Y","業務 B",[5,8,12,15,19,24],"bad","持續變慢。建議業務本週拜訪，並請 Credit Control 檢視額度。"],["歐系工控客戶 Z","業務 C",[30,28,31,29,30,32],"warn","長期固定晚付約 30 天。原因是我方發票常被客戶入口網站拒收，屬內部問題，交 AR 會計改善。"],["國內代理商 W","業務 B",[0,0,35,0,0,0],"warn","8 月單次異常：客戶其實已付款，被誤沖到另一張發票，已更正。"],["新創客戶 V","業務 A",[0,0,0,4,10,9],"warn","首年客戶開始延遲，提醒業務取得明確付款承諾。"]];
+const HAB=[["美系品牌客戶 X","業務 A",[2,3,2,1,2,2],"ok","穩定準時。"],["雲端服務商 Y","業務 B",[5,8,12,15,19,24],"bad","持續變慢。建議業務本週拜訪，並請 Credit Control 檢視額度。"],["歐系工控客戶 Z","業務 C",[30,28,31,29,30,32],"warn","長期固定晚付約 30 天。原因是我方發票常被客戶入口網站拒收，屬內部問題，交 AR 會計改善。"],["國內代理商 W","業務 B",[0,0,0,35,0,0],"warn","8 月單次異常：客戶其實已付款，被誤沖到另一張發票，已更正。"],["新創客戶 V","業務 A",[0,0,0,4,10,9],"warn","首年客戶開始延遲，提醒業務取得明確付款承諾。"]];
 const spark=(a,cls)=>{const mx=Math.max(35,...a),pts=a.map((v,i)=>`${4+i*22},${24-v/mx*20}`).join(" ");return `<svg class="spark" viewBox="0 0 120 28" aria-hidden="true"><line x1="4" y1="24" x2="114" y2="24" style="stroke:var(--line)"/><polyline points="${pts}" style="fill:none;stroke:var(--${cls==="ok"?"ok":cls==="bad"?"bad":"warn"});stroke-width:2"/></svg>`};
 $("habit").innerHTML=`<thead><tr><th>客戶</th><th>負責業務</th><th>近 6 個月逾期天數</th><th class="num">本月</th><th>AI 判讀</th></tr></thead><tbody>${HAB.map(h=>`<tr><td><b>${h[0]}</b></td><td>${h[1]}</td><td>${spark(h[2],h[3])}</td><td class="num">${h[2][5]} 天</td><td style="white-space:normal">${h[4]}</td></tr>`).join("")}</tbody>`;
 
