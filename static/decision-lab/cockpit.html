@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>老闆駕駛艙：預測、備料與現金</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+TC:wght@700&display=swap">
+<style>
+/* Layout: cockpit — four lamps on top, one integrated model below (customers → material policy → cash), decision comparison, AI morning brief */
+:root{
+  --bg:#f3f5f7; --panel:#ffffff; --ink:#18222d; --muted:#5b6876; --line:#d9dfe6;
+  --accent:#1f5f8b; --accent-soft:#e3eef6; --inv:#8a4b2a; --inv-soft:#f6e9e1; --ai:#5a4a9e; --ai-soft:#ece9f7;
+  --ok:#2f7d4f; --ok-soft:#e2f2e8; --warn:#a86a0c; --warn-soft:#fbefd9; --bad:#b33a3a; --bad-soft:#f8e1e1;
+  --f-display:"Noto Serif TC","Songti TC",serif; --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11161c; --panel:#18202a; --ink:#e4e9ef; --muted:#93a1b0; --line:#2b3644;
+  --accent:#6fb0dc; --accent-soft:#1c3346; --inv:#e0a07c; --inv-soft:#3a2619; --ai:#b3a5ef; --ai-soft:#2a2545;
+  --ok:#6cc792; --ok-soft:#1a3326; --warn:#e3a94a; --warn-soft:#3a2d16; --bad:#ec7f7f; --bad-soft:#3d1f22; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161c; --panel:#18202a; --ink:#e4e9ef; --muted:#93a1b0; --line:#2b3644;
+  --accent:#6fb0dc; --accent-soft:#1c3346; --inv:#e0a07c; --inv-soft:#3a2619; --ai:#b3a5ef; --ai-soft:#2a2545;
+  --ok:#6cc792; --ok-soft:#1a3326; --warn:#e3a94a; --warn-soft:#3a2d16; --bad:#ec7f7f; --bad-soft:#3d1f22; color-scheme:dark}
+*{box-sizing:border-box}
+html{font-size:106.25%}
+@media (max-width:480px){html{font-size:100%}}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1rem;line-height:1.65}
+.wrap{max-width:1040px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:24px}
+h1{font-family:var(--f-display);font-size:clamp(1.7rem,4.6vw,2.4rem);line-height:1.25;margin:4px 0 0;text-wrap:balance}
+h2{font-family:var(--f-display);font-size:1.25rem;margin:0;text-wrap:balance}
+h3{font-size:1rem;margin:0}
+p{margin:0}
+.lead{color:var(--muted);max-width:66ch;margin-top:10px}
+.eyebrow{font-size:.78rem;letter-spacing:.12em;color:var(--ai);font-weight:500}
+.label{font-size:.72rem;letter-spacing:.08em;color:var(--muted)}
+.mono,.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.note{color:var(--muted);font-size:.84rem}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px}
+a{color:var(--accent)}
+.opener{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.opener div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 14px;display:flex;flex-direction:column;gap:2px}
+.opener b{font-size:1rem}.opener span{color:var(--muted);font-size:.84rem}
+.opener a{text-decoration:none}
+.sec{display:flex;flex-direction:column;gap:10px}
+.lamps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0}
+.lamp{padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel);border-top:5px solid var(--line)}
+.lamp.ok{border-top-color:var(--ok)}.lamp.warn{border-top-color:var(--warn)}.lamp.bad{border-top-color:var(--bad)}
+.lamp .label{display:block}
+.lamp b{display:block;font-family:var(--f-mono);font-size:1.35rem;font-variant-numeric:tabular-nums;line-height:1.2;margin-top:2px}
+.lamp.ok b{color:var(--ok)}.lamp.warn b{color:var(--warn)}.lamp.bad b{color:var(--bad)}
+.lamp span.s{font-size:.78rem;color:var(--muted)}
+.tablebox{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:620px}
+th,td{padding:6px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap;font-size:.86rem;vertical-align:middle}
+th{font-weight:500;color:var(--muted);font-size:.76rem}
+td.num,th.num{text-align:right}
+td.wrap,th.wrap{white-space:normal}
+input[type=range]{width:100%;accent-color:var(--accent)}
+input[type=number]{font:inherit;width:84px;padding:2px 6px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink);font-family:var(--f-mono);text-align:right}
+.ctl{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ctl>div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;font-size:.9rem}
+.ctl label{display:flex;justify-content:space-between;gap:8px;font-size:.86rem}
+.ctl output{font-family:var(--f-mono);color:var(--accent)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--panel);flex-wrap:wrap}
+.seg button{all:unset;cursor:pointer;padding:4px 12px;font-size:.84rem;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--panel)}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.toggles{display:flex;flex-wrap:wrap;gap:14px;font-size:.88rem}
+.toggles label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.toggles input{accent-color:var(--accent);width:16px;height:16px}
+.pill{font-size:.75rem;padding:1px 8px;border-radius:999px;font-weight:500;white-space:nowrap}
+.p-ok{background:var(--ok-soft);color:var(--ok)}.p-warn{background:var(--warn-soft);color:var(--warn)}.p-bad{background:var(--bad-soft);color:var(--bad)}
+svg.chart{width:100%;height:auto;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.78rem;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:5px}
+.legend s{display:inline-block;width:18px;border-top:3px solid;vertical-align:middle;margin-right:5px;text-decoration:none}
+.cmp td.best{color:var(--ok);font-weight:700}
+.cmp tr.pick td{background:var(--accent-soft)}
+.btn{font:inherit;cursor:pointer;border-radius:5px;padding:8px 16px;border:1px solid var(--accent);background:var(--accent);color:var(--panel);font-weight:500;align-self:flex-start}
+.btn.ai{border-color:var(--ai);background:var(--ai)}
+.btn.sm{padding:3px 10px;font-size:.8rem}
+.btn:disabled{opacity:.6;cursor:default}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.console{padding:18px;background:var(--ai-soft);border-color:var(--ai);display:flex;flex-direction:column;gap:10px}
+.brief{background:var(--panel);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.brief h3{color:var(--ai)}
+.brief ul{margin:0;padding-left:1.1em}
+.callout{padding:14px 16px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 6px 6px 0;font-size:.95rem}
+.diag{padding:12px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;gap:6px;font-size:.92rem}
+.diag b.h{color:var(--inv)}
+@media (max-width:820px){.opener,.ctl{grid-template-columns:1fr}.lamps{grid-template-columns:1fr 1fr;position:static}}
+</style>
+</head>
+<body>
+<div style="background:#fbefd9;color:#6b4407;font:14px/1.5 system-ui,sans-serif;padding:8px max(16px,env(safe-area-inset-left,0px));text-align:center">網站版・測試版 2026-10-23：本頁所有數字由「規則試算」依公式即時計算；「老闆早報」由開源 AI 模型把算好的結果寫成文字，不做計算。</div>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">AI LAB · 現金循環系列 00 · 老闆駕駛艙</span>
+    <h1>一個月確認訂單、三個月預測：<br>備多少料、準備多少錢、誰會延遲出貨？</h1>
+    <p class="lead">電子業的常態是客戶只給一個月的確認訂單加三個月預測，預測準確度大約八成，關鍵零組件卻要提前兩個月下單。採購在賭預測，財務在猜要準備多少錢，業務在催交期，各看各的報表。這個駕駛艙把客戶預測、備料政策、應收應付天期、存貨積壓與延遲出貨放進同一個模型，老闆看四盞燈就知道問題在哪一段，再比較三種決策的代價。</p>
+    <div class="opener">
+      <div><b>5 分鐘</b><span>調整預測準確度與備料政策，看四盞燈怎麼變</span></div>
+      <div><b>即時 AI</b><span>把算好的結果寫成一頁老闆早報</span></div>
+      <div><a href="index.html"><b>← 現金循環總覽</b></a><span>客戶端（CRM）、S&amp;OP、MRP、AR、AP 在這裡匯合</span></div>
+    </div>
+  </header>
+
+  <div class="lamps" id="lamps" aria-label="四盞燈"></div>
+
+  <section class="diag" id="diag" aria-label="診斷"></section>
+
+  <section class="sec" aria-label="客戶預測">
+    <div><span class="label">規則試算・客戶端輸入</span><h2>客戶給的數字：確認訂單、三個月預測、歷史準確度</h2>
+    <p class="note" style="margin-top:4px">金額單位新台幣萬元。「實際／預測」是這家客戶過去預測的兌現率：80% 代表客戶報 100、實際拉 80。拉動每家客戶的兌現率，所有燈號會立刻重算。</p></div>
+    <div class="panel tablebox"><table id="cust"></table></div>
+  </section>
+
+  <section class="sec" aria-label="備料與付款政策">
+    <div><span class="label">規則試算・你的決定</span><h2>關鍵零組件怎麼備？錢怎麼收、怎麼付？</h2></div>
+    <div class="ctl">
+      <div><b>關鍵零組件備料政策</b><span class="note">交期 2 個月，現在下單的料供第 3、4 個月使用</span>
+        <span class="seg" role="group" aria-label="備料政策" id="polSeg"><button type="button" data-p="firm" aria-pressed="false">只備已確認</button><button type="button" data-p="adj" aria-pressed="false">依兌現率校正</button><button type="button" data-p="full" aria-pressed="true">照預測全備</button></span>
+        <label for="ss"><span>另加安全庫存</span><output id="ssOut" class="num">10%</output></label><input type="range" id="ss" min="0" max="40" step="5" value="10">
+        <label for="lt"><span>關鍵料交期（月）</span><output id="ltOut" class="num">2</output></label><input type="range" id="lt" min="1" max="3" step="1" value="2">
+      </div>
+      <div><b>交易條件</b>
+        <label for="dpoK"><span>關鍵料供應商帳期（天）</span><output id="dpoKOut" class="num">30</output></label><input type="range" id="dpoK" min="0" max="90" step="15" value="30">
+        <label for="pre"><span>關鍵料下單預付</span><output id="preOut" class="num">20%</output></label><input type="range" id="pre" min="0" max="50" step="10" value="20">
+        <label for="dpoO"><span>一般料供應商帳期（天）</span><output id="dpoOOut" class="num">60</output></label><input type="range" id="dpoO" min="0" max="90" step="15" value="60">
+      </div>
+      <div><b>財務</b>
+        <label><span>期初現金</span><input type="number" id="cash0" value="25000" step="1000"></label>
+        <label><span>安全水位</span><input type="number" id="safe" value="10000" step="1000"></label>
+        <label><span>銀行額度</span><input type="number" id="line" value="30000" step="1000"></label>
+        <span class="note">每月固定費用 4,000 萬；料成本占營收 85%，其中關鍵零組件 45%。借款年息 3%。</span>
+      </div>
+    </div>
+    <div class="toggles">
+      <label><input type="checkbox" id="ncnr"> 大客戶書面預測附 NCNR：預測落空的關鍵料，七成由客戶承擔</label>
+      <label><input type="checkbox" id="depo"> 新創客戶預付 30% 訂金</label>
+      <label><input type="checkbox" id="exp"> 短缺時走急件與現貨補料（成本 +25%，可補八成缺口）</label>
+    </div>
+  </section>
+
+  <section class="sec" aria-label="六個月推演">
+    <div><span class="label">規則試算・六個月推演（期望情境）</span><h2>需求、備料與現金，放在同一條時間軸</h2></div>
+    <div class="legend"><span><i style="background:var(--line)"></i>客戶預測／確認訂單</span><span><i style="background:var(--accent)"></i>預期實際拉貨</span><span><i style="background:var(--inv)"></i>關鍵料準備量（換算營收）</span><span><s style="border-color:var(--ok)"></s>現金餘額</span><span><s style="border-color:var(--warn);border-top-style:dashed"></s>安全水位</span></div>
+    <div class="panel" style="padding:10px"><svg class="chart" id="chart" viewBox="0 0 680 300" role="img" aria-label="六個月需求、備料與現金"></svg></div>
+    <div class="panel tablebox"><table id="months"></table></div>
+    <p class="note">期望情境以各客戶的兌現率計算。第 1 個月是確認訂單，第 2 個月的料已在上一輪依預測訂妥；現在的決定只影響第 3、4 個月的關鍵料。應收依各客戶帳期入帳，推演期之前的營收假設與第 1 個月相同。</p>
+  </section>
+
+  <section class="sec" aria-label="三種決策比較">
+    <div><span class="label">規則試算・決策比較</span><h2>三種備料政策，各自的代價</h2>
+    <p class="note" style="margin-top:4px">同樣的客戶數字與交易條件，只換備料政策。沒有一種全贏：少備料省現金但延遲出貨，多備料保交期但卡現金、冒呆料風險。</p></div>
+    <div class="panel tablebox"><table id="cmp" class="cmp"></table></div>
+    <p class="note" id="cmpNote"></p>
+  </section>
+
+  <section class="sec" aria-label="即時 AI">
+    <div class="panel console">
+      <div><span class="eyebrow">即時 AI · 開源模型 · 老闆早報</span><h3 style="margin-top:2px">把上面的結果，寫成一頁老闆看得懂的早報</h3>
+      <p class="note" style="margin-top:4px">所有數字由頁面規則算好，AI 只負責用經營語言說明：問題在哪一段、要做什麼決定、該找誰確認。這是 AI 在經營決策裡最可靠的角色：整理與解釋，而不是替老闆決定。</p></div>
+      <button class="btn ai" id="bBtn" type="button">產生老闆早報</button>
+      <div id="bOut" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <p class="callout">老闆要看的不是五張報表，而是一條鏈：客戶預測的可信度 → 關鍵料要押多少 → 現金要準備多少 → 哪家客戶會延遲、哪批料會積壓。鏈上每一段由不同部門負責，但只有放在同一個模型裡，取捨才看得見。這正是 S&amp;OP 會議該看的那一張表。</p>
+  <p class="note">本頁客戶、數字與情境皆為虛構示範，僅供教學與研究用途，與作者任職或服務的任何公司無關。</p>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+const fmt=n=>(n<0?"−":"")+Math.abs(Math.round(n)).toLocaleString("zh-TW");
+const pct=(x,d=0)=>(x*100).toFixed(d)+"%";
+const track=(e,d)=>{try{window.labTrack&&window.labTrack(e,d)}catch(_){}};
+
+/* 客戶（情境示範） */
+const CUST=[
+ {k:"A",name:"雲端客戶 A（AI 伺服器）",firm:30000,fc:[32000,36000,40000],r:.80,dso:90,big:true},
+ {k:"B",name:"工控客戶 B",firm:8000,fc:[8000,8500,8500],r:.97,dso:60},
+ {k:"C",name:"新創客戶 C",firm:3000,fc:[6000,9000,12000],r:.50,dso:45,startup:true},
+];
+const MAT=.85, KEY=.45, OTH=.40, OPEX=4000, RATE=.03, H=6;
+const st={pol:"full",ss:.10,lt:2,dpoK:30,pre:.20,dpoO:60,cash0:25000,safe:10000,line:30000,ncnr:false,depo:false,exp:false};
+
+function model(pol,ss=st.ss){
+  const M=H; const plan=Array(M).fill(0),act=Array(M).fill(0),prep=Array(M).fill(0),ship=Array(M).fill(0),late=Array(M).fill(0),excess=Array(M).fill(0);
+  const custRows=[];
+  CUST.forEach(c=>{
+    const p=[c.firm,...c.fc]; while(p.length<M) p.push(p[p.length-1]);
+    const a=p.map((v,i)=>i===0?v:v*c.r);
+    // key material prepared (in revenue terms) for month i
+    const kp=p.map((v,i)=>{
+      if(i===0) return v;                        // firm, already in house
+      if(i<st.lt) return p[i];                   // ordered last cycle on full forecast
+      if(pol==="firm") return c.firm;            // only what is confirmed today
+      if(pol==="adj") return p[i]*c.r*(1+ss);
+      return p[i]*(1+ss);                        // full forecast
+    });
+    const s=a.map((v,i)=>{let avail=kp[i]; if(st.exp&&avail<v) avail+= (v-avail)*.8; return Math.min(v,avail)});
+    const l=a.map((v,i)=>v-s[i]);
+    const e=kp.map((v,i)=>Math.max(0,v-a[i]));
+    for(let i=0;i<M;i++){plan[i]+=p[i];act[i]+=a[i];prep[i]+=kp[i];ship[i]+=s[i];late[i]+=l[i];excess[i]+=e[i];}
+    custRows.push({c,p,a,kp,s,l,e});
+  });
+  // cash
+  const cash=[];let bal=st.cash0,minCash=Infinity,minM=0,interest=0,expCost=0;
+  for(let m=0;m<M;m++){
+    // AR in: by customer, lag = dso/30 months; before horizon assume firm level
+    let arIn=0; custRows.forEach(x=>{const lag=Math.round(x.c.dso/30); const idx=m-lag; const dep=st.depo&&x.c.startup?.3:0;
+      arIn+= idx>=0 ? x.s[idx]*(1-dep) : x.c.firm;            // collections at the customer's terms; before the horizon, steady firm level
+      if(dep) arIn+= (m+1<M?x.a[m+1]:x.a[M-1])*dep; });       // deposit arrives the month before shipment
+    // key material payments: order month = use month − lt; prepay at order; balance at receipt(use month) + dpoK
+    let kOut=0; for(let u=-4;u<M+3;u++){ const q=(u<0?prep[0]:u<M?prep[u]:prep[M-1])*KEY; const o=u-st.lt; const payM=u+Math.round(st.dpoK/30);
+      if(o===m) kOut+=q*st.pre; if(payM===m) kOut+=q*(1-st.pre); }
+    // expedite cost: shipped beyond prepared at +25% on key share
+    let exCost=0; custRows.forEach(x=>{ const over=Math.max(0,x.s[m]-x.kp[m]); exCost+=over*KEY*.25; }); expCost+=exCost;
+    // other material: pay at use month + dpoO
+    let oOut=0; { const payLag=Math.round(st.dpoO/30); const idx=m-payLag; oOut=(idx>=0?ship[idx]:ship[0])*OTH; }
+    const it=bal<0?-bal*RATE/12:0; interest+=it;
+    bal+=arIn-kOut-oOut-exCost-OPEX-it; cash.push(bal); if(bal<minCash){minCash=bal;minM=m;}
+  }
+  const lateRev=late.reduce((a,b)=>a+b,0), lateRev34=late[2]+late[3];
+  let excessKey=Math.max(...excess.slice(2,4).map((v,i)=>v))*KEY; // peak excess in months 3-4 (key material value)
+  let excessOwn=excessKey; if(st.ncnr){ // big customer share shifts 70%
+    const bigE=Math.max(...custRows.filter(x=>x.c.big).map(x=>Math.max(x.e[2],x.e[3])))*KEY; excessOwn=excessKey-bigE*.7; }
+  const dayRev=act.slice(0,3).reduce((a,b)=>a+b,0)/90;
+  const dsoW=custRows.reduce((a,x)=>a+x.c.dso*x.a[0],0)/act[0];
+  const dpoW=(st.dpoK*KEY+st.dpoO*OTH)/MAT;
+  const inv=prep.slice(2,4).reduce((a,b)=>a+b,0)/2*KEY/(dayRev*MAT); // key material inventory days (approx, on-hand for one month of use)
+  return {plan,act,prep,ship,late,excess,cash,minCash,minM,interest,expCost,lateRev,lateRev34,excessKey,excessOwn,dayRev,dsoW,dpoW,custRows};
+}
+
+function lamp(cls,label,val,sub){return `<div class="lamp ${cls}"><span class="label">${label}</span><b>${val}</b><span class="s">${sub}</span></div>`}
+function renderLamps(r){
+  const cashCls=r.minCash<-st.line?"bad":r.minCash<st.safe?"warn":"ok";
+  const lateCls=r.lateRev34>r.act[2]*.15?"bad":r.lateRev34>0?"warn":"ok";
+  const exDays=r.excessOwn/(r.dayRev*KEY);
+  const exCls=exDays>15?"bad":exDays>5?"warn":"ok";
+  const gap=r.dsoW-r.dpoW, gapCls=gap>60?"bad":gap>30?"warn":"ok";
+  $("lamps").innerHTML=
+    lamp(cashCls,"現金",fmt(r.minCash)+" 萬",`第 ${r.minM+1} 個月最低；${r.minCash<0?"需動用額度 "+fmt(-r.minCash)+" 萬":"安全水位 "+fmt(st.safe)+" 萬"}`)+
+    lamp(lateCls,"延遲出貨",fmt(r.lateRev34)+" 萬",`第 3–4 個月因缺料無法出貨的營收`)+
+    lamp(exCls,"存貨積壓",fmt(r.excessOwn)+" 萬",`預測落空、由我方承擔的關鍵料，約 ${Math.round(exDays)} 天用量${st.ncnr?"（已扣 NCNR）":""}`)+
+    lamp(gapCls,"收付款天期",Math.round(gap)+" 天",`加權應收 ${Math.round(r.dsoW)} 天 − 加權應付 ${Math.round(r.dpoW)} 天，每天約 ${fmt(r.dayRev)} 萬`);
+  return {cashCls,lateCls,exCls,gapCls,gap};
+}
+function renderDiag(r,L){
+  const probs=[];
+  const bigA=r.custRows.find(x=>x.c.big);
+  if(L.exCls!=="ok") probs.push(`<b class="h">存貨：</b>客戶 ${bigA.c.k} 的預測兌現率只有 ${pct(bigA.c.r)}，${st.pol==="full"?"照預測全備等於替客戶的樂觀付錢":"即使已依兌現率校正，安全庫存仍會變成積壓"}。先問業務：這份預測有沒有書面？能不能附 NCNR？`);
+  if(L.lateCls!=="ok") probs.push(`<b class="h">交期：</b>第 3–4 個月有 ${fmt(r.lateRev34)} 萬因關鍵料不足出不了貨。${st.pol==="firm"?"只備已確認訂單，等於把兩個月交期的風險全押在急件上。":"兌現率校正低估了拉貨較準的客戶。"}先問採購：急件補料的成本和機率。`);
+  if(L.cashCls!=="ok") probs.push(`<b class="h">現金：</b>第 ${r.minM+1} 個月最低 ${fmt(r.minCash)} 萬。關鍵料要預付、供應商帳期只有 ${st.dpoK} 天，客戶卻 ${Math.round(r.dsoW)} 天才付款。先問財務：額度夠不夠撐到收款；再問業務：大客戶的票期有沒有交換條件。`);
+  if(L.gapCls!=="ok") probs.push(`<b class="h">天期：</b>收款比付款慢 ${Math.round(L.gap)} 天，每天 ${fmt(r.dayRev)} 萬，等於長期墊 ${fmt(L.gap*r.dayRev)} 萬。這不是這個月的問題，是結構問題，要在年度議約時處理。`);
+  $("diag").innerHTML=`<span class="label">一眼看出</span>`+(probs.length?probs.map(p=>`<p>${p}</p>`).join(""):`<p>四盞燈都是綠的。目前的備料政策與交易條件，在這組客戶數字下可以兼顧交期與現金。可以試著把客戶 A 的兌現率拉低，看哪一盞先變色。</p>`);
+}
+function renderCust(){
+  $("cust").innerHTML=`<thead><tr><th>客戶</th><th class="num">第 1 月確認</th><th class="num">第 2 月預測</th><th class="num">第 3 月預測</th><th class="num">第 4 月預測</th><th style="min-width:170px">實際／預測（兌現率）</th><th class="num">帳期</th></tr></thead><tbody>${CUST.map((c,i)=>`<tr><td><b>${c.name}</b></td><td class="num">${fmt(c.firm)}</td>${c.fc.map(v=>`<td class="num">${fmt(v)}</td>`).join("")}<td><input type="range" data-r="${i}" min="30" max="110" step="5" value="${Math.round(c.r*100)}" aria-label="${c.name} 兌現率"> <output class="num" id="r${i}">${pct(c.r)}</output></td><td class="num">${c.dso} 天</td></tr>`).join("")}</tbody>`;
+}
+function renderChart(r){
+  const svg=$("chart"); svg.innerHTML="";
+  const NS="http://www.w3.org/2000/svg", mk=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);svg.appendChild(e);return e};
+  const txt=(x,y,s,a={})=>{const e=mk("text",Object.assign({x,y,"font-size":11,fill:"var(--muted)","font-family":"IBM Plex Mono,monospace"},a));e.textContent=s;return e};
+  const W=680,HT=300,PL=56,PR=56,PT=16,PB=28,n=r.plan.length;
+  const maxBar=Math.max(...r.plan,...r.prep,...r.act)*1.1;
+  const cashAll=[...r.cash,st.safe,-st.line,0]; const cMin=Math.min(...cashAll)*1.1, cMax=Math.max(...cashAll)*1.1;
+  const x=i=>PL+(i+.5)*(W-PL-PR)/n, yb=v=>PT+(1-v/maxBar)*(HT-PT-PB), yc=v=>PT+(cMax-v)*(HT-PT-PB)/(cMax-cMin);
+  const bw=(W-PL-PR)/n*.22;
+  for(let i=0;i<n;i++){
+    mk("rect",{x:x(i)-bw*1.5,y:yb(r.plan[i]),width:bw,height:yb(0)-yb(r.plan[i]),fill:"var(--line)"});
+    mk("rect",{x:x(i)-bw*.5,y:yb(r.act[i]),width:bw,height:yb(0)-yb(r.act[i]),fill:"var(--accent)"});
+    mk("rect",{x:x(i)+bw*.5,y:yb(r.prep[i]),width:bw,height:yb(0)-yb(r.prep[i]),fill:"var(--inv)",opacity:.85});
+    txt(x(i),HT-10,"第 "+(i+1)+" 月",{"text-anchor":"middle"});
+  }
+  [0,maxBar/2].forEach(v=>txt(PL-6,yb(v)+4,fmt(v),{"text-anchor":"end"}));
+  mk("line",{x1:PL,x2:W-PR,y1:yc(st.safe),y2:yc(st.safe),stroke:"var(--warn)","stroke-dasharray":"5 4","stroke-width":1.5});
+  mk("line",{x1:PL,x2:W-PR,y1:yc(0),y2:yc(0),stroke:"var(--muted)","stroke-width":1,opacity:.5});
+  mk("path",{d:r.cash.map((v,i)=>(i?"L":"M")+x(i)+" "+yc(v)).join(" "),fill:"none",stroke:"var(--ok)","stroke-width":3,"stroke-linejoin":"round"});
+  r.cash.forEach((v,i)=>{mk("circle",{cx:x(i),cy:yc(v),r:4,fill:v<st.safe?"var(--bad)":"var(--ok)"});txt(x(i),yc(v)-8,fmt(v),{"text-anchor":"middle",fill:"var(--ink)"})});
+  txt(W-PR+6,yc(st.safe)+4,"安全",{fill:"var(--warn)"}); txt(W-PR+6,yc(0)+4,"0",{});
+}
+function renderMonths(r){
+  const row=(lab,arr,f=fmt)=>`<tr><td>${lab}</td>${arr.map(v=>`<td class="num">${f(v)}</td>`).join("")}</tr>`;
+  $("months").innerHTML=`<thead><tr><th>萬元</th>${[1,2,3,4,5,6].map(i=>`<th class="num">第 ${i} 月</th>`).join("")}</tr></thead><tbody>${row("客戶預測／確認",r.plan)}${row("預期實際拉貨",r.act)}${row("關鍵料準備量（營收口徑）",r.prep)}${row("可出貨",r.ship)}${row("延遲出貨",r.late)}${row("預測落空的關鍵料（當月，料成本）",r.excess.map(v=>v*KEY))}${row("月底現金",r.cash)}</tbody>`;
+}
+function renderCmp(){
+  const P=[["firm","只備已確認"],["adj","依兌現率校正"],["full","照預測全備"]].map(([p,n])=>({p,n,r:model(p)}));
+  const best=(key,lo)=>{const vals=P.map(o=>o.r[key]);const b=lo?Math.min(...vals):Math.max(...vals);return vals.map(v=>v===b)};
+  const bL=best("lateRev34",true),bE=best("excessOwn",true),bC=best("minCash",false),bX=best("expCost",true);
+  $("cmp").innerHTML=`<thead><tr><th>備料政策</th><th class="num">延遲出貨（3–4 月）</th><th class="num">我方承擔的積壓料</th><th class="num">最低現金</th><th class="num">急件加價</th><th class="num">利息</th></tr></thead><tbody>${P.map((o,i)=>`<tr class="${o.p===st.pol?"pick":""}"><td><b>${o.n}</b>${o.p===st.pol?' <span class="pill p-ok">目前</span>':""}</td><td class="num ${bL[i]?"best":""}">${fmt(o.r.lateRev34)}</td><td class="num ${bE[i]?"best":""}">${fmt(o.r.excessOwn)}</td><td class="num ${bC[i]?"best":""}">${fmt(o.r.minCash)}</td><td class="num ${bX[i]?"best":""}">${fmt(o.r.expCost)}</td><td class="num">${fmt(o.r.interest)}</td></tr>`).join("")}</tbody>`;
+  const f=P[0].r,a=P[1].r,u=P[2].r;
+  $("cmpNote").textContent=`從「只備已確認」到「照預測全備」，延遲出貨從 ${fmt(f.lateRev34)} 萬降到 ${fmt(u.lateRev34)} 萬，代價是積壓料從 ${fmt(f.excessOwn)} 萬升到 ${fmt(u.excessOwn)} 萬、最低現金從 ${fmt(f.minCash)} 萬降到 ${fmt(u.minCash)} 萬。中間的「依兌現率校正」是把客戶的歷史行為放進備料；要再改善，不是調政策，而是去改變客戶的承諾形式（書面預測、NCNR、訂金）。`;
+  return P;
+}
+let LAST=null;
+function render(){
+  const r=model(st.pol); const L=renderLamps(r); renderDiag(r,L); renderChart(r); renderMonths(r); const P=renderCmp();
+  LAST={r,L,P};
+}
+document.addEventListener("input",e=>{
+  const t=e.target;
+  if(t.dataset.r!==undefined){CUST[+t.dataset.r].r=+t.value/100;$("r"+t.dataset.r).textContent=pct(CUST[+t.dataset.r].r);render();return}
+  const m={ss:["ss",v=>v/100,v=>v+"%"],lt:["lt",v=>+v,v=>v],dpoK:["dpoK",v=>+v,v=>v],pre:["pre",v=>v/100,v=>v+"%"],dpoO:["dpoO",v=>+v,v=>v]};
+  if(m[t.id]){const [k,f,o]=m[t.id];st[k]=f(+t.value);$(t.id+"Out").textContent=o(t.value);render();return}
+  if(["cash0","safe","line"].includes(t.id)){st[t.id]=+t.value||0;render();}
+});
+document.addEventListener("change",e=>{const t=e.target;if(["ncnr","depo","exp"].includes(t.id)){st[t.id]=t.checked;render();track("lever",t.id+(t.checked?"+":"-"))}});
+document.addEventListener("click",e=>{const b=e.target.closest("#polSeg button");if(b){st.pol=b.dataset.p;$("polSeg").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));render();track("lever","pol="+b.dataset.p)}});
+renderCust();render();
+
+/* 即時 AI：老闆早報（AI 只解釋，不計算） */
+const AI_ERR={rate_limited:"你這段時間已經試了好幾次，請 10 分鐘後再試。",daily_cap:"今天的 AI 使用次數已達上限，請明天再來。",ai_unavailable:"AI 服務目前沒有啟用，請稍後再試。",no_result:"這次 AI 沒有產生完整結果，請再按一次。"};
+$("bBtn").addEventListener("click",async()=>{
+  const btn=$("bBtn"),out=$("bOut");
+  if(location.protocol==="file:"){out.innerHTML='<p class="note">即時 AI 只能在網站上使用。</p>';return}
+  const {r,L,P}=LAST; const pol={firm:"只備已確認",adj:"依兌現率校正",full:"照預測全備"};
+  const facts={
+    備料政策:pol[st.pol]+"，安全庫存 "+pct(st.ss)+"，關鍵料交期 "+st.lt+" 個月",
+    客戶:CUST.map(c=>`${c.name}：第1月確認 ${fmt(c.firm)} 萬，預測 ${c.fc.map(fmt).join("/")} 萬，兌現率 ${pct(c.r)}，帳期 ${c.dso} 天`),
+    燈號:{現金:L.cashCls,延遲出貨:L.lateCls,存貨積壓:L.exCls,收付款天期:L.gapCls},
+    最低現金:`第 ${r.minM+1} 個月 ${fmt(r.minCash)} 萬（安全水位 ${fmt(st.safe)}，額度 ${fmt(st.line)}）`,
+    延遲出貨營收_3至4月:fmt(r.lateRev34)+" 萬",
+    我方承擔的積壓關鍵料:fmt(r.excessOwn)+" 萬"+(st.ncnr?"（已有 NCNR）":"（沒有 NCNR）"),
+    收付款天期差:Math.round(L.gap)+" 天，每天約 "+fmt(r.dayRev)+" 萬",
+    交易條件:`關鍵料預付 ${pct(st.pre)}、供應商帳期 ${st.dpoK} 天；一般料 ${st.dpoO} 天`+(st.depo?"；新創客戶已付 30% 訂金":"")+(st.exp?"；短缺時走急件補料":""),
+    三種政策比較:P.map(o=>`${o.n}：延遲 ${fmt(o.r.lateRev34)}、積壓 ${fmt(o.r.excessOwn)}、最低現金 ${fmt(o.r.minCash)}`),
+  };
+  btn.disabled=true;out.innerHTML='<p class="note">AI 撰寫中，通常約 10–30 秒……</p>';track("ai_run","cockpit-brief");
+  try{
+    const resp=await fetch("/api/ai/cockpit-brief",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({text:JSON.stringify(facts)})});
+    const j=await resp.json().catch(()=>({}));
+    if(!resp.ok||!j.ok){out.innerHTML=`<p class="note">${AI_ERR[j.error]||"這次沒有取得完整結果，請再按一次。"}</p>`;track("ai_fail",j.error||String(resp.status));return}
+    const d=j.result, Lx=x=>Array.isArray(x)?x:[];
+    out.innerHTML=`<div class="brief"><h3>${esc(d.headline)}</h3>
+      <div><b>問題在哪一段</b><ul>${Lx(d.problems).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+      <div><b>今天要做的決定</b><ul>${Lx(d.decisions).map(x=>`<li><b>${esc(x.decision)}</b>（${esc(x.owner)}）：${esc(x.tradeoff)}</li>`).join("")}</ul></div>
+      <div><b>先去問誰</b><ul>${Lx(d.questions).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+      <p class="note">由開源模型 ${esc(j.model)} 依頁面算好的數字撰寫；數字若與上方不同，以上方規則試算為準。</p></div>`;
+    track("ai_ok","cockpit-brief");
+  }catch(e){out.innerHTML='<p class="note">連線中斷，請再按一次。</p>';track("ai_fail","network")}
+  finally{btn.disabled=false}
+});
+</script>
+<script src="track.js" defer></script>
+</body>
+</html>
