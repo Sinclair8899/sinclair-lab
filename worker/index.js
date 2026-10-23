@@ -8,8 +8,8 @@
 const DEFAULT_MODEL = "@cf/mistralai/mistral-small-3.1-24b-instruct";
 const FALLBACK_MODEL = "@cf/google/gemma-4-26b-a4b-it";
 const BOT_RE = /bot|crawl|spider|slurp|preview|facebookexternalhit|lighthouse|headless/i;
-const PAGES = new Set(["index", "case-boss", "ap", "mrp", "sourcing", "production", "ar", "sop", "cash-cycle-lab"]);
-const EVENTS = new Set(["view", "scenario", "lever", "lens", "ai_run", "ai_ok", "ai_fail", "copy_email", "module_click"]);
+const PAGES = new Set(["index", "case-boss", "ap", "mrp", "sourcing", "production", "ar", "sop", "crm", "cash-cycle-lab"]);
+const EVENTS = new Set(["view", "scenario", "lever", "lens", "ai_run", "ai_ok", "ai_fail", "ai_apply", "copy_email", "module_click"]);
 
 let schemaReady = false;
 async function ensureSchema(db) {
@@ -101,18 +101,56 @@ function cleanResult(d) {
   };
 }
 
-async function runModel(env, model, text) {
-  if (env.MOCK_AI === "1") {
-    return { response: JSON.stringify({ summary: "（測試模式）客戶新機種進入 EVT，舊機種 Q4 需求下修兩成", signals: [{ type: "需求變化", content: "舊機種 Q4 出貨可能少兩成", impact: "高" }], actions: [{ dept: "生管", action: "下修 Q4 排程並通知採購", when: "本週" }], risks: ["客戶導入第二家組裝廠"], next_visit: ["新機種 DVT 時程是否確定？"] }) };
-  }
+const CRM_PROMPT = `你是電子製造公司的 CRM 稽核 agent，負責把業務的拜訪紀錄整理成表單，並把「有書面證據的客戶承諾」和「只是口頭說法」分開。判斷規則：
+- 只有提到具體文件或客戶實際行動（例如正式 RFQ、客戶簽認的規格書、測試報告、PO、LOI、書面預測、簽約、付訂金）才算「書面證據」；客戶口頭說「沒問題」「應該會」「很有機會」或業務自己的推測，一律算「口頭」。
+- 不要捏造紀錄中沒有的內容；沒有提到的里程碑不要列出。
+- 一律使用繁體中文（台灣用語），精簡。
+里程碑代碼：M1 正式 RFQ 與報價、M2 客戶規格凍結與技術簽認、M3 EVT 送樣測試通過、M4 DVT 可靠度驗證通過、M5 PVT 小量試產與首張 PO、M6 量產與年度協議。
+採購中心角色代碼（依 Kotler 的 B2B 採購中心）：user 使用者／研發工程、influencer 影響者（PM、品保）、buyer 採購、decider 決策者、gatekeeper 把關者。
+SPIN 提問分類（依 Rackham）：S 現況提問、P 問題提問、I 影響提問、N 需求回報提問。只分類「我方」在紀錄中提出的問題。
+會談結果：「推進」= 客戶同意了一個具體的下一步行動（送樣、測試、提供預測、簽文件、安排高層會議等）；「延續」= 沒有具體的客戶行動。
+只回覆一個 JSON 物件，不要加任何說明或 Markdown 標記，格式如下：
+{"summary":"一句話重點（40 字內）","milestones":[{"code":"M1-M6","status":"書面證據|口頭","evidence":"依據，30 字內","date":"日期或空字串"}],"forecast":[{"period":"期間","qty":"數量（原文）","basis":"客戶書面|業務口述"}],"buying_center":[{"role":"user|influencer|buyer|decider|gatekeeper","person":"職稱","attitude":"支持|中立|反對|未知"}],"spin":{"S":["問題"],"P":["問題"],"I":["問題"],"N":["問題"]},"needs":{"implied":["隱含需求"],"explicit":["明確需求"]},"outcome":{"type":"推進|延續","reason":"30 字內"},"virtual_commitments":["沒有證據支撐的承諾或樂觀說法，最多 4 項"],"followups":[{"owner":"業務|FAE 工程師|研發|品保|財務|主管","action":"具體行動，30 字內","due":"時間點"}],"next_questions":["下次應該問的影響提問或需求回報提問，最多 3 項"]}`;
+
+const ROLES = ["user", "influencer", "buyer", "decider", "gatekeeper"];
+function cleanCrm(d) {
+  const q = x => arr(x).slice(0, 4).map(y => str(y, 120));
+  return {
+    summary: str(d.summary, 120),
+    milestones: arr(d.milestones).filter(x => /^M[1-6]$/.test(String(x.code))).slice(0, 6).map(x => ({ code: String(x.code), status: x.status === "書面證據" ? "書面證據" : "口頭", evidence: str(x.evidence, 80), date: str(x.date, 20) })),
+    forecast: arr(d.forecast).slice(0, 6).map(x => ({ period: str(x.period, 20), qty: str(x.qty, 30), basis: x.basis === "客戶書面" ? "客戶書面" : "業務口述" })),
+    buying_center: arr(d.buying_center).filter(x => ROLES.includes(x.role)).slice(0, 8).map(x => ({ role: x.role, person: str(x.person, 30), attitude: ["支持", "中立", "反對", "未知"].includes(x.attitude) ? x.attitude : "未知" })),
+    spin: { S: q(d.spin?.S), P: q(d.spin?.P), I: q(d.spin?.I), N: q(d.spin?.N) },
+    needs: { implied: q(d.needs?.implied), explicit: q(d.needs?.explicit) },
+    outcome: { type: d.outcome?.type === "推進" ? "推進" : "延續", reason: str(d.outcome?.reason, 80) },
+    virtual_commitments: q(d.virtual_commitments),
+    followups: arr(d.followups).slice(0, 6).map(x => ({ owner: str(x.owner, 12), action: str(x.action, 100), due: str(x.due, 30) })),
+    next_questions: arr(d.next_questions).slice(0, 3).map(y => str(y, 120)),
+  };
+}
+
+const TASKS = {
+  "visit-notes": { prompt: VISIT_PROMPT, label: "拜訪紀錄", maxTokens: 1200, clean: cleanResult, ok: d => d && (d.summary || arr(d.signals).length) },
+  "crm-note": { prompt: CRM_PROMPT, label: "拜訪紀錄", maxTokens: 1600, clean: cleanCrm, ok: d => d && (d.summary || arr(d.milestones).length) },
+};
+
+const MOCK = {
+  "visit-notes": { summary: "（測試模式）客戶新機種進入 EVT，舊機種 Q4 需求下修兩成", signals: [{ type: "需求變化", content: "舊機種 Q4 出貨可能少兩成", impact: "高" }], actions: [{ dept: "生管", action: "下修 Q4 排程並通知採購", when: "本週" }], risks: ["客戶導入第二家組裝廠"], next_visit: ["新機種 DVT 時程是否確定？"] },
+  "crm-note": { summary: "（測試模式）EVT 樣品通過僅為口頭說法，DVT 時程未確認", milestones: [{ code: "M2", status: "書面證據", evidence: "客戶簽認規格書 v1.2", date: "10/02" }, { code: "M3", status: "口頭", evidence: "PM 口頭表示 EVT 沒問題", date: "" }], forecast: [{ period: "明年 Q2", qty: "10 萬片", basis: "業務口述" }], buying_center: [{ role: "user", person: "硬體研發經理", attitude: "支持" }, { role: "buyer", person: "採購經理", attitude: "中立" }], spin: { S: ["目前用哪家的板子？"], P: [], I: [], N: [] }, needs: { implied: ["散熱方案還沒定"], explicit: [] }, outcome: { type: "延續", reason: "沒有約定下一步行動" }, virtual_commitments: ["「EVT 沒問題」沒有測試報告"], followups: [{ owner: "FAE 工程師", action: "索取 EVT 測試報告", due: "下週" }], next_questions: ["如果散熱方案延後定案，對 DVT 時程影響多大？"] },
+};
+
+async function runModel(env, model, text, task) {
+  const t = TASKS[task];
+  if (env.MOCK_AI === "1") return { response: JSON.stringify(MOCK[task]) };
   return env.AI.run(model, {
-    messages: [{ role: "system", content: VISIT_PROMPT }, { role: "user", content: `拜訪紀錄：\n${text}` }],
-    max_tokens: 1200,
+    messages: [{ role: "system", content: t.prompt }, { role: "user", content: `${t.label}：\n${text}` }],
+    max_tokens: t.maxTokens,
     temperature: 0.2,
   });
 }
 
-async function handleVisitNotes(req, env) {
+async function handleAiTask(req, env, task) {
+  const T = TASKS[task];
   if (!sameSite(req)) return json({ error: "forbidden" }, 403);
   if (!env.AI && env.MOCK_AI !== "1") return json({ error: "ai_unavailable" }, 503);
   let body;
@@ -139,8 +177,8 @@ async function handleVisitNotes(req, env) {
   let result = null, used = null;
   for (const m of models) {
     try {
-      const d = extractJson(outputText(await runModel(env, m, text)));
-      if (d && (d.summary || arr(d.signals).length)) { result = cleanResult(d); used = m; break; }
+      const d = extractJson(outputText(await runModel(env, m, text, task)));
+      if (T.ok(d)) { result = T.clean(d); used = m; break; }
     } catch (e) { /* try the fallback model */ }
   }
   if (env.DB) {
@@ -171,7 +209,7 @@ async function handleStats(req, env) {
     q(`SELECT COALESCE(country,'?') AS country, COUNT(DISTINCT visitor || day) AS visitors FROM events WHERE day >= ? GROUP BY country ORDER BY visitors DESC LIMIT 10`, since),
     q(`SELECT COUNT(*) AS calls, SUM(ok) AS ok, ROUND(AVG(ms)/1000.0,1) AS sec FROM ai_calls WHERE day >= ?`, since),
   ])).map(r => r.results);
-  const EV = { view: "瀏覽", scenario: "選情境", lever: "選選項", lens: "看分析視角", ai_run: "執行 AI", ai_ok: "AI 成功", ai_fail: "AI 失敗", copy_email: "複製信箱", module_click: "點模組" };
+  const EV = { view: "瀏覽", scenario: "選情境", lever: "選選項", lens: "看分析視角", ai_run: "執行 AI", ai_ok: "AI 成功", ai_fail: "AI 失敗", ai_apply: "套用 AI 建議", copy_email: "複製信箱", module_click: "點模組" };
   for (const r of [...byEvent, ...byDetail]) r.event = EV[r.event] || r.event;
   const t = tot[0] || {};
   const table = (rows, cols) => `<table><thead><tr>${cols.map(c => `<th>${c[1]}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr>${cols.map(c => `<td>${esc(r[c[0]] ?? 0)}</td>`).join("")}</tr>`).join("") || `<tr><td colspan="${cols.length}">尚無資料</td></tr>`}</tbody></table>`;
@@ -208,7 +246,8 @@ export default {
     const url = new URL(req.url);
     try {
       if (url.pathname === "/api/e" && req.method === "POST") return await handleEvent(req, env);
-      if (url.pathname === "/api/ai/visit-notes" && req.method === "POST") return await handleVisitNotes(req, env);
+      const ai = url.pathname.match(/^\/api\/ai\/([a-z-]+)$/);
+      if (ai && req.method === "POST" && TASKS[ai[1]]) return await handleAiTask(req, env, ai[1]);
       if (url.pathname === "/api/stats" && req.method === "GET") return await handleStats(req, env);
       if (url.pathname.startsWith("/api/")) return json({ error: "not_found" }, 404);
     } catch (e) {

@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>CRM 客戶承諾管理模擬器</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+TC:wght@700&display=swap">
+<style>
+/* Layout: executive briefing — program card (evidence ledger) → resource gates → live AI note auditor → what a real CRM must capture */
+:root{
+  --bg:#f3f5f7; --panel:#ffffff; --ink:#18222d; --muted:#5b6876; --line:#d9dfe6;
+  --accent:#1f5f8b; --accent-soft:#e3eef6; --inv:#8a4b2a; --inv-soft:#f6e9e1; --ai:#5a4a9e; --ai-soft:#ece9f7;
+  --ok:#2f7d4f; --ok-soft:#e2f2e8; --warn:#a86a0c; --warn-soft:#fbefd9; --bad:#b33a3a; --bad-soft:#f8e1e1;
+  --f-display:"Noto Serif TC","Songti TC",serif; --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11161c; --panel:#18202a; --ink:#e4e9ef; --muted:#93a1b0; --line:#2b3644;
+  --accent:#6fb0dc; --accent-soft:#1c3346; --inv:#e0a07c; --inv-soft:#3a2619; --ai:#b3a5ef; --ai-soft:#2a2545;
+  --ok:#6cc792; --ok-soft:#1a3326; --warn:#e3a94a; --warn-soft:#3a2d16; --bad:#ec7f7f; --bad-soft:#3d1f22; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161c; --panel:#18202a; --ink:#e4e9ef; --muted:#93a1b0; --line:#2b3644;
+  --accent:#6fb0dc; --accent-soft:#1c3346; --inv:#e0a07c; --inv-soft:#3a2619; --ai:#b3a5ef; --ai-soft:#2a2545;
+  --ok:#6cc792; --ok-soft:#1a3326; --warn:#e3a94a; --warn-soft:#3a2d16; --bad:#ec7f7f; --bad-soft:#3d1f22; color-scheme:dark}
+*{box-sizing:border-box}
+html{font-size:106.25%}
+@media (max-width:480px){html{font-size:100%}}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1rem;line-height:1.65}
+.wrap{max-width:1040px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:24px}
+h1{font-family:var(--f-display);font-size:clamp(1.7rem,4.6vw,2.4rem);line-height:1.25;margin:4px 0 0;text-wrap:balance}
+h2{font-family:var(--f-display);font-size:1.25rem;margin:0;text-wrap:balance}
+h3{font-size:1rem;margin:0}
+p{margin:0}
+.lead{color:var(--muted);max-width:66ch;margin-top:10px}
+.eyebrow{font-size:.78rem;letter-spacing:.12em;color:var(--ai);font-weight:500}
+.label{font-size:.72rem;letter-spacing:.08em;color:var(--muted)}
+.mono,.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.note{color:var(--muted);font-size:.84rem}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px}
+a{color:var(--accent)}
+.opener{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.opener div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 14px;display:flex;flex-direction:column;gap:2px}
+.opener b{font-size:1rem}.opener span{color:var(--muted);font-size:.84rem}
+.opener a{text-decoration:none}
+.thesis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.thesis div{padding:12px 14px;border-left:3px solid var(--inv);background:var(--panel);border-radius:0 6px 6px 0}
+.thesis p{color:var(--muted);font-size:.88rem;margin-top:2px}
+.sec{display:flex;flex-direction:column;gap:10px}
+.tablebox{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap;font-size:.88rem;vertical-align:top}
+th{font-weight:500;color:var(--muted);font-size:.78rem}
+td.num,th.num{text-align:right}
+td.wrap,th.wrap{white-space:normal}
+.pill{font-size:.75rem;padding:1px 8px;border-radius:999px;font-weight:500;white-space:nowrap}
+.p-ok{background:var(--ok-soft);color:var(--ok)}.p-warn{background:var(--warn-soft);color:var(--warn)}.p-bad{background:var(--bad-soft);color:var(--bad)}.p-mute{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.btn{font:inherit;cursor:pointer;border-radius:5px;padding:8px 16px;border:1px solid var(--accent);background:var(--accent);color:var(--panel);font-weight:500;align-self:flex-start}
+.btn.ai{border-color:var(--ai);background:var(--ai)}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.sm{padding:3px 10px;font-size:.8rem}
+.btn:disabled{opacity:.6;cursor:default}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.callout{padding:14px 16px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 6px 6px 0;font-size:.95rem}
+.console{padding:18px;background:var(--ai-soft);border-color:var(--ai);display:flex;flex-direction:column;gap:10px}
+.console textarea{font:inherit;width:100%;min-height:150px;padding:8px;border:1px solid var(--line);border-radius:4px;background:var(--panel);color:var(--ink)}
+.console textarea:focus-visible{outline:2px solid var(--ai)}
+.res{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.res>div{border-radius:6px;padding:10px 14px}
+.r-me{background:var(--panel);border:1px solid var(--line)}
+.r-ag{background:var(--ai-soft);border:1px solid var(--ai)}
+.r-ag b{color:var(--ai)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--panel)}
+.seg button{all:unset;cursor:pointer;padding:3px 11px;font-size:.8rem;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--panel)}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.seg.evi button[aria-pressed="true"]{background:var(--ok)}
+.seg.evi button[data-v="口頭"][aria-pressed="true"]{background:var(--warn)}
+.seg.evi button[data-v="未達"][aria-pressed="true"]{background:var(--bad)}
+.msl{display:flex;flex-direction:column;gap:6px}
+.msr{display:grid;grid-template-columns:1.3fr 1fr auto;gap:6px 14px;padding:10px 14px;border:1px solid var(--line);border-radius:6px;background:var(--panel);align-items:start}
+.msr .t{font-size:.95rem}.msr .t b{font-family:var(--f-mono)}
+.msr .d{font-size:.82rem;color:var(--muted)}
+.msr .e{grid-column:1/3;font-size:.86rem}
+.msr .e .label{display:inline;margin-right:6px}
+.msr .seg{justify-self:end}
+.msr.m-ok{border-left:4px solid var(--ok)}.msr.m-warn{border-left:4px solid var(--warn)}.msr.m-bad{border-left:4px solid var(--bad)}
+@media (max-width:820px){.msr{grid-template-columns:1fr}.msr .e{grid-column:1}.msr .seg{justify-self:start}}
+.gates{display:flex;flex-direction:column;gap:6px}
+.gate{display:grid;grid-template-columns:auto 1fr auto auto;gap:10px;align-items:center;padding:8px 12px;border:1px solid var(--line);border-radius:6px;background:var(--panel);font-size:.9rem}
+.gate .who{font-size:.76rem;color:var(--muted);display:block}
+.gate.g-ok{border-left:4px solid var(--ok)}.gate.g-warn{border-left:4px solid var(--warn)}.gate.g-bad{border-left:4px solid var(--bad)}.gate.g-off{opacity:.55}
+.gate input{width:18px;height:18px;accent-color:var(--accent)}
+.lamp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.lamp>div{padding:12px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel)}
+.lamp b{display:block;font-family:var(--f-mono);font-size:1.5rem;font-variant-numeric:tabular-nums}
+.lamp .label{display:block}
+.lamp .ok b{color:var(--ok)}.lamp .warn b{color:var(--warn)}.lamp .bad b{color:var(--bad)}
+.verdict{padding:12px 16px;border-radius:8px;border:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;gap:6px}
+.verdict .big{font-family:var(--f-mono);font-size:1.3rem}
+.toggles{display:flex;flex-wrap:wrap;gap:14px;font-size:.88rem}
+.toggles label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.toggles input{accent-color:var(--accent);width:16px;height:16px}
+.team{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.team div{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:.84rem}
+.team div.cov{border-color:var(--ok);background:var(--ok-soft)}
+.team b{display:block;font-size:.78rem}
+.forms{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.forms div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-size:.86rem}
+.forms b{display:block;margin-bottom:4px}
+.forms ul{margin:0;padding-left:1.1em;color:var(--muted)}
+.agents{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.agents div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+.agents p{font-size:.84rem;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--f-mono);font-size:.76rem;padding:1px 7px;border-radius:3px;background:var(--panel);border:1px solid var(--line)}
+@media (max-width:820px){.opener,.thesis,.res,.lamp,.forms,.agents{grid-template-columns:1fr}.team{grid-template-columns:1fr 1fr}.gate{grid-template-columns:auto 1fr;grid-auto-rows:auto}.gate .amt{grid-column:2}}
+</style>
+</head>
+<body>
+<div style="background:#fbefd9;color:#6b4407;font:14px/1.5 system-ui,sans-serif;padding:8px max(16px,env(safe-area-inset-left,0px));text-align:center">網站版・測試版 2026-10-23：「規則試算」依公式即時計算；「情境示範」為預設資料；「拜訪紀錄」區塊由開源 AI 模型即時分析。</div>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">AI LAB · 現金循環系列 04A · 客戶端</span>
+    <h1>CRM：把業務的口頭承諾，變成公司的指引燈</h1>
+    <p class="lead">研發、生產、採購、財務都依賴業務帶回來的客戶情報決定投入多少資源。問題是，大多數情報只存在業務的嘴巴和記憶裡，客戶的客套話常被說成承諾。這個模組把客戶的開發進度、我們產品的驗證里程碑、出貨預測寫成表單，區分「書面證據」和「口頭說法」，再由 AI agent 從拜訪紀錄自動填表、標出沒有證據的承諾。龍頭對了，後面的投入才不會泡湯。</p>
+    <div class="opener">
+      <div><b>5 分鐘</b><span>看一張專案卡，決定各部門可以投入多少</span></div>
+      <div><b>即時 AI</b><span>貼上拜訪紀錄，AI 自動填表並稽核承諾</span></div>
+      <div><a href="index.html"><b>← 現金循環總覽</b></a><span>客戶端情報決定存貨天數與應收天數的起點</span></div>
+    </div>
+    <p class="note" style="margin-top:12px;padding:8px 12px;border:1px dashed var(--line);border-radius:6px">本頁說明（網站版）：<b>情境示範</b>是預設的專案資料；<b>規則試算</b>依公式即時計算；<b>即時 AI</b> 區塊由 Cloudflare 代管的開源模型分析你送出的文字，只用於產生這次結果。方法依據 Kotler &amp; Keller《Marketing Management》的企業採購中心與客戶獲利度概念，以及 Rackham《SPIN Selling》的提問與承諾分類；本頁只引用概念，不含書中內容。</p>
+  </header>
+
+  <section class="thesis" aria-label="三個依賴">
+    <div><b>研發與品保</b><p>依客戶的規格凍結與驗證時程排人力、開模具。客戶規格沒簽認就開模，改一次就是一筆損失。</p></div>
+    <div><b>採購與生管</b><p>依出貨預測備長交期料、保留產能。預測灌水兩成，存貨就多兩成，現金卡在倉庫。</p></div>
+    <div><b>財務</b><p>依客戶付款條件與信用評估應收天數與資金需求。業務為了成交答應的票期，財務往往最後才知道。</p></div>
+  </section>
+
+  <section class="sec" aria-label="專案卡">
+    <div><span class="label">規則試算・專案卡（證據帳本）</span><h2>一張專案卡：每個里程碑，是書面證據還是口頭說法？</h2>
+    <p class="note" style="margin-top:4px">情境示範：雲端客戶 Y 的新一代 AI 伺服器主機板專案。業務口述年量 40 萬片、單價約 1.2 萬元，年營收約 48 億。切換每個里程碑的狀態，看下方的指引燈和各部門「可以投入」的範圍怎麼變。</p></div>
+    <div class="msl" id="ms"></div>
+    <p class="note">規則：里程碑只有在客戶提供文件或做出實際行動時才算「書面證據」。客戶口頭說「沒問題」、業務自己推測，都是「口頭」。客戶如果不願意給書面，這本身就是一個訊號。</p>
+  </section>
+
+  <section class="sec" aria-label="資源投入關卡">
+    <div><span class="label">規則試算・資源投入關卡</span><h2>各部門可以投入到哪裡？超前投入的錢，誰在冒險？</h2>
+    <p class="note" style="margin-top:4px">每一筆投入都對應一個里程碑。勾選公司目前「已經投入或計畫投入」的項目；顏色表示這筆錢背後的證據等級。金額為虛構示範，單位新台幣萬元。</p></div>
+    <div class="gates" id="gates"></div>
+    <div class="toggles">
+      <label><input type="checkbox" id="nre"> 客戶分攤一半 NRE（模具與治具費用）</label>
+      <label><input type="checkbox" id="ncnr"> 客戶書面預測附 NCNR 條款（不可取消、不可退貨料由客戶承擔）</label>
+      <label><input type="checkbox" id="depo"> 客戶已付訂金或簽產能保留協議</label>
+    </div>
+    <div class="lamp">
+      <div class="ok"><span class="label">有書面證據支撐</span><b class="num" id="gOk"></b><span class="note">客戶若反悔，有文件可以主張</span></div>
+      <div class="warn"><span class="label">只有口頭說法</span><b class="num" id="gWarn"></b><span class="note">現金先出，證據還沒到</span></div>
+      <div class="bad"><span class="label">沒有任何依據</span><b class="num" id="gBad"></b><span class="note">純粹押注</span></div>
+    </div>
+    <div class="verdict" id="verdict"></div>
+    <div class="chips" id="fixes"></div>
+  </section>
+
+  <section class="sec" aria-label="誰去拜訪">
+    <div><span class="label">規則試算・採購中心覆蓋</span><h2>誰去拜訪，決定情報的品質</h2>
+    <p class="note" style="margin-top:4px">B2B 的採購決定不是一個人做的。業務單獨去，通常只見得到採購；技術里程碑要由工程師去確認，付款條件要有人懂財務。選擇拜訪團隊，看採購中心的覆蓋率。</p></div>
+    <div><span class="seg" role="group" aria-label="拜訪團隊" id="teamSeg"><button type="button" data-t="0" aria-pressed="true">業務單獨</button><button type="button" data-t="1" aria-pressed="false">業務＋FAE 工程師</button><button type="button" data-t="2" aria-pressed="false">業務＋FAE＋主管</button></span></div>
+    <div class="team" id="team"></div>
+    <p class="note" id="teamNote"></p>
+  </section>
+
+  <section class="sec" aria-label="即時 AI">
+    <div class="panel console">
+      <div><span class="eyebrow">即時 AI · 開源模型 · 拜訪紀錄 → 專案卡</span><h3 style="margin-top:2px">貼上業務的拜訪紀錄，AI 自動填表，並標出沒有證據的承諾</h3>
+      <p class="note" style="margin-top:4px">AI 會抽出里程碑（書面或口頭）、出貨預測（客戶書面或業務口述）、採購中心角色、我方問了哪些 SPIN 提問、客戶的隱含與明確需求，並判斷這次會談是「推進」還是「延續」。可以改寫下面的範例再試；請勿貼上真實客戶或公司機密資料。</p></div>
+      <label for="vTxt" class="note">拜訪紀錄</label>
+      <textarea id="vTxt">10/16 與 FAE 一起拜訪雲端客戶 Y 的硬體研發經理、PM 和採購經理。研發經理說新一代 AI 伺服器主機板 10/2 已經簽回我們的規格書 v1.2，目前在 EVT，PM 說 EVT 應該沒問題，DVT 預計 3 月。我問他們目前散熱方案的進度，PM 說還沒定，如果用液冷，板子的佈局可能要改。採購經理提到明年 Q2 量產，預估每季 10 萬片，但還不能給書面預測，要等他們老闆下個月批准年度計畫；付款條件希望月結 90 天。採購說會導入第二家板廠分散風險。研發經理私下說，老闆最在意我們的交期，上次延遲兩天被記了一筆。我回覆我們可以保證產能，請他們盡快給預測。下週 FAE 會再去確認 EVT 測試報告。</textarea>
+      <button class="btn ai" id="vBtn" type="button">交給 AI 填表</button>
+      <div id="vOut" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="sec" aria-label="真正的 CRM">
+    <div><span class="label">情境示範・表單設計</span><h2>真正的 CRM 要記什麼：三層表單</h2>
+    <p class="note" style="margin-top:4px">市面上的 CRM 多半從「聯絡人與商機」出發。製造業需要的是「客戶 × 專案 × 證據」。欄位設計參考 Kotler 的企業市場分析：採購情況類型、採購中心、客戶獲利度，以及 Rackham 對會談結果的分類。</p></div>
+    <div class="forms">
+      <div><b>客戶層（一年看一次）</b><ul><li>區隔與定位：策略客戶、成長客戶、維持客戶</li><li>客戶獲利度：毛利 − 服務成本 − 應收與專屬存貨的資金成本</li><li>付款行為：實際收現天數、爭議與扣款紀錄</li><li>集中度與議價力：占我方營收比重、我方占客戶採購比重</li></ul></div>
+      <div><b>專案層（每週更新）</b><ul><li>採購情況：全新採購、修正重購、直接重購</li><li>採購中心：使用者、影響者、採購、決策者、把關者，各自的態度</li><li>里程碑 M1–M6：狀態、證據文件、日期</li><li>出貨預測：客戶書面 vs 業務口述，分開記</li><li>交易條件：價格、票期、NCNR、訂金、價格調整條款</li></ul></div>
+      <div><b>活動層（每次拜訪）</b><ul><li>我方問了什麼：現況、問題、影響、需求回報</li><li>客戶說了什麼：隱含需求 vs 明確需求</li><li>會談結果：推進（客戶同意具體行動）或延續（沒有行動）</li><li>虛承諾：沒有證據支撐的說法，標起來追蹤</li><li>各部門待辦與期限</li></ul></div>
+    </div>
+    <div class="agents">
+      <div><h3>紀錄整理 agent</h3><p>從拜訪紀錄、Email、會議摘要抽出欄位，業務只負責確認，不用從頭打字。這是目前 AI 最可靠的工作類型。</p></div>
+      <div><h3>證據稽核 agent</h3><p>每週比對專案卡：哪個里程碑超過期限還是「口頭」、哪筆投入超前了證據、哪個客戶的書面預測一直沒來。</p></div>
+      <div><h3>預測偏差 agent</h3><p>比對每位業務、每家客戶過去的預測與實際出貨，算出偏差係數，讓生管和採購用校正後的量備料。</p></div>
+    </div>
+    <p class="callout">AI 可以把口頭說法整理成表單、把沒有證據的承諾標出來；但要不要相信客戶、要不要超前投入、要不要接受票期，仍然是業務主管、研發、採購、財務各自要簽名承擔的決定。表單的價值，是讓這些決定建立在同一份證據上。</p>
+  </section>
+
+  <p class="note">本頁客戶、專案、數字與情境皆為虛構示範，僅供教學與研究用途，與作者任職或服務的任何公司無關。</p>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+const fmt=n=>Math.round(n).toLocaleString("zh-TW");
+const track=(e,d)=>{try{window.labTrack&&window.labTrack(e,d)}catch(_){}};
+
+/* 里程碑（情境示範） */
+const MS=[
+ {code:"M1",name:"正式 RFQ 與報價",doc:"客戶 RFQ 文件、我方報價單",st:"書面證據",ev:"9/10 收到 RFQ，9/18 報價",dept:"業務"},
+ {code:"M2",name:"客戶規格凍結與技術簽認",doc:"客戶簽回的規格書",st:"書面證據",ev:"10/2 客戶簽回規格書 v1.2",dept:"研發"},
+ {code:"M3",name:"EVT 送樣測試通過",doc:"客戶 EVT 測試報告",st:"口頭",ev:"PM 口頭說「EVT 應該沒問題」",dept:"研發／品保"},
+ {code:"M4",name:"DVT 可靠度驗證通過",doc:"客戶 DVT 報告、可靠度數據",st:"未達",ev:"客戶預計 3 月",dept:"品保"},
+ {code:"M5",name:"PVT 小量試產與首張 PO",doc:"客戶 PO",st:"未達",ev:"",dept:"生管／採購"},
+ {code:"M6",name:"量產預測與年度協議",doc:"客戶書面預測、協議、訂金或 NCNR 條款",st:"口頭",ev:"採購口述每季 10 萬片，年度計畫待批",dept:"業務／財務"},
+];
+const ST=["書面證據","口頭","未達"];
+const PILL={"書面證據":"p-ok","口頭":"p-warn","未達":"p-bad"};
+
+/* 資源投入關卡：每筆投入對應一個里程碑 */
+const GATES=[
+ {k:"rd",need:"M1",who:"研發",what:"設計人力與打樣",amt:300,rec:0,on:true},
+ {k:"nre",need:"M2",who:"研發／生產",what:"模具、治具與測試設備（NRE）",amt:600,rec:.1,on:true},
+ {k:"lt",need:"M3",who:"採購",what:"DVT／PVT 所需長交期關鍵料",amt:800,rec:.3,on:true},
+ {k:"cap",need:"M4",who:"生管",what:"PVT 產能保留與人力訓練",amt:400,rec:0,on:true},
+ {k:"first",need:"M5",who:"採購／財務",what:"量產首批料與營運資金額度",amt:4000,rec:.3,on:false},
+ {k:"fc",need:"M6",who:"採購",what:"依預測備一季量產料（記憶體、主晶片）",amt:12000,rec:.3,on:true},
+];
+
+const MCLS={"書面證據":"m-ok","口頭":"m-warn","未達":"m-bad"};
+function renderMs(){
+  $("ms").innerHTML=MS.map((m,i)=>`<div class="msr ${MCLS[m.st]}"><div class="t"><b>${m.code}</b> ${m.name}<span class="d" style="display:block">負責確認：${m.dept}</span></div><div class="d">需要的書面證據：${m.doc}</div><span class="seg evi" role="group" aria-label="${m.code} 狀態">${ST.map(s=>`<button type="button" data-i="${i}" data-v="${s}" aria-pressed="${m.st===s}">${s}</button>`).join("")}</span><div class="e"><span class="label">目前依據</span><span id="ev${i}">${esc(m.ev)||"—"}</span></div></div>`).join("");
+}
+function renderGates(){
+  $("gates").innerHTML=GATES.map(g=>{const m=MS.find(x=>x.code===g.need);const cls=!g.on?"g-off":m.st==="書面證據"?"g-ok":m.st==="口頭"?"g-warn":"g-bad";
+    return `<label class="gate ${cls}"><input type="checkbox" data-k="${g.k}" ${g.on?"checked":""}><span><span class="who">${g.who}・需要 ${g.need} 書面證據</span>${g.what}</span><span class="pill ${PILL[m.st]}">${g.need} ${m.st}</span><span class="num amt">${fmt(g.amt)} 萬</span></label>`}).join("");
+}
+function calc(){
+  const nre=$("nre").checked,ncnr=$("ncnr").checked,depo=$("depo").checked;
+  let ok=0,warn=0,bad=0,lossDelay=0,lossCancel=0;
+  const rows=[];
+  GATES.filter(g=>g.on).forEach(g=>{
+    const m=MS.find(x=>x.code===g.need);
+    let amt=g.amt; if(g.k==="nre"&&nre) amt/=2;
+    let rec=g.rec; if(g.k==="fc"&&ncnr) rec=.85; if((g.k==="cap"||g.k==="first")&&depo) rec=Math.max(rec,.7);
+    if(m.st==="書面證據"){ok+=amt;}
+    else{ if(m.st==="口頭") warn+=amt; else bad+=amt; lossDelay+=amt; lossCancel+=amt*(1-rec); }
+    rows.push({g,m,amt,rec});
+  });
+  return {ok,warn,bad,lossDelay,lossCancel,rows};
+}
+function render(){
+  renderGates();
+  const c=calc();
+  $("gOk").textContent=fmt(c.ok)+" 萬";$("gWarn").textContent=fmt(c.warn)+" 萬";$("gBad").textContent=fmt(c.bad)+" 萬";
+  const total=c.ok+c.warn+c.bad, over=c.warn+c.bad;
+  let v="";
+  if(total===0) v=`<p>目前沒有勾選任何投入。</p>`;
+  else if(over===0) v=`<p class="big" style="color:var(--ok)">指引燈：綠</p><p>已投入 ${fmt(total)} 萬全部有書面證據支撐。客戶若反悔，至少有文件可以主張責任。</p>`;
+  else {
+    const pct=Math.round(over/total*100);
+    v=`<p class="big" style="color:${c.bad>0?"var(--bad)":"var(--warn)"}">指引燈：${c.bad>0?"紅":"黃"}　超前投入 ${fmt(over)} 萬（占 ${pct}%）</p>
+    <p>若客戶時程<b>延後一季</b>：約 ${fmt(c.lossDelay)} 萬現金會多卡一季在模具、料和產能上，以年息 3% 估計利息約 ${fmt(c.lossDelay*.03/4)} 萬，存貨天數同步拉長。</p>
+    <p>若專案<b>取消或轉單</b>：扣掉可轉用或退回的部分，可能損失約 <b class="num">${fmt(c.lossCancel)}</b> 萬。</p>`;
+    const fc=c.rows.find(r=>r.g.k==="fc"&&r.m.st!=="書面證據");
+    if(fc) v+=`<p class="note">最大的一筆是依口述預測備的一季料（${fmt(fc.amt)} 萬）。${$("ncnr").checked?"已勾選 NCNR 條款，但條款要寫在客戶的書面預測或協議裡才成立；目前 M6 仍不是書面證據，條款無從主張。":"沒有書面預測，就沒有 NCNR 可以主張，這筆料的風險全在我方。"}</p>`;
+  }
+  $("verdict").innerHTML=v;
+  const fixes=[];
+  MS.forEach((m,i)=>{ if(m.st==="口頭"&&GATES.some(g=>g.on&&g.need===m.code)) fixes.push(`<button class="btn ghost sm" type="button" data-fix="${i}">把 ${m.code} 變成書面：索取${m.doc.split("、")[0]}</button>`); });
+  $("fixes").innerHTML=fixes.length?`<span class="note" style="align-self:center">把黃燈變綠燈的動作：</span>`+fixes.join(""):"";
+}
+document.addEventListener("click",e=>{
+  const b=e.target.closest(".seg.evi button");
+  if(b){const i=+b.dataset.i;MS[i].st=b.dataset.v;renderMs();render();track("lever",MS[i].code+"="+b.dataset.v);return}
+  const f=e.target.closest("[data-fix]");
+  if(f){const i=+f.dataset.fix;MS[i].st="書面證據";MS[i].ev="（已索取）"+MS[i].doc.split("、")[0];renderMs();render();track("lever",MS[i].code+"=fix");return}
+  const t=e.target.closest("#teamSeg button");
+  if(t){$("teamSeg").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===t));renderTeam(+t.dataset.t);track("lever","team="+t.dataset.t);}
+});
+document.addEventListener("change",e=>{
+  const g=e.target.closest("input[data-k]"); if(g){GATES.find(x=>x.k===g.dataset.k).on=g.checked;render();return}
+  if(["nre","ncnr","depo"].includes(e.target.id)) render();
+});
+
+/* 採購中心覆蓋 */
+const ROLE=[["user","使用者","研發工程師：決定規格、測試結果"],["influencer","影響者","PM、品保：時程與品質標準"],["buyer","採購","價格、票期、第二來源"],["decider","決策者","客戶高層：年度計畫、產能承諾"],["gatekeeper","把關者","財務、法務：信用、合約條款"]];
+const COV=[["buyer"],["user","influencer","buyer"],["user","influencer","buyer","decider","gatekeeper"]];
+const TNOTE=["只見採購：技術里程碑（M2–M4）只能聽轉述，預測與年度計畫（M6）要等決策者，容易全部變成「口頭」。","加上 FAE：規格簽認、EVT／DVT 報告可以當場確認，M2–M4 有機會拿到書面；M6 仍要見到決策者。","加上主管：可以對客戶高層談年度協議、訂金與 NCNR，並讓財務介入票期。代價是主管時間，所以只用在策略客戶的關鍵里程碑。"];
+function renderTeam(t){
+  $("team").innerHTML=ROLE.map(r=>`<div class="${COV[t].includes(r[0])?"cov":""}"><b>${r[1]}</b>${r[2]}</div>`).join("");
+  $("teamNote").textContent=`採購中心覆蓋 ${COV[t].length}/5。`+TNOTE[t];
+}
+
+renderMs();render();renderTeam(0);
+
+/* 即時 AI：拜訪紀錄 → 專案卡 */
+const L=x=>Array.isArray(x)?x:[];
+const AI_ERR={rate_limited:"你這段時間已經試了好幾次，請 10 分鐘後再試。",daily_cap:"今天的 AI 使用次數已達上限，請明天再來。",too_short:"拜訪紀錄太短，請至少輸入一兩句內容。",ai_unavailable:"AI 服務目前沒有啟用，請稍後再試。",no_result:"這次 AI 沒有產生完整結果，請再按一次。"};
+const RN={user:"使用者",influencer:"影響者",buyer:"採購",decider:"決策者",gatekeeper:"把關者"};
+const SN={S:"現況",P:"問題",I:"影響",N:"需求回報"};
+let lastAI=null;
+$("vBtn").addEventListener("click",async()=>{
+  const btn=$("vBtn"),out=$("vOut"),txt=$("vTxt").value.trim().slice(0,3000);
+  if(!txt)return;
+  if(location.protocol==="file:"){out.innerHTML='<p class="note">即時 AI 只能在網站上使用，本機開啟的檔案無法連線。</p>';return}
+  btn.disabled=true;out.innerHTML='<p class="note">AI 填表中，通常約 10–30 秒……</p>';track("ai_run","crm-note");
+  try{
+    const r=await fetch("/api/ai/crm-note",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({text:txt})});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok||!j.ok){out.innerHTML=`<p class="note">${AI_ERR[j.error]||"這次沒有取得完整結果，請再按一次。"}</p>`;track("ai_fail",j.error||String(r.status));return}
+    const d=j.result; lastAI=d;
+    const tb=(head,rows)=>`<div class="tablebox" style="background:var(--panel);border-radius:6px;margin-top:8px"><table style="min-width:480px"><thead><tr>${head.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.length?rows.join(""):`<tr><td colspan="${head.length}" class="note">紀錄中沒有提到</td></tr>`}</tbody></table></div>`;
+    out.innerHTML=`<h3 style="margin-top:4px">${esc(d.summary)}</h3>
+     <div class="chips" style="margin-top:6px"><span class="chip ${d.outcome.type==="推進"?"":""}" style="${d.outcome.type==="推進"?"color:var(--ok);border-color:var(--ok)":"color:var(--warn);border-color:var(--warn)"}">會談結果：${esc(d.outcome.type)}</span><span class="note">${esc(d.outcome.reason)}</span></div>
+     ${tb(["里程碑","狀態","依據","日期"],L(d.milestones).map(m=>`<tr><td><b class="mono">${esc(m.code)}</b> ${esc((MS.find(x=>x.code===m.code)||{}).name||"")}</td><td><span class="pill ${m.status==="書面證據"?"p-ok":"p-warn"}">${esc(m.status)}</span></td><td class="wrap">${esc(m.evidence)}</td><td>${esc(m.date)||"—"}</td></tr>`))}
+     ${tb(["預測期間","數量","依據"],L(d.forecast).map(f=>`<tr><td>${esc(f.period)}</td><td>${esc(f.qty)}</td><td><span class="pill ${f.basis==="客戶書面"?"p-ok":"p-warn"}">${esc(f.basis)}</span></td></tr>`))}
+     ${tb(["採購中心角色","職稱","態度"],L(d.buying_center).map(b=>`<tr><td>${RN[b.role]||esc(b.role)}</td><td>${esc(b.person)}</td><td>${esc(b.attitude)}</td></tr>`))}
+     <div class="res" style="margin-top:8px">
+       <div class="r-me"><b>我方的 SPIN 提問</b><ul style="margin:4px 0 0;padding-left:1.1em">${["S","P","I","N"].map(k=>`<li><b>${SN[k]}</b>：${L(d.spin[k]).length?L(d.spin[k]).map(esc).join("；"):"<span class='note'>沒有</span>"}</li>`).join("")}</ul></div>
+       <div class="r-me"><b>客戶需求</b><ul style="margin:4px 0 0;padding-left:1.1em"><li><b>隱含</b>：${L(d.needs.implied).map(esc).join("；")||"<span class='note'>沒有</span>"}</li><li><b>明確</b>：${L(d.needs.explicit).map(esc).join("；")||"<span class='note'>沒有</span>"}</li></ul></div>
+       <div class="r-me" style="border-color:var(--warn)"><b style="color:var(--warn)">沒有證據支撐的承諾</b><ul style="margin:4px 0 0;padding-left:1.1em">${L(d.virtual_commitments).map(x=>`<li>${esc(x)}</li>`).join("")||"<li class='note'>沒有發現</li>"}</ul></div>
+       <div class="r-ag"><b>下次拜訪該問的問題</b><ul style="margin:4px 0 0;padding-left:1.1em">${L(d.next_questions).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+     </div>
+     ${tb(["負責","要做的事","期限"],L(d.followups).map(f=>`<tr><td><b>${esc(f.owner)}</b></td><td class="wrap">${esc(f.action)}</td><td>${esc(f.due)}</td></tr>`))}
+     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px"><button class="btn sm" type="button" id="apply">把 AI 的里程碑判讀套用到上方專案卡</button><span class="note">套用後請往上看指引燈。AI 只負責整理；是否採信，由業務主管確認。</span></div>
+     <p class="note" style="margin-top:8px">由開源模型 ${esc(j.model)} 即時產生。</p>`;
+    track("ai_ok","crm-note");
+    $("apply").addEventListener("click",()=>{
+      L(lastAI.milestones).forEach(m=>{const i=MS.findIndex(x=>x.code===m.code);if(i>=0){MS[i].st=m.status;MS[i].ev=m.evidence+(m.date?"（"+m.date+"）":"")}});
+      renderMs();render();track("ai_apply","crm-note");
+      document.querySelector('[aria-label="專案卡"]').scrollIntoView({behavior:"smooth",block:"start"});
+    });
+  }catch(e){out.innerHTML='<p class="note">連線中斷，請再按一次。</p>';track("ai_fail","network")}
+  finally{btn.disabled=false}
+});
+</script>
+<script src="track.js" defer></script>
+</body>
+</html>
