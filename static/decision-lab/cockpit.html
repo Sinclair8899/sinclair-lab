@@ -329,7 +329,8 @@ $("bBtn").addEventListener("click",async()=>{
     我方承擔的積壓關鍵料:fmt(r.excessOwn)+" 萬"+(st.ncnr?"（已有 NCNR）":"（沒有 NCNR）"),
     收付款天期差:Math.round(L.gap)+" 天，每天約 "+fmt(r.dayRev)+" 萬",
     交易條件:`關鍵料預付 ${pct(st.pre)}、供應商帳期 ${st.dpoK} 天；一般料 ${st.dpoO} 天`+(st.depo?"；新創客戶已付 30% 訂金":"")+(st.exp?"；短缺時走急件補料":""),
-    三種政策比較:P.map(o=>`${o.n}：延遲 ${fmt(o.r.lateRev34)}、積壓 ${fmt(o.r.excessOwn)}、最低現金 ${fmt(o.r.minCash)}`),
+    三種政策比較_相對目前:P.filter(o=>o.p!==st.pol).map(o=>{const d=(a,b)=>(b-a>=0?"增加 ":"減少 ")+fmt(Math.abs(b-a))+" 萬";return `改為「${o.n}」：延遲出貨${d(r.lateRev34,o.r.lateRev34)}、我方積壓料${d(r.excessOwn,o.r.excessOwn)}、最低現金${d(r.minCash,o.r.minCash)}`}),
+    最大客戶:CUST.reduce((a,c)=>c.firm>a.firm?c:a).name,
   };
   btn.disabled=true;out.innerHTML='<p class="note">AI 撰寫中，通常約 10–30 秒……</p>';track("ai_run","cockpit-brief");
   try{
