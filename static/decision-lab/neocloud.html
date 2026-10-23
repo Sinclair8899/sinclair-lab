@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>AI 算力公司：合約、借款與殘值</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+TC:wght@700&display=swap">
+<style>
+/* Layout: cockpit for a capex-heavy AI compute provider — four lamps, one 8-year model (contracts → EBITDA → debt service → collateral), expansion decisions, AI brief */
+:root{
+  --bg:#f3f5f7; --panel:#ffffff; --ink:#18222d; --muted:#5b6876; --line:#d9dfe6;
+  --accent:#1f5f8b; --accent-soft:#e3eef6; --inv:#8a4b2a; --inv-soft:#f6e9e1; --ai:#5a4a9e; --ai-soft:#ece9f7;
+  --ok:#2f7d4f; --ok-soft:#e2f2e8; --warn:#a86a0c; --warn-soft:#fbefd9; --bad:#b33a3a; --bad-soft:#f8e1e1;
+  --f-display:"Noto Serif TC","Songti TC",serif; --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11161c; --panel:#18202a; --ink:#e4e9ef; --muted:#93a1b0; --line:#2b3644;
+  --accent:#6fb0dc; --accent-soft:#1c3346; --inv:#e0a07c; --inv-soft:#3a2619; --ai:#b3a5ef; --ai-soft:#2a2545;
+  --ok:#6cc792; --ok-soft:#1a3326; --warn:#e3a94a; --warn-soft:#3a2d16; --bad:#ec7f7f; --bad-soft:#3d1f22; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161c; --panel:#18202a; --ink:#e4e9ef; --muted:#93a1b0; --line:#2b3644;
+  --accent:#6fb0dc; --accent-soft:#1c3346; --inv:#e0a07c; --inv-soft:#3a2619; --ai:#b3a5ef; --ai-soft:#2a2545;
+  --ok:#6cc792; --ok-soft:#1a3326; --warn:#e3a94a; --warn-soft:#3a2d16; --bad:#ec7f7f; --bad-soft:#3d1f22; color-scheme:dark}
+*{box-sizing:border-box}
+html{font-size:106.25%}
+@media (max-width:480px){html{font-size:100%}}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1rem;line-height:1.65}
+.wrap{max-width:1040px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:24px}
+h1{font-family:var(--f-display);font-size:clamp(1.7rem,4.6vw,2.4rem);line-height:1.25;margin:4px 0 0;text-wrap:balance}
+h2{font-family:var(--f-display);font-size:1.25rem;margin:0;text-wrap:balance}
+h3{font-size:1rem;margin:0}
+p{margin:0}
+.lead{color:var(--muted);max-width:66ch;margin-top:10px}
+.eyebrow{font-size:.78rem;letter-spacing:.12em;color:var(--ai);font-weight:500}
+.label{font-size:.72rem;letter-spacing:.08em;color:var(--muted)}
+.mono,.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.note{color:var(--muted);font-size:.84rem}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px}
+a{color:var(--accent)}
+.opener{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.opener div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 14px;display:flex;flex-direction:column;gap:2px}
+.opener b{font-size:1rem}.opener span{color:var(--muted);font-size:.84rem}
+.opener a{text-decoration:none}
+.sec{display:flex;flex-direction:column;gap:10px}
+.lamps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.lamp{padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel);border-top:5px solid var(--line)}
+.lamp.ok{border-top-color:var(--ok)}.lamp.warn{border-top-color:var(--warn)}.lamp.bad{border-top-color:var(--bad)}
+.lamp .label{display:block}
+.lamp b{display:block;font-family:var(--f-mono);font-size:1.35rem;font-variant-numeric:tabular-nums;line-height:1.2;margin-top:2px}
+.lamp.ok b{color:var(--ok)}.lamp.warn b{color:var(--warn)}.lamp.bad b{color:var(--bad)}
+.lamp span.s{font-size:.78rem;color:var(--muted)}
+.diag{padding:12px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;gap:6px;font-size:.92rem}
+.diag b.h{color:var(--inv)}
+.ctl{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ctl>div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;font-size:.9rem}
+.ctl label{display:flex;justify-content:space-between;gap:8px;font-size:.86rem}
+.ctl output{font-family:var(--f-mono);color:var(--accent)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--panel);flex-wrap:wrap}
+.seg button{all:unset;cursor:pointer;padding:4px 12px;font-size:.84rem;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--panel)}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.tablebox{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th,td{padding:6px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap;font-size:.86rem}
+th{font-weight:500;color:var(--muted);font-size:.76rem}
+td.num,th.num{text-align:right}
+.cmp td.best{color:var(--ok);font-weight:700}
+.cmp tr.pick td{background:var(--accent-soft)}
+.opts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.opts button{all:unset;cursor:pointer;border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:var(--bg);display:flex;flex-direction:column;gap:2px}
+.opts button:hover{border-color:var(--accent)}
+.opts button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.opts button.pick{border-color:var(--accent);background:var(--accent-soft)}
+.opts small{color:var(--muted);font-size:.8rem}
+svg.chart{width:100%;height:auto;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.78rem;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:5px}
+.legend s{display:inline-block;width:18px;border-top:3px solid;vertical-align:middle;margin-right:5px;text-decoration:none}
+.btn{font:inherit;cursor:pointer;border-radius:5px;padding:8px 16px;border:1px solid var(--accent);background:var(--accent);color:var(--panel);font-weight:500;align-self:flex-start}
+.btn.ai{border-color:var(--ai);background:var(--ai)}
+.btn:disabled{opacity:.6;cursor:default}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.console{padding:18px;background:var(--ai-soft);border-color:var(--ai);display:flex;flex-direction:column;gap:10px}
+.brief{background:var(--panel);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.brief h3{color:var(--ai)}
+.brief ul{margin:0;padding-left:1.1em}
+.callout{padding:14px 16px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 6px 6px 0;font-size:.95rem}
+.signals{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.signals div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-size:.84rem}
+.signals b{display:block}
+.signals span{color:var(--muted)}
+@media (max-width:820px){.opener,.ctl,.opts{grid-template-columns:1fr}.lamps,.signals{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div style="background:#fbefd9;color:#6b4407;font:14px/1.5 system-ui,sans-serif;padding:8px max(16px,env(safe-area-inset-left,0px));text-align:center">網站版・測試版 2026-10-23：本頁所有數字由「規則試算」依公式即時計算；「老闆早報」由開源 AI 模型把算好的結果寫成文字，不做計算。公司為虛構，數量級參考 2026 年 10 月的公開報導。</div>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">AI LAB · 現金循環系列 06 · AI 時代的資本循環</span>
+    <h1>AI 算力公司：訂單越多、借越多，<br>合約能不能還得起債？</h1>
+    <p class="lead">2026 年 10 月，市場開始追問一個問題：新興 AI 雲端業者的算力需求很強，但資本跟不上，債券殖利率升到百分之十幾，而晶片供應商主張 GPU 可以用八年、應該成為銀行願意融資的資產。這是現金循環系列的最後一哩：把客戶長約、GPU 抵押借款、殘值假設、客戶集中與再融資放進同一個八年模型。數字為虛構公司，單位新台幣億元。</p>
+    <div class="opener">
+      <div><b>5 分鐘</b><span>調整合約覆蓋、殘值假設與利率，看四盞燈怎麼變</span></div>
+      <div><b>即時 AI</b><span>把算好的結果寫成老闆早報</span></div>
+      <div><a href="index.html"><b>← 現金循環總覽</b></a><span>和「雲端巨頭」情境、未來 5 年分頁互相對照</span></div>
+    </div>
+  </header>
+
+  <div class="lamps" id="lamps" aria-label="四盞燈"></div>
+  <section class="diag" id="diag" aria-label="診斷"></section>
+
+  <section class="sec" aria-label="輸入">
+    <div><span class="label">規則試算・你的假設</span><h2>合約、借款、殘值：三組假設決定這家公司能不能活</h2></div>
+    <div class="ctl">
+      <div><b>合約端</b>
+        <label for="cov"><span>已簽長約的算力占比</span><output id="covOut" class="num">70%</output></label><input type="range" id="cov" min="0" max="100" step="5" value="70">
+        <label for="term"><span>長約年限</span><output id="termOut" class="num">4 年</output></label><input type="range" id="term" min="2" max="6" step="1" value="4">
+        <label for="conc"><span>最大客戶占合約比重</span><output id="concOut" class="num">65%</output></label><input type="range" id="conc" min="20" max="90" step="5" value="65">
+        <label for="util"><span>未簽約算力的現貨利用率</span><output id="utilOut" class="num">50%</output></label><input type="range" id="util" min="0" max="100" step="10" value="50">
+        <span class="note">滿載年營收＝投資額 × 32%；現貨價格為長約的七折；長約到期後以六折續約。</span>
+      </div>
+      <div><b>借款端</b>
+        <label for="lev"><span>投資額中借款比例</span><output id="levOut" class="num">80%</output></label><input type="range" id="lev" min="40" max="95" step="5" value="80">
+        <label for="rate"><span>借款利率</span><output id="rateOut" class="num">10%</output></label><input type="range" id="rate" min="4" max="18" step="1" value="10">
+        <label for="refi"><span>第 5 年到期再融資利率加碼</span><output id="refiOut" class="num">+3 pt</output></label><input type="range" id="refi" min="0" max="8" step="1" value="3">
+        <span class="note">投資額 1,000 億（GPU 占八成、機房兩成）；借款 5 年到期一次還本，期間只付息；營運費用（電力、人力）每年為投資額的 10%。</span>
+      </div>
+      <div><b>殘值端</b>
+        <span class="note">GPU 經濟壽命假設（影響折舊與抵押品價值）</span>
+        <span class="seg" role="group" aria-label="GPU 壽命" id="lifeSeg"><button type="button" data-l="4" aria-pressed="true">4 年（市場慣例）</button><button type="button" data-l="6" aria-pressed="false">6 年</button><button type="button" data-l="8" aria-pressed="false">8 年（供應商主張）</button></span>
+        <label for="haircut"><span>銀行對 GPU 帳面價值的折價</span><output id="haircutOut" class="num">30%</output></label><input type="range" id="haircut" min="0" max="70" step="10" value="30">
+        <span class="note">技術上能用八年，不等於八年都租得到原來的價格。殘值是假設，不是市場成交價。</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" aria-label="八年推演">
+    <div><span class="label">規則試算・八年推演</span><h2>營收、本息與抵押品，放在同一條時間軸</h2></div>
+    <div class="legend"><span><i style="background:var(--accent)"></i>長約營收</span><span><i style="background:var(--line)"></i>現貨營收</span><span><i style="background:var(--inv)"></i>利息＋到期本金</span><span><s style="border-color:var(--ok)"></s>累計現金</span><span><s style="border-color:var(--ai);border-top-style:dashed"></s>抵押品價值 ÷ 債務餘額</span></div>
+    <div class="panel" style="padding:10px"><svg class="chart" id="chart" viewBox="0 0 680 300" role="img" aria-label="八年營收、本息、累計現金與抵押覆蓋"></svg></div>
+    <div class="panel tablebox"><table id="years"></table></div>
+  </section>
+
+  <section class="sec" aria-label="決策">
+    <div><span class="label">規則試算・擴張決策</span><h2>需求很強，要不要再借 1,000 億擴一倍？</h2>
+    <p class="note" style="margin-top:4px">四種做法，同一組假設。看最低合約覆蓋率、第 5 年到期牆缺口、抵押品覆蓋最低值，以及最大客戶砍一半時的覆蓋率。</p></div>
+    <div class="opts" id="opts"></div>
+    <div class="panel tablebox"><table id="cmp" class="cmp"></table></div>
+    <p class="note" id="cmpNote"></p>
+  </section>
+
+  <section class="sec" aria-label="追蹤訊號">
+    <div><span class="label">情境示範・值得追蹤的訊號</span><h2>看這五個數字，不看每天的股價</h2></div>
+    <div class="signals">
+      <div><b>債券殖利率與信用利差</b><span>信用市場是否持續收緊；利差擴大會比財報更早反映融資壓力。</span></div>
+      <div><b>新簽合約 vs 已認列營收</b><span>區分未來承諾與已實現需求；合約積壓不是現金。</span></div>
+      <div><b>自由現金流與利息保障倍數</b><span>成長有沒有財務上的可持續性。</span></div>
+      <div><b>GPU 租金、利用率與二手殘值</b><span>驗證抵押品的真實價值，而不是供應商的主張。</span></div>
+      <div><b>下游資本支出與融資計畫</b><span>客戶自己的現金流撐不撐得起他們的承諾。</span></div>
+    </div>
+  </section>
+
+  <section class="sec" aria-label="即時 AI">
+    <div class="panel console">
+      <div><span class="eyebrow">即時 AI · 開源模型 · 老闆早報</span><h3 style="margin-top:2px">把上面的結果，寫成一頁董事會看得懂的早報</h3>
+      <p class="note" style="margin-top:4px">所有數字由頁面規則算好，AI 只負責說明問題在哪一段、要做什麼決定、該找誰確認。</p></div>
+      <button class="btn ai" id="bBtn" type="button">產生早報</button>
+      <div id="bOut" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <p class="callout">這一頁和系列其他模組講的是同一件事，只是規模不同：客戶的承諾決定你敢對資金提供者承諾多少。一家板卡廠押的是記憶體長約，一家算力公司押的是一千億的 GPU 借款；兩者的問題都是「這筆錢是替誰的樂觀先付的」。AI 時代的競爭有三層：技術、資本、價值實現；前兩層的投資，終究要靠第三層的現金流來還。</p>
+  <p class="note">本頁公司、合約與數字皆為虛構示範，數量級參考公開報導，僅供教學與研究用途，與作者任職或服務的任何公司無關，亦非投資建議。</p>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+const fmt=n=>(n<0?"−":"")+Math.abs(Math.round(n)).toLocaleString("zh-TW");
+const f1=n=>{const v=Math.round(n*10)/10;return (v<0?"−":"")+Math.abs(v).toFixed(1)};
+const pct=(x,d=0)=>(x*100).toFixed(d)+"%";
+const track=(e,d)=>{try{window.labTrack&&window.labTrack(e,d)}catch(_){}};
+
+const CAPEX=1000, GPU=.8, YIELD=.32, OPEX=.10, SPOT=.7, RENEW=.6, Y=8, MAT=5;
+const st={cov:.7,term:4,conc:.65,util:.5,lev:.8,rate:.10,refi:.03,life:4,haircut:.3,opt:"A"};
+
+/* 期望模型：一筆投資的 8 年現金流 */
+function model(o={}){
+  const p=Object.assign({},st,o);
+  const scale=p.scale||1, prepay=p.prepay||0, floor=p.floor||0, stress=p.stress||false;
+  const capex=CAPEX*scale, debt0=capex*p.lev-(prepay?capex*YIELD*p.term*p.cov*prepay:0); // 預付款直接少借
+  const full=capex*YIELD, cash0=capex*(1-p.lev)*.15; // 自有資金的一小部分留作現金
+  let debt=Math.max(0,debt0), cash=cash0, rate=p.rate;
+  const rows=[], cum=[], cover=[];
+  let minDscr=Infinity, minCov=Infinity, wall=0, wallYear=MAT, covAtMat=0;
+  let concCut=stress?p.conc*.5:0; // 最大客戶砍一半：合約量減少 conc×50%
+  for(let t=1;t<=Y;t++){
+    const inTerm=t<=p.term;
+    let covNow=p.cov*(1-(stress&&t>=2?concCut:0));
+    const contract=inTerm?full*covNow:full*covNow*RENEW;
+    let spotShare=Math.max(0,1-covNow); let util=Math.max(p.util,floor);
+    const spot=full*spotShare*util*SPOT;
+    const rev=contract+spot, opex=capex*OPEX, ebitda=rev-opex;
+    const interest=debt*rate;
+    let principal=0; if(t===MAT){ principal=debt; }
+    const dscr=ebitda/Math.max(1,interest+(t===MAT?0:0)); // 覆蓋率看利息（本金靠再融資）
+    const book=capex*GPU*Math.max(0,1-t/p.life)+capex*(1-GPU)*Math.max(0,1-t/15);
+    const collateral=book*(1-p.haircut);
+    const fcf=ebitda-interest;
+    cash+=fcf;
+    if(t===MAT){ // 到期：用累計現金還一部分，其餘再融資
+      const repay=Math.max(0,Math.min(cash,debt)); wall=debt-repay; cash-=repay; debt=wall; rate=p.rate+p.refi;
+    }
+    if(t===MAT) covAtMat=collateral/Math.max(1,debt0);   // 到期再融資時，抵押品相對原借款
+    const cov=debt>0?collateral/debt:9;
+    rows.push({t,contract,spot,rev,ebitda,interest,fcf,cash,debt,collateral,dscr,cov,principal});
+    minDscr=Math.min(minDscr,dscr); minCov=Math.min(minCov,cov);
+  }
+  return {rows,minDscr,minCov:covAtMat,wall,wallYear:MAT,cash8:rows[Y-1].cash,debt8:rows[Y-1].debt,debt0:Math.max(0,debt0),capex};
+}
+const OPTS={
+ A:{t:"再借 1,000 億擴一倍",d:"合約覆蓋率不變，借款比例不變",o:{scale:2}},
+ B:{t:"只擴已簽長約的量",d:"擴張量＝合約覆蓋率 × 1,000 億，新產能全部有約",o:{}},
+ C:{t:"要客戶預付 20% 合約款",d:"現金前移，少借，客戶綁更深",o:{scale:2,prepay:.2}},
+ D:{t:"取得供應商回購保證",d:"未售出算力由供應商吃下，利用率下限 80%",o:{scale:2,floor:.8}},
+};
+function lamp(cls,label,val,sub){return `<div class="lamp ${cls}"><span class="label">${label}</span><b>${val}</b><span class="s">${sub}</span></div>`}
+function render(){
+  const r=model(), s=model({stress:true});
+  const dscrCls=r.minDscr>=1.5?"ok":r.minDscr>=1.1?"warn":"bad";
+  const wallCls=r.wall<=0?"ok":r.wall<r.debt0*.5?"warn":"bad";
+  const covCls=r.minCov>=1?"ok":r.minCov>=.7?"warn":"bad";
+  const stCls=s.minDscr>=1.2?"ok":s.minDscr>=1?"warn":"bad";
+  $("lamps").innerHTML=
+    lamp(dscrCls,"合約覆蓋率（最低）",f1(r.minDscr)+"×",`EBITDA ÷ 利息，8 年最低；1.0 以下就是靠借新還舊`)+
+    lamp(wallCls,"第 5 年到期牆",fmt(r.wall)+" 億",`${r.wall>0?"累計現金不夠還本，需再融資，利率 "+pct(st.rate+st.refi):"累計現金足以還本"}`)+
+    lamp(covCls,"抵押品覆蓋（第 5 年到期時）",f1(r.minCov)+"×",`GPU 折價後價值 ÷ 原借款；壽命假設 ${st.life} 年、折價 ${pct(st.haircut)}`)+
+    lamp(stCls,"最大客戶砍一半",f1(s.minDscr)+"×",`最大客戶占合約 ${pct(st.conc)}，第 2 年起減半時的最低覆蓋率`);
+  const probs=[];
+  if(dscrCls!=="ok") probs.push(`<b class="h">覆蓋：</b>合約與現貨營收扣掉營運費用後，最低只有利息的 ${f1(r.minDscr)} 倍。長約到期（第 ${st.term} 年）後續約打六折，是覆蓋率掉下來的主因。`);
+  if(wallCls!=="ok") probs.push(`<b class="h">到期牆：</b>第 5 年要還 ${fmt(r.debt0)} 億，累計現金只夠一部分，${fmt(r.wall)} 億要再融資。利率每加 1 個百分點，之後每年多付 ${fmt(r.wall*.01)} 億利息。這不是營運問題，是融資期限和資產回收期不匹配。`);
+  if(covCls!=="ok") probs.push(`<b class="h">抵押品：</b>用 ${st.life} 年壽命加 ${pct(st.haircut)} 折價算，第 5 年要再融資時，抵押品只剩原借款的 ${f1(r.minCov)} 倍。把壽命切到 8 年可以讓數字變好看，但那是假設，不是二手市場的成交價。`);
+  if(stCls!=="ok") probs.push(`<b class="h">集中：</b>最大客戶占合約 ${pct(st.conc)}，他砍一半，覆蓋率掉到 ${f1(s.minDscr)} 倍。客戶的承諾是你的資產，也是你最大的單一風險。`);
+  $("diag").innerHTML=`<span class="label">一眼看出</span>`+(probs.length?probs.map(p=>`<p>${p}</p>`).join(""):`<p>四盞燈都是綠的：合約覆蓋足夠、到期前能還本、抵押品夠、客戶集中風險可承受。試著把利率拉到 15% 或把合約覆蓋率降到 50%，看哪一盞先變色。</p>`);
+  drawChart(r); renderYears(r); renderCmp();
+  LAST={r,s};
+}
+function drawChart(r){
+  const svg=$("chart"); svg.innerHTML="";
+  const NS="http://www.w3.org/2000/svg", mk=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);svg.appendChild(e);return e};
+  const txt=(x,y,s,a={})=>{const e=mk("text",Object.assign({x,y,"font-size":11,fill:"var(--muted)","font-family":"IBM Plex Mono,monospace"},a));e.textContent=s;return e};
+  const W=680,HT=300,PL=50,PR=50,PT=16,PB=28,n=Y;
+  const maxBar=Math.max(...r.rows.map(x=>Math.max(x.rev,x.interest+x.principal)))*1.1;
+  const cashAll=r.rows.map(x=>x.cash).concat([0]); const cMin=Math.min(...cashAll)*1.1-1, cMax=Math.max(...cashAll)*1.1+1;
+  const x=i=>PL+(i+.5)*(W-PL-PR)/n, yb=v=>PT+(1-v/maxBar)*(HT-PT-PB), yc=v=>PT+(cMax-v)*(HT-PT-PB)/(cMax-cMin);
+  const bw=(W-PL-PR)/n*.25;
+  r.rows.forEach((row,i)=>{
+    mk("rect",{x:x(i)-bw*1.5,y:yb(row.contract+row.spot),width:bw,height:yb(0)-yb(row.contract+row.spot),fill:"var(--line)"});
+    mk("rect",{x:x(i)-bw*1.5,y:yb(row.contract),width:bw,height:yb(0)-yb(row.contract),fill:"var(--accent)"});
+    const ds=row.interest+row.principal;
+    mk("rect",{x:x(i)-bw*.4,y:yb(ds),width:bw,height:yb(0)-yb(ds),fill:"var(--inv)",opacity:.85});
+    txt(x(i),HT-10,"第 "+row.t+" 年",{"text-anchor":"middle"});
+  });
+  [0,maxBar/2].forEach(v=>txt(PL-6,yb(v)+4,fmt(v),{"text-anchor":"end"}));
+  mk("line",{x1:PL,x2:W-PR,y1:yc(0),y2:yc(0),stroke:"var(--muted)",opacity:.5});
+  mk("path",{d:r.rows.map((row,i)=>(i?"L":"M")+x(i)+" "+yc(row.cash)).join(" "),fill:"none",stroke:"var(--ok)","stroke-width":3,"stroke-linejoin":"round"});
+  r.rows.forEach((row,i)=>{mk("circle",{cx:x(i),cy:yc(row.cash),r:4,fill:row.cash<0?"var(--bad)":"var(--ok)"});txt(x(i),yc(row.cash)-8,fmt(row.cash),{"text-anchor":"middle",fill:"var(--ink)"})});
+  // collateral coverage line on 0–2 scale mapped to chart height
+  const yk=v=>PT+(1-Math.min(2,v)/2)*(HT-PT-PB);
+  mk("path",{d:r.rows.map((row,i)=>(i?"L":"M")+x(i)+" "+yk(row.cov)).join(" "),fill:"none",stroke:"var(--ai)","stroke-width":2,"stroke-dasharray":"6 4"});
+  mk("line",{x1:PL,x2:W-PR,y1:yk(1),y2:yk(1),stroke:"var(--ai)",opacity:.35}); txt(W-PR+6,yk(1)+4,"1.0×",{fill:"var(--ai)"}); txt(W-PR+6,yk(2)+4,"2.0×",{fill:"var(--ai)"});
+}
+function renderYears(r){
+  const row=(lab,f)=>`<tr><td>${lab}</td>${r.rows.map(x=>`<td class="num">${f(x)}</td>`).join("")}</tr>`;
+  $("years").innerHTML=`<thead><tr><th>億元</th>${r.rows.map(x=>`<th class="num">第 ${x.t} 年</th>`).join("")}</tr></thead><tbody>${row("長約營收",x=>fmt(x.contract))}${row("現貨營收",x=>fmt(x.spot))}${row("EBITDA",x=>fmt(x.ebitda))}${row("利息",x=>fmt(x.interest))}${row("到期本金",x=>fmt(x.principal))}${row("自由現金流（息後）",x=>fmt(x.fcf))}${row("累計現金",x=>fmt(x.cash))}${row("債務餘額",x=>fmt(x.debt))}${row("抵押品價值",x=>fmt(x.collateral))}${row("合約覆蓋率",x=>f1(x.dscr)+"×")}${row("抵押覆蓋",x=>f1(x.cov)+"×")}</tbody>`;
+}
+function renderCmp(){
+  $("opts").innerHTML=Object.entries(OPTS).map(([k,o])=>`<button type="button" data-opt="${k}" class="${st.opt===k?"pick":""}"><b>${k}・${o.t}</b><small>${o.d}</small></button>`).join("");
+  OPTS.B.o={scale:1+st.cov,cov:2*st.cov/(1+st.cov)};
+  const P=Object.entries(OPTS).map(([k,o])=>({k,o,r:model(o.o),s:model(Object.assign({stress:true},o.o))}));
+  const best=(f,hi)=>{const v=P.map(f);const b=hi?Math.max(...v):Math.min(...v);return v.map(x=>x===b)};
+  const b1=best(p=>p.r.minDscr,true),b2=best(p=>p.r.wall,false),b3=best(p=>p.r.minCov,true),b4=best(p=>p.s.minDscr,true);
+  $("cmp").innerHTML=`<thead><tr><th>做法</th><th class="num">借款</th><th class="num">最低合約覆蓋率</th><th class="num">第 5 年到期牆</th><th class="num">到期時抵押覆蓋</th><th class="num">最大客戶砍半</th><th class="num">第 8 年累計現金</th></tr></thead><tbody>${P.map((p,i)=>`<tr class="${p.k===st.opt?"pick":""}"><td><b>${p.k}</b> ${p.o.t}</td><td class="num">${fmt(p.r.debt0)}</td><td class="num ${b1[i]?"best":""}">${f1(p.r.minDscr)}×</td><td class="num ${b2[i]?"best":""}">${fmt(p.r.wall)}</td><td class="num ${b3[i]?"best":""}">${f1(p.r.minCov)}×</td><td class="num ${b4[i]?"best":""}">${f1(p.s.minDscr)}×</td><td class="num">${fmt(p.r.cash8)}</td></tr>`).join("")}</tbody>`;
+  const a=P[0],c=P[2],d=P[3];
+  $("cmpNote").textContent=`擴一倍不會改變比率，只會把到期牆放大一倍（${fmt(a.r.wall)} 億）。預付款（C）把到期牆降到 ${fmt(c.r.wall)} 億，但客戶會要求價格或綁約交換；供應商回購保證（D）讓現貨端有底，覆蓋率升到 ${f1(d.r.minDscr)} 倍，代價是供應商、客戶與資金提供者的風險綁在一起，一家出事全鏈都受影響。`;
+  CMP=P;
+}
+let LAST=null, CMP=null;
+document.addEventListener("input",e=>{
+  const t=e.target, m={cov:["cov",v=>v/100,v=>v+"%"],term:["term",v=>+v,v=>v+" 年"],conc:["conc",v=>v/100,v=>v+"%"],util:["util",v=>v/100,v=>v+"%"],lev:["lev",v=>v/100,v=>v+"%"],rate:["rate",v=>v/100,v=>v+"%"],refi:["refi",v=>v/100,v=>"+"+v+" pt"],haircut:["haircut",v=>v/100,v=>v+"%"]};
+  if(m[t.id]){const [k,f,o]=m[t.id];st[k]=f(+t.value);$(t.id+"Out").textContent=o(t.value);render();}
+});
+document.addEventListener("click",e=>{
+  const l=e.target.closest("#lifeSeg button");if(l){st.life=+l.dataset.l;$("lifeSeg").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===l));render();track("lever","life="+st.life);return}
+  const o=e.target.closest("[data-opt]");if(o){st.opt=o.dataset.opt;renderCmp();track("lever","opt="+st.opt)}
+});
+render();
+
+/* 老闆早報 */
+const AI_ERR={rate_limited:"你這段時間已經試了好幾次，請 10 分鐘後再試。",daily_cap:"今天的 AI 使用次數已達上限，請明天再來。",ai_unavailable:"AI 服務目前沒有啟用，請稍後再試。",no_result:"這次 AI 沒有產生完整結果，請再按一次。"};
+$("bBtn").addEventListener("click",async()=>{
+  const btn=$("bBtn"),out=$("bOut");
+  if(location.protocol==="file:"){out.innerHTML='<p class="note">即時 AI 只能在網站上使用。</p>';return}
+  const {r,s}=LAST, P=CMP;
+  const facts={
+    公司:"虛構的 AI 算力公司，投資 1,000 億（GPU 八成），單位億元",
+    假設:`長約覆蓋 ${pct(st.cov)}、年限 ${st.term} 年、最大客戶占合約 ${pct(st.conc)}、現貨利用率 ${pct(st.util)}；借款 ${pct(st.lev)}、利率 ${pct(st.rate)}、第 5 年到期再融資加碼 ${pct(st.refi)}；GPU 壽命假設 ${st.life} 年、銀行折價 ${pct(st.haircut)}`,
+    燈號:{合約覆蓋率:r.minDscr>=1.5?"ok":r.minDscr>=1.1?"warn":"bad",到期牆:r.wall<=0?"ok":r.wall<r.debt0*.5?"warn":"bad",抵押品覆蓋:r.minCov>=1?"ok":r.minCov>=.7?"warn":"bad",客戶集中:s.minDscr>=1.2?"ok":s.minDscr>=1?"warn":"bad"},
+    最低合約覆蓋率:f1(r.minDscr)+" 倍",第5年到期牆:fmt(r.wall)+" 億（借款 "+fmt(r.debt0)+" 億）",抵押品覆蓋最低:f1(r.minCov)+" 倍",最大客戶砍半後最低覆蓋率:f1(s.minDscr)+" 倍",第8年累計現金:fmt(r.cash8)+" 億",
+    四種擴張做法:P.map(p=>`${p.o.t}：借款 ${fmt(p.r.debt0)}、最低覆蓋率 ${f1(p.r.minDscr)} 倍、到期牆 ${fmt(p.r.wall)}、抵押覆蓋 ${f1(p.r.minCov)} 倍、客戶砍半後 ${f1(p.s.minDscr)} 倍`),
+  };
+  btn.disabled=true;out.innerHTML='<p class="note">AI 撰寫中，通常約 10–30 秒……</p>';track("ai_run","neocloud-brief");
+  try{
+    const resp=await fetch("/api/ai/neocloud-brief",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({text:JSON.stringify(facts)})});
+    const j=await resp.json().catch(()=>({}));
+    if(!resp.ok||!j.ok){out.innerHTML=`<p class="note">${AI_ERR[j.error]||"這次沒有取得完整結果，請再按一次。"}</p>`;track("ai_fail",j.error||String(resp.status));return}
+    const d=j.result, L=x=>Array.isArray(x)?x:[];
+    out.innerHTML=`<div class="brief"><h3>${esc(d.headline)}</h3>
+      <div><b>問題在哪一段</b><ul>${L(d.problems).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+      <div><b>要做的決定</b><ul>${L(d.decisions).map(x=>`<li><b>${esc(x.decision)}</b>（${esc(x.owner)}）：${esc(x.tradeoff)}</li>`).join("")}</ul></div>
+      <div><b>先去確認什麼</b><ul>${L(d.questions).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+      <p class="note">由開源模型 ${esc(j.model)} 依頁面算好的數字撰寫；數字若與上方不同，以上方規則試算為準。</p></div>`;
+    track("ai_ok","neocloud-brief");
+  }catch(e){out.innerHTML='<p class="note">連線中斷，請再按一次。</p>';track("ai_fail","network")}
+  finally{btn.disabled=false}
+});
+</script>
+<script src="track.js" defer></script>
+</body>
+</html>
