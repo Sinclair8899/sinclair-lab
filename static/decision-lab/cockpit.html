@@ -125,6 +125,7 @@ svg.chart{width:100%;height:auto;display:block}
         <span class="seg" role="group" aria-label="備料政策" id="polSeg"><button type="button" data-p="firm" aria-pressed="false">只備已確認</button><button type="button" data-p="adj" aria-pressed="false">依兌現率校正</button><button type="button" data-p="full" aria-pressed="true">照預測全備</button></span>
         <label for="ss"><span>另加安全庫存</span><output id="ssOut" class="num">10%</output></label><input type="range" id="ss" min="0" max="40" step="5" value="10">
         <label for="lt"><span>關鍵料交期（月）</span><output id="ltOut" class="num">2</output></label><input type="range" id="lt" min="1" max="3" step="1" value="2">
+        <span class="note">客戶、料成本、交易條件與 CRM、供應商模組共用同一組情境資料。</span>
       </div>
       <div><b>交易條件</b>
         <label for="dpoK"><span>關鍵料供應商帳期（天）</span><output id="dpoKOut" class="num">30</output></label><input type="range" id="dpoK" min="0" max="90" step="15" value="30">
@@ -173,6 +174,7 @@ svg.chart{width:100%;height:auto;display:block}
   <p class="note">本頁客戶、數字與情境皆為虛構示範，僅供教學與研究用途，與作者任職或服務的任何公司無關。</p>
 </div>
 
+<script src="data.js"></script>
 <script>
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
@@ -181,13 +183,10 @@ const pct=(x,d=0)=>(x*100).toFixed(d)+"%";
 const track=(e,d)=>{try{window.labTrack&&window.labTrack(e,d)}catch(_){}};
 
 /* 客戶（情境示範） */
-const CUST=[
- {k:"A",name:"雲端客戶 A（AI 伺服器）",firm:30000,fc:[32000,36000,40000],r:.80,dso:90,big:true},
- {k:"B",name:"工控客戶 B",firm:8000,fc:[8000,8500,8500],r:.97,dso:60},
- {k:"C",name:"新創客戶 C",firm:3000,fc:[6000,9000,12000],r:.50,dso:45,startup:true},
-];
-const MAT=.85, KEY=.45, OTH=.40, OPEX=4000, RATE=.03, H=6;
-const st={pol:"full",ss:.10,lt:2,dpoK:30,pre:.20,dpoO:60,cash0:25000,safe:10000,line:30000,ncnr:false,depo:false,exp:false};
+const CUST=LAB.customers.map(c=>Object.assign({},c));
+const CO=LAB.company, KM=LAB.keyMaterial;
+const MAT=CO.matShare, KEY=CO.keyShare, OTH=CO.othShare, OPEX=CO.opex, RATE=CO.rate, H=6;
+const st={pol:"full",ss:.10,lt:KM.leadTimeMonths,dpoK:KM.dpo,pre:KM.prepay,dpoO:LAB.otherMaterial.dpo,cash0:CO.cash0,safe:CO.safe,line:CO.line,ncnr:false,depo:false,exp:false};
 
 function model(pol,ss=st.ss){
   const M=H; const plan=Array(M).fill(0),act=Array(M).fill(0),prep=Array(M).fill(0),ship=Array(M).fill(0),late=Array(M).fill(0),excess=Array(M).fill(0);

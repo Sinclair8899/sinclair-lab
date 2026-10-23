@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>供應商承諾管理模擬器</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+TC:wght@700&display=swap">
+<style>
+/* Layout: executive briefing — Kraljic ledger → two-sided commitment reconciliation → three supplier decisions → pharma-style discipline → live PCN reader */
+:root{
+  --bg:#f3f5f7; --panel:#ffffff; --ink:#18222d; --muted:#5b6876; --line:#d9dfe6;
+  --accent:#1f5f8b; --accent-soft:#e3eef6; --inv:#8a4b2a; --inv-soft:#f6e9e1; --ai:#5a4a9e; --ai-soft:#ece9f7;
+  --ok:#2f7d4f; --ok-soft:#e2f2e8; --warn:#a86a0c; --warn-soft:#fbefd9; --bad:#b33a3a; --bad-soft:#f8e1e1;
+  --f-display:"Noto Serif TC","Songti TC",serif; --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11161c; --panel:#18202a; --ink:#e4e9ef; --muted:#93a1b0; --line:#2b3644;
+  --accent:#6fb0dc; --accent-soft:#1c3346; --inv:#e0a07c; --inv-soft:#3a2619; --ai:#b3a5ef; --ai-soft:#2a2545;
+  --ok:#6cc792; --ok-soft:#1a3326; --warn:#e3a94a; --warn-soft:#3a2d16; --bad:#ec7f7f; --bad-soft:#3d1f22; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161c; --panel:#18202a; --ink:#e4e9ef; --muted:#93a1b0; --line:#2b3644;
+  --accent:#6fb0dc; --accent-soft:#1c3346; --inv:#e0a07c; --inv-soft:#3a2619; --ai:#b3a5ef; --ai-soft:#2a2545;
+  --ok:#6cc792; --ok-soft:#1a3326; --warn:#e3a94a; --warn-soft:#3a2d16; --bad:#ec7f7f; --bad-soft:#3d1f22; color-scheme:dark}
+*{box-sizing:border-box}
+html{font-size:106.25%}
+@media (max-width:480px){html{font-size:100%}}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1rem;line-height:1.65}
+.wrap{max-width:1040px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:24px}
+h1{font-family:var(--f-display);font-size:clamp(1.7rem,4.6vw,2.4rem);line-height:1.25;margin:4px 0 0;text-wrap:balance}
+h2{font-family:var(--f-display);font-size:1.25rem;margin:0;text-wrap:balance}
+h3{font-size:1rem;margin:0}
+p{margin:0}
+.lead{color:var(--muted);max-width:66ch;margin-top:10px}
+.eyebrow{font-size:.78rem;letter-spacing:.12em;color:var(--ai);font-weight:500}
+.label{font-size:.72rem;letter-spacing:.08em;color:var(--muted)}
+.mono,.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.note{color:var(--muted);font-size:.84rem}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px}
+a{color:var(--accent)}
+.opener{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.opener div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 14px;display:flex;flex-direction:column;gap:2px}
+.opener b{font-size:1rem}.opener span{color:var(--muted);font-size:.84rem}
+.opener a{text-decoration:none}
+.sec{display:flex;flex-direction:column;gap:10px}
+.tablebox{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap;font-size:.86rem;vertical-align:top}
+th{font-weight:500;color:var(--muted);font-size:.76rem}
+td.num,th.num{text-align:right}
+td.wrap,th.wrap{white-space:normal}
+.pill{font-size:.75rem;padding:1px 8px;border-radius:999px;font-weight:500;white-space:nowrap}
+.p-ok{background:var(--ok-soft);color:var(--ok)}.p-warn{background:var(--warn-soft);color:var(--warn)}.p-bad{background:var(--bad-soft);color:var(--bad)}.p-ai{background:var(--ai-soft);color:var(--ai)}.p-mute{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.ledger{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:stretch}
+.ledger>div{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;font-size:.9rem}
+.ledger .mid{background:var(--accent-soft);border-color:var(--accent);justify-content:center;text-align:center;min-width:150px}
+.ledger .row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--line);padding:3px 0}
+.ledger .row b{font-family:var(--f-mono);font-weight:500}
+.ledger .tot{font-weight:700;border-top:2px solid var(--line);padding-top:6px;margin-top:2px}
+.ledger .big{font-family:var(--f-mono);font-size:1.5rem;font-weight:500}
+.toggles{display:flex;flex-wrap:wrap;gap:14px;font-size:.88rem}
+.toggles label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.toggles input{accent-color:var(--accent);width:16px;height:16px}
+.slider{display:flex;flex-direction:column;gap:4px;font-size:.88rem;max-width:420px}
+.slider label{display:flex;justify-content:space-between}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.opts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.opts button{all:unset;cursor:pointer;border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:var(--bg);display:flex;flex-direction:column;gap:2px}
+.opts button:hover{border-color:var(--accent)}
+.opts button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.opts button.pick{border-color:var(--accent);background:var(--accent-soft)}
+.opts small{color:var(--muted);font-size:.8rem}
+.verdict{padding:12px 16px;border-radius:8px;border:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;gap:6px;font-size:.92rem}
+.verdict .ag{border-left:3px solid var(--ai);padding-left:10px;color:var(--ink)}
+.verdict .ag b{color:var(--ai)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--f-mono);font-size:.76rem;padding:1px 7px;border-radius:3px;background:var(--panel);border:1px solid var(--line)}
+.c-bad{color:var(--bad);border-color:var(--bad)}.c-warn{color:var(--warn);border-color:var(--warn)}.c-ok{color:var(--ok);border-color:var(--ok)}
+.disc{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.disc div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-size:.86rem}
+.disc b{display:block}
+.disc span{color:var(--muted)}
+.btn{font:inherit;cursor:pointer;border-radius:5px;padding:8px 16px;border:1px solid var(--accent);background:var(--accent);color:var(--panel);font-weight:500;align-self:flex-start}
+.btn.ai{border-color:var(--ai);background:var(--ai)}
+.btn:disabled{opacity:.6;cursor:default}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.console{padding:18px;background:var(--ai-soft);border-color:var(--ai);display:flex;flex-direction:column;gap:10px}
+.console textarea{font:inherit;width:100%;min-height:150px;padding:8px;border:1px solid var(--line);border-radius:4px;background:var(--panel);color:var(--ink)}
+.console textarea:focus-visible{outline:2px solid var(--ai)}
+.res{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.res>div{border-radius:6px;padding:10px 14px;background:var(--panel);border:1px solid var(--line)}
+.res .r-ag{background:var(--ai-soft);border-color:var(--ai)}
+.callout{padding:14px 16px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 6px 6px 0;font-size:.95rem}
+@media (max-width:820px){.opener,.ledger,.opts,.disc,.res{grid-template-columns:1fr}.ledger .mid{min-width:0}}
+</style>
+</head>
+<body>
+<div style="background:#fbefd9;color:#6b4407;font:14px/1.5 system-ui,sans-serif;padding:8px max(16px,env(safe-area-inset-left,0px));text-align:center">網站版・測試版 2026-10-23：「規則試算」依公式即時計算；「情境示範」為預設資料；「PCN 解讀」區塊由開源 AI 模型即時分析。</div>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">AI LAB · 現金循環系列 04B · 供應商端</span>
+    <h1>供應商承諾管理：配額、長約、預付與變更，<br>誰在替誰扛風險？</h1>
+    <p class="lead">客戶只給一個月確認訂單，記憶體原廠卻要求簽兩年長約、預付三成才保配額；主晶片原廠發 PCN 說封裝廠要搬，三十天不回覆視同接受；客戶指定的連接器只有一家在做。供應端的每一個承諾都是現金先出、風險先扛。這個模組把供應商分級，和客戶端的承諾對帳，再比較每個決定的代價。客戶、料成本與交易條件和老闆駕駛艙、CRM 模組共用同一組情境資料。</p>
+    <div class="opener">
+      <div><b>5 分鐘</b><span>做三個供應端決定，看對帳表怎麼變</span></div>
+      <div><b>即時 AI</b><span>貼上供應商的變更通知，AI 解讀影響與期限</span></div>
+      <div><a href="index.html"><b>← 現金循環總覽</b></a><span>供應端承諾決定應付天數、存貨天數與斷料風險</span></div>
+    </div>
+    <p class="note" style="margin-top:12px;padding:8px 12px;border:1px dashed var(--line);border-radius:6px">方法依據：Kraljic 採購組合矩陣（1983）、Liker &amp; Choi 對豐田式供應商關係的整理（2004）、ICH Q10 與 FDA 品質協議指引的委外管理原則、JEDEC J-STD-046 的產品變更通知分類。本頁只引用概念，供應商與數字皆為虛構。</p>
+  </header>
+
+  <section class="sec" aria-label="分級">
+    <div><span class="label">規則試算・Kraljic 分級</span><h2>先分級，再決定用什麼方式管</h2>
+    <p class="note" style="margin-top:4px">以第 4 個月預測營收（駕駛艙）推算每月採購金額：關鍵料占營收 45%、一般料 40%。策略型用豐田式深度協作，瓶頸型用製藥式變更管控加第二來源，槓桿型競價，一般型寄售。</p></div>
+    <div class="panel tablebox"><table id="kraljic"></table></div>
+  </section>
+
+  <section class="sec" aria-label="對帳表">
+    <div><span class="label">規則試算・兩端承諾對帳表</span><h2>供應端的硬承諾，有多少被客戶端的硬承諾覆蓋？</h2>
+    <p class="note" style="margin-top:4px">左邊是客戶已經簽下的東西，右邊是我們對供應商簽下的東西。規則：<b>右邊的硬承諾，不應超過左邊的硬承諾加上老闆願意承擔的風險額度。</b>切換客戶端的承諾形式（和 CRM、駕駛艙相同的開關），再看下面三個供應端決定。</p></div>
+    <div class="toggles">
+      <label><input type="checkbox" id="ncnr"> 客戶 A 書面預測附 NCNR（第 2–4 月預測量由客戶背書）</label>
+      <label><input type="checkbox" id="depo"> 新創客戶 C 預付 30% 訂金</label>
+      <label><input type="checkbox" id="b2b"> 客戶 A 同意背對背：分攤記憶體長約的一半</label>
+    </div>
+    <div class="slider"><label for="risk"><span>老闆願意承擔的風險額度（12 個月）</span><output id="riskOut" class="num">20,000 萬</output></label><input type="range" id="risk" min="0" max="80000" step="5000" value="20000"></div>
+    <div class="ledger" id="ledger"></div>
+    <p class="note" id="ledgerNote"></p>
+  </section>
+
+  <section class="sec" aria-label="決定一">
+    <div><span class="label">規則試算・決定 1（策略型）</span><h2>記憶體原廠 S2：簽兩年長約、預付 30% 才保配額</h2>
+    <p class="note" style="margin-top:4px">每月記憶體需求以第 4 個月預測計算；沒有長約時，原廠只保證七成配額，缺口要走現貨（加價 25%）或延遲出貨。金額單位新台幣萬元。</p></div>
+    <div class="opts" id="v1opts"></div>
+    <div class="panel tablebox"><table id="v1tab"></table></div>
+    <div class="verdict" id="v1v"></div>
+  </section>
+
+  <section class="sec" aria-label="決定二">
+    <div><span class="label">規則試算・決定 2（策略型，變更管理）</span><h2>主晶片原廠 S1 發出 PCN：封裝廠搬遷，30 天內未回覆視同接受</h2>
+    <p class="note" style="margin-top:4px">受影響的是客戶 A 的量產料號。車用與伺服器客戶通常要求變更前重新驗證；驗證需要 3 個月，期間若要維持出貨，就得在舊廠停產前做最後採購。</p></div>
+    <div class="opts" id="v2opts"></div>
+    <div class="verdict" id="v2v"></div>
+  </section>
+
+  <section class="sec" aria-label="決定三">
+    <div><span class="label">規則試算・決定 3（瓶頸型）</span><h2>連接器廠 S3 連續三批不良率上升：換商、駐廠改善，還是推給一階？</h2>
+    <p class="note" style="margin-top:4px">S3 是客戶指定、單一來源的瓶頸型料。換商要客戶核准第二來源並重新驗證（6–9 個月）；豐田式做法是派工程師駐廠三個月聯合改善。</p></div>
+    <div class="opts" id="v3opts"></div>
+    <div class="verdict" id="v3v"></div>
+  </section>
+
+  <section class="sec" aria-label="製藥式紀律">
+    <div><span class="label">情境示範・製藥式紀律</span><h2>向製藥業借五條紀律，用在高可靠度電子</h2>
+    <p class="note" style="margin-top:4px">製藥業的核心原則是「委外不免責」：產品品質的責任不會因為外包而轉移。對車用、醫療電子與 AI 伺服器供應鏈，這五條最值得照抄。</p></div>
+    <div class="disc">
+      <div><b>品質協議與商業合約分開</b><span>價格談判時，品質條款不能被拿來交換。策略型與瓶頸型供應商各簽一份獨立的品質協議。</span></div>
+      <div><b>變更須事前核准並驗證</b><span>PCN 收到後 30 天內必回覆；沉默視同接受是最常見的失誤。關鍵料號設變更凍結期。</span></div>
+      <div><b>核准供應商清單（ASL）</b><span>只向核准來源進料；第二來源要先驗證、再上清單，不是缺料時才找。</span></div>
+      <div><b>持續監控，不只稽核一次</b><span>品質（PPM、8D 結案時間）、準交率、財務訊號每月看；異常進入 S&amp;OP 會議。</span></div>
+      <div><b>高階主管對供應商品質負責</b><span>關鍵供應商的品質與 PCN 狀態列入經營會議；不是 SQE 一個人的事。</span></div>
+      <div><b>豐田式的那一半</b><span>對少數策略型供應商：長期關係、分享生產計畫、聯合改善、投資對方能力。代價是人力與知識外溢，只用在 10–20 家。</span></div>
+    </div>
+  </section>
+
+  <section class="sec" aria-label="即時 AI">
+    <div class="panel console">
+      <div><span class="eyebrow">即時 AI · 開源模型 · PCN 解讀器</span><h3 style="margin-top:2px">貼上供應商的產品變更通知，AI 解讀變更類型、影響範圍與回覆期限</h3>
+      <p class="note" style="margin-top:4px">AI 會依 J-STD-046 的分類判斷變更類型（外形、配合、功能、品質、可靠度、製程或據點），找出受影響的料號與客戶，標出回覆期限與「未回覆視同接受」的條款，並列出研發、品保、採購、業務各自該做的事。可以改寫範例再試；請勿貼上真實供應商文件。</p></div>
+      <label for="pTxt" class="note">變更通知內容</label>
+      <textarea id="pTxt">PCN 編號 S1-2026-118。發文日期：10/20。受影響料號：SOC-7400 系列（含 SOC-7400A、SOC-7400B）。變更說明：因產能調整，自 2027 年 2 月起，上述料號的封裝與測試作業由台灣廠移轉至馬來西亞廠；晶粒設計、製程節點與電氣規格不變，封裝材料改用新供應商之導線架，已完成內部可靠度驗證（HTOL 1000 小時、溫度循環 1000 次）。舊廠最後下單日為 2026 年 12 月 15 日，最後出貨日為 2027 年 1 月 31 日。客戶如需樣品，請於 11 月 10 日前提出。本通知發出後 30 日內未收到書面回覆，視為接受變更。</textarea>
+      <button class="btn ai" id="pBtn" type="button">交給 AI 解讀</button>
+      <div id="pOut" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <p class="callout">客戶端的承諾決定你敢對供應商承諾多少；供應端的承諾決定你能對客戶承諾多少。兩邊放在同一張對帳表上，才看得出哪一筆錢是替別人的樂觀先付的。AI 可以整理、比對、提醒期限；簽不簽長約、接不接受變更、要不要駐廠，仍然是採購、品保與老闆要簽名的決定。</p>
+  <p class="note">本頁供應商、客戶、數字與情境皆為虛構示範，僅供教學與研究用途，與作者任職或服務的任何公司無關。</p>
+</div>
+
+<script src="data.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+const fmt=n=>(n<0?"−":"")+Math.abs(Math.round(n)).toLocaleString("zh-TW");
+const pct=(x,d=0)=>(x*100).toFixed(d)+"%";
+const track=(e,d)=>{try{window.labTrack&&window.labTrack(e,d)}catch(_){}};
+const CO=LAB.company, D=LAB.derived, A=LAB.customers[0], C=LAB.customers[2], KM=LAB.keyMaterial;
+const keyM4=D.keyMonthlyAtM4, othM4=D.m4Revenue*CO.othShare;
+const MEM=KM.mix.find(x=>x.k==="mem"), SOC=KM.mix.find(x=>x.k==="soc"), CON=KM.mix.find(x=>x.k==="con");
+const memM=keyM4*MEM.share, socM=keyM4*SOC.share, conM=keyM4*CON.share;   // 每月金額（第 4 個月預測水準）
+const st={ncnr:false,depo:false,b2b:false,risk:20000,v1:"B",v2:"B",v3:"B"};
+
+/* Kraljic */
+const WAY={"策略型":["豐田式深度協作：長約、分享計畫、聯合改善","p-ai"],"瓶頸型":["製藥式變更管控＋第二來源驗證","p-warn"],"槓桿型":["競價、年度議約","p-ok"],"一般型":["VMI 寄售、自動補貨","p-mute"]};
+$("kraljic").innerHTML=`<thead><tr><th>品項／供應商</th><th>分級</th><th class="num">每月金額</th><th class="num">來源數</th><th class="wrap">交易條件</th><th class="wrap">管理方式</th></tr></thead><tbody>${[...KM.mix.map(m=>({...m,amt:keyM4*m.share})),...LAB.otherMaterial.mix.map(m=>({...m,amt:othM4*m.share}))].map(m=>`<tr><td><b>${m.name}</b></td><td><span class="pill ${WAY[m.kraljic][1]}">${m.kraljic}</span></td><td class="num">${fmt(m.amt)}</td><td class="num">${m.sources}</td><td class="wrap">${m.terms}</td><td class="wrap">${WAY[m.kraljic][0]}</td></tr>`).join("")}</tbody>`;
+
+/* 決定 1：記憶體長約 */
+const V1={
+ A:{t:"全簽：24 個月、預付 30%",d:"量＝第 4 月預測，配額 100%",months:24,cov:1,pre:.3,alloc:1},
+ B:{t:"只簽客戶已承諾的量（滾動）",d:"12 個月框架，最低採購只到客戶書面覆蓋的月份",months:"hard",cov:"hard",pre:.3,alloc:"partial"},
+ C:{t:"全簽，但背對背",d:"要求客戶 A 分攤一半預付與最低採購",months:24,cov:1,pre:.3,alloc:1,b2b:true},
+ D:{t:"不簽，走配額＋現貨",d:"原廠只保七成，缺口現貨加價 25%",months:0,cov:0,pre:0,alloc:.7},
+};
+/* 決定 2：PCN */
+const V2={
+ A:{t:"接受變更",d:"不驗證，照原廠資料放行",ltb:0,verify:0,risk:"高",note:"省下驗證成本與時間；客戶 A 若事後稽核發現未重新驗證，品質責任仍在我方（委外不免責）。"},
+ B:{t:"要樣品與可靠度資料，驗證後再接受",d:"3 個月驗證，期間做 3 個月最後採購",ltb:3,verify:600,risk:"低",note:"合規做法。代價是最後採購卡住三個月的料，以及驗證人力。"},
+ C:{t:"拒絕變更，做 12 個月最後採購",d:"舊廠料一次買足一年",ltb:12,verify:0,risk:"中",note:"現金與存貨天數大增，料還有跌價與呆滯風險；只在客戶明確禁止變更時才合理。"},
+};
+/* 決定 3：瓶頸型不良 */
+const V3={
+ A:{t:"扣款並啟動換商",d:"客戶核准第二來源＋驗證 6–9 個月",cost:300,ss:6,ppm:"換商前不變",rel:"緊張",note:"驗證期要多備 6 個月安全庫存，而且客戶指定料能不能換，決定權在客戶。"},
+ B:{t:"派工程師駐廠三個月聯合改善",d:"豐田式：找根因、改製程、每週回報",cost:450,ss:1,ppm:"預期降五成",rel:"加深",note:"人力成本最高，但保住唯一來源，也累積對方的製程知識；代價是依存度更高。"},
+ C:{t:"要求一階自行處理，罰款了事",d:"發 8D、扣款 2%",cost:0,ss:3,ppm:"不確定",rel:"疏遠",note:"最省事，但問題多半回來；多備三個月安全庫存墊著。"},
+};
+
+function custHard(){
+  // 客戶端硬承諾，一律換算成關鍵料金額（營收 × 關鍵料占比）；訂金與背對背是現金或直接的記憶體金額，照原值計
+  const items=[["第 1 月確認訂單（全部客戶）",D.firmRevenue*CO.keyShare,"書面"]];
+  const aFc=A.fc.reduce((x,y)=>x+y,0);
+  if(st.ncnr) items.push(["客戶 A 第 2–4 月預測，附 NCNR",aFc*CO.keyShare,"書面"]); else items.push(["客戶 A 第 2–4 月預測（口頭）",0,"口頭，不計入"]);
+  if(st.depo) items.push(["新創客戶 C 訂金（第 2–4 月預測 × 30%）",C.fc.reduce((x,y)=>x+y,0)*.3,"現金"]);
+  if(st.b2b&&st.v1==="C") items.push(["客戶 A 背對背：承擔記憶體長約的一半",memM*V1.C.months*.5,"書面"]);
+  return items;
+}
+function hardMonths(){return st.ncnr?4:1}
+function memHardBase(){ // 客戶書面覆蓋的月份裡，每月對應的記憶體金額
+  const rev=D.firmRevenue+(st.ncnr?A.fc.reduce((x,y)=>x+y,0)+LAB.customers[1].fc.reduce((x,y)=>x+y,0)*0:0);
+  return rev/hardMonths()*CO.keyShare*MEM.share;
+}
+function supHard(v1){
+  const o=V1[v1];
+  const items=[];
+  items.push([`主晶片 S1：已下單 ${KM.leadTimeMonths} 個月量，預付 ${pct(KM.prepay)}`,socM*KM.leadTimeMonths,"硬"]);
+  items.push(["連接器 S3：交期 16 週，4 個月量在途",conM*4,"硬"]);
+  let memCommit=0, memLabel="記憶體 S2：未簽長約";
+  if(o.months){ const months=o.months==="hard"?hardMonths():o.months; const base=o.cov==="hard"?memHardBase():memM; memCommit=base*months; memLabel=`記憶體 S2：長約最低採購 ${months} 個月`; if(o.b2b&&st.b2b){memCommit*=.5;memLabel+="（客戶 A 分攤一半後）"} }
+  items.push([memLabel,memCommit,"硬"]);
+  return items;
+}
+function renderLedger(){
+  const ch=custHard(), sh=supHard(st.v1);
+  const cT=ch.filter(x=>x[2]!=="口頭，不計入").reduce((a,x)=>a+x[1],0);
+  const sT=sh.reduce((a,x)=>a+x[1],0);
+  const gap=sT-cT-st.risk;
+  $("ledger").innerHTML=`<div><span class="label">客戶端硬承諾（換算關鍵料金額）</span>${ch.map(x=>`<div class="row"><span>${x[0]}<span class="note"> ${x[2]}</span></span><b>${x[2]==="口頭，不計入"?"—":fmt(x[1])}</b></div>`).join("")}<div class="row tot"><span>合計</span><b>${fmt(cT)}</b></div><div class="row"><span>＋老闆願意承擔的風險額度</span><b>${fmt(st.risk)}</b></div></div>
+   <div class="mid"><span class="label">未被覆蓋的供應端承諾</span><span class="big" style="color:${gap>0?"var(--bad)":"var(--ok)"}">${gap>0?fmt(gap):"0"}</span><span class="note">${gap>0?"右邊超過左邊＋風險額度":"在額度之內"}</span></div>
+   <div><span class="label">供應端硬承諾（12 個月口徑）</span>${sh.map(x=>`<div class="row"><span>${x[0]}</span><b>${fmt(x[1])}</b></div>`).join("")}<div class="row tot"><span>合計</span><b>${fmt(sT)}</b></div></div>`;
+  $("ledgerNote").textContent=gap>0?`供應端比客戶端多承諾了 ${fmt(gap)} 萬（已扣風險額度）。這筆錢是在替客戶的樂觀先付。能縮小缺口的動作只有兩種：讓客戶把承諾變成書面（NCNR、訂金、背對背），或把供應端的承諾縮到客戶已經簽的量。`:`供應端承諾在客戶端承諾加風險額度之內。注意：這是承諾金額的對帳，不代表沒有斷料風險；看下面三個決定的代價。`;
+  return {cT,sT,gap};
+}
+function renderV1(){
+  $("v1opts").innerHTML=Object.entries(V1).map(([k,o])=>`<button type="button" data-v1="${k}" class="${st.v1===k?"pick":""}"><b>${k}・${o.t}</b><small>${o.d}</small></button>`).join("");
+  const rows=Object.entries(V1).map(([k,o])=>{
+    const base=o.cov==="hard"?memHardBase():memM;
+    const months=o.months==="hard"?hardMonths():o.months;
+    let commit=months?base*months:0; let pre=commit?Math.min(commit,base*12)*o.pre:0;
+    if(o.b2b&&st.b2b){commit*=.5;pre*=.5}
+    const alloc=o.alloc==="partial"?Math.min(1,.7+.3*(base/memM)):o.alloc;       // 配額：簽多少保多少，其餘七成
+    const short=memM*(1-alloc);                                                   // 每月缺口（記憶體金額）
+    const spot=short*.25;                                                         // 現貨加價
+    const lateRev=short/(CO.keyShare*MEM.share)*.2;                               // 假設現貨只補八成，兩成出不了貨
+    const dpoDays=pre?-(pre/(memM/30)):0;                                        // 預付等於應付天數變負
+    return {k,o,commit,pre,alloc,short,spot,lateRev,dpoDays};
+  });
+  $("v1tab").innerHTML=`<thead><tr><th>選項</th><th class="num">今天預付</th><th class="num">記憶體應付天數</th><th class="num">最低採購承諾</th><th class="num">保證配額</th><th class="num">每月現貨加價</th><th class="num">每月延遲出貨</th></tr></thead><tbody>${rows.map(r=>`<tr class="${r.k===st.v1?"pick":""}"><td><b>${r.k}</b> ${r.o.t}</td><td class="num">${fmt(r.pre)}</td><td class="num">${r.dpoDays?Math.round(r.dpoDays)+" 天":KM.dpo+" 天"}</td><td class="num">${fmt(r.commit)}</td><td class="num">${pct(r.alloc)}</td><td class="num">${fmt(r.spot)}</td><td class="num">${fmt(r.lateRev)}</td></tr>`).join("")}</tbody>`;
+  const r=rows.find(x=>x.k===st.v1), L=renderLedger();
+  const ai=`依兩端對帳：客戶端硬承諾換算關鍵料 ${fmt(L.cT)} 萬，供應端 ${fmt(L.sT)} 萬${L.gap>0?`，超出 ${fmt(L.gap)} 萬`:"，在額度內"}。建議先做 B（只簽客戶已承諾的量），同時由業務去談 NCNR 或背對背，再把合約量往上加；預付用 ${pct(V1.A.pre)} 的資金成本換配額，只在客戶書面覆蓋的部分划算。`;
+  $("v1v").innerHTML=`<b>你的決定：${r.o.t}</b><div class="chips"><span class="chip ${r.pre>20000?"c-bad":r.pre>0?"c-warn":"c-ok"}">今天預付 ${fmt(r.pre)}</span><span class="chip ${r.commit>L.cT+st.risk?"c-bad":"c-ok"}">承諾 ${fmt(r.commit)}</span><span class="chip ${r.lateRev>5000?"c-bad":r.lateRev>0?"c-warn":"c-ok"}">每月延遲出貨 ${fmt(r.lateRev)}</span><span class="chip">記憶體應付天數 ${r.dpoDays?Math.round(r.dpoDays):KM.dpo} 天</span></div><p class="note">${r.k==="A"?"配額保住了，但預付先出、兩年承諾全由我方扛；客戶 A 的預測兌現率 80%，落空的量就是呆料。":r.k==="B"?"承諾與客戶端對齊，但未覆蓋的需求只有七成配額，缺口走現貨或延遲。":r.k==="C"?(st.b2b?"客戶 A 分攤後，預付與承諾各減半，是最平衡的結構；代價是談判時客戶多半會要求以票期或價格交換。":"客戶 A 尚未同意背對背（勾選上方開關模擬同意），目前效果等於 A。"):"沒有現金壓力，但三成需求靠現貨，加價與延遲每月都在發生，年度算下來通常比預付貴。"}</p><p class="ag"><b>AI 會前建議：</b>${ai}</p>`;
+}
+function renderV2(){
+  $("v2opts").innerHTML=Object.entries(V2).map(([k,o])=>`<button type="button" data-v2="${k}" class="${st.v2===k?"pick":""}"><b>${k}・${o.t}</b><small>${o.d}</small></button>`).join("");
+  const o=V2[st.v2]; const ltb=socM*o.ltb; const invDays=ltb/(keyM4/30);
+  $("v2v").innerHTML=`<b>你的決定：${o.t}</b><div class="chips"><span class="chip ${ltb>30000?"c-bad":ltb>0?"c-warn":"c-ok"}">最後採購現金 ${fmt(ltb)}</span><span class="chip">關鍵料存貨天數 +${Math.round(invDays)} 天</span><span class="chip">驗證費用 ${fmt(o.verify)}</span><span class="chip ${o.risk==="高"?"c-bad":o.risk==="中"?"c-warn":"c-ok"}">品質風險 ${o.risk}</span></div><p class="note">${o.note}</p><p class="ag"><b>AI 會前建議：</b>PCN 屬於據點與封裝材料變更，依 J-STD-046 要通知客戶；客戶 A 的料號受影響，應在 30 天內書面回覆「接受但須驗證」，並向原廠索取樣品與可靠度報告。最後採購只買驗證期需要的 3 個月（約 ${fmt(socM*3)} 萬），不要買一年。同時把這筆 PCN 轉知客戶 A，取得他們的書面核准，否則日後稽核責任在我方。</p>`;
+}
+function renderV3(){
+  $("v3opts").innerHTML=Object.entries(V3).map(([k,o])=>`<button type="button" data-v3="${k}" class="${st.v3===k?"pick":""}"><b>${k}・${o.t}</b><small>${o.d}</small></button>`).join("");
+  const o=V3[st.v3]; const ss=conM*o.ss;
+  $("v3v").innerHTML=`<b>你的決定：${o.t}</b><div class="chips"><span class="chip ${o.cost>400?"c-warn":"c-ok"}">直接成本 ${fmt(o.cost)}</span><span class="chip ${ss>10000?"c-bad":ss>3000?"c-warn":"c-ok"}">多備安全庫存 ${fmt(ss)}（${o.ss} 個月）</span><span class="chip">不良率 ${o.ppm}</span><span class="chip">關係 ${o.rel}</span></div><p class="note">${o.note}</p><p class="ag"><b>AI 會前建議：</b>S3 是客戶指定的單一來源，換商的決定權不在我方。短期先駐廠改善（B），把 8D 根因與製程參數變成雙方共用的紀錄；同時把「核准第二來源」列入下次與客戶 A 的會議議題，等客戶核准後再走 A。多備的安全庫存以一個月為限，超過就是在替供應商的品質付利息。</p>`;
+}
+function renderAll(){renderV1();renderV2();renderV3();}
+document.addEventListener("click",e=>{
+  for(const k of ["v1","v2","v3"]){const b=e.target.closest(`[data-${k}]`);if(b){st[k]=b.dataset[k];renderAll();track("lever",k+"="+st[k]);return}}
+});
+document.addEventListener("change",e=>{const t=e.target;if(["ncnr","depo","b2b"].includes(t.id)){st[t.id]=t.checked;renderAll();track("lever",t.id+(t.checked?"+":"-"))}});
+$("risk").addEventListener("input",e=>{st.risk=+e.target.value;$("riskOut").textContent=fmt(st.risk)+" 萬";renderAll();});
+renderAll();
+
+/* 即時 AI：PCN 解讀 */
+const L=x=>Array.isArray(x)?x:[];
+const AI_ERR={rate_limited:"你這段時間已經試了好幾次，請 10 分鐘後再試。",daily_cap:"今天的 AI 使用次數已達上限，請明天再來。",too_short:"內容太短，請至少輸入一兩句。",ai_unavailable:"AI 服務目前沒有啟用，請稍後再試。",no_result:"這次 AI 沒有產生完整結果，請再按一次。"};
+$("pBtn").addEventListener("click",async()=>{
+  const btn=$("pBtn"),out=$("pOut"),txt=$("pTxt").value.trim().slice(0,3000);
+  if(!txt)return;
+  if(location.protocol==="file:"){out.innerHTML='<p class="note">即時 AI 只能在網站上使用。</p>';return}
+  btn.disabled=true;out.innerHTML='<p class="note">AI 解讀中，通常約 10–30 秒……</p>';track("ai_run","pcn-read");
+  try{
+    const r=await fetch("/api/ai/pcn-read",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({text:txt})});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok||!j.ok){out.innerHTML=`<p class="note">${AI_ERR[j.error]||"這次沒有取得完整結果，請再按一次。"}</p>`;track("ai_fail",j.error||String(r.status));return}
+    const d=j.result;
+    out.innerHTML=`<h3 style="margin-top:4px">${esc(d.summary)}</h3>
+     <div class="chips" style="margin-top:6px">${L(d.change_types).map(x=>`<span class="chip">${esc(x)}</span>`).join("")}<span class="chip ${d.customer_notification==="需要"?"c-warn":"c-ok"}">客戶通知：${esc(d.customer_notification)}</span><span class="chip ${d.silence_is_acceptance?"c-bad":""}">${d.silence_is_acceptance?"未回覆視同接受":"需明確回覆"}</span></div>
+     <div class="res" style="margin-top:8px">
+      <div><b>關鍵日期</b><ul style="margin:4px 0 0;padding-left:1.1em">${L(d.dates).map(x=>`<li><b>${esc(x.what)}</b>：${esc(x.date)}</li>`).join("")}</ul></div>
+      <div><b>受影響</b><ul style="margin:4px 0 0;padding-left:1.1em"><li>料號：${L(d.affected_parts).map(esc).join("、")||"—"}</li><li>我方產品／客戶：${esc(d.affected_products)||"請比對料號清單"}</li></ul></div>
+      <div><b>風險</b><ul style="margin:4px 0 0;padding-left:1.1em">${L(d.risks).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+      <div class="r-ag"><b>各部門要做的事</b><ul style="margin:4px 0 0;padding-left:1.1em">${L(d.actions).map(x=>`<li><b>${esc(x.dept)}</b>：${esc(x.action)}（${esc(x.due)}）</li>`).join("")}</ul></div>
+     </div>
+     <p class="note" style="margin-top:8px">由開源模型 ${esc(j.model)} 即時產生。AI 只負責解讀與提醒；接受或拒絕變更，由品保與採購主管決定並書面回覆。</p>`;
+    track("ai_ok","pcn-read");
+  }catch(e){out.innerHTML='<p class="note">連線中斷，請再按一次。</p>';track("ai_fail","network")}
+  finally{btn.disabled=false}
+});
+</script>
+<script src="track.js" defer></script>
+</body>
+</html>

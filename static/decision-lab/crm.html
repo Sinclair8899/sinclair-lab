@@ -141,14 +141,14 @@ td.wrap,th.wrap{white-space:normal}
 
   <section class="sec" aria-label="專案卡">
     <div><span class="label">規則試算・專案卡（證據帳本）</span><h2>一張專案卡：每個里程碑，是書面證據還是口頭說法？</h2>
-    <p class="note" style="margin-top:4px">情境示範：雲端客戶 Y 的新一代 AI 伺服器主機板專案。業務口述年量 40 萬片、單價約 1.2 萬元，年營收約 48 億。切換每個里程碑的狀態，看下方的指引燈和各部門「可以投入」的範圍怎麼變。</p></div>
+    <p class="note" style="margin-top:4px">情境示範：雲端客戶 A 的新一代 AI 伺服器主機板專案。業務口述年量 40 萬片、單價約 1.2 萬元，年營收約 48 億，相當於每月約 40,000 萬，也就是老闆駕駛艙裡客戶 A 第 4 個月的預測量。切換每個里程碑的狀態，看下方的指引燈和各部門「可以投入」的範圍怎麼變。</p></div>
     <div class="msl" id="ms"></div>
     <p class="note">規則：里程碑只有在客戶提供文件或做出實際行動時才算「書面證據」。客戶口頭說「沒問題」、業務自己推測，都是「口頭」。客戶如果不願意給書面，這本身就是一個訊號。</p>
   </section>
 
   <section class="sec" aria-label="資源投入關卡">
     <div><span class="label">規則試算・資源投入關卡</span><h2>各部門可以投入到哪裡？超前投入的錢，誰在冒險？</h2>
-    <p class="note" style="margin-top:4px">每一筆投入都對應一個里程碑。勾選公司目前「已經投入或計畫投入」的項目；顏色表示這筆錢背後的證據等級。金額為虛構示範，單位新台幣萬元。</p></div>
+    <p class="note" style="margin-top:4px">每一筆投入都對應一個里程碑。勾選公司目前「已經投入或計畫投入」的項目；顏色表示這筆錢背後的證據等級。單位新台幣萬元；量產料的金額由共用情境資料推算：每月 40,000 萬營收 × 關鍵料占營收 45%。</p></div>
     <div class="gates" id="gates"></div>
     <div class="toggles">
       <label><input type="checkbox" id="nre"> 客戶分攤一半 NRE（模具與治具費用）</label>
@@ -177,7 +177,7 @@ td.wrap,th.wrap{white-space:normal}
       <div><span class="eyebrow">即時 AI · 開源模型 · 拜訪紀錄 → 專案卡</span><h3 style="margin-top:2px">貼上業務的拜訪紀錄，AI 自動填表，並標出沒有證據的承諾</h3>
       <p class="note" style="margin-top:4px">AI 會抽出里程碑（書面或口頭）、出貨預測（客戶書面或業務口述）、採購中心角色、我方問了哪些 SPIN 提問、客戶的隱含與明確需求，並判斷這次會談是「推進」還是「延續」。可以改寫下面的範例再試；請勿貼上真實客戶或公司機密資料。</p></div>
       <label for="vTxt" class="note">拜訪紀錄</label>
-      <textarea id="vTxt">10/16 與 FAE 一起拜訪雲端客戶 Y 的硬體研發經理、PM 和採購經理。研發經理說新一代 AI 伺服器主機板 10/2 已經簽回我們的規格書 v1.2，目前在 EVT，PM 說 EVT 應該沒問題，DVT 預計 3 月。我問他們目前散熱方案的進度，PM 說還沒定，如果用液冷，板子的佈局可能要改。採購經理提到明年 Q2 量產，預估每季 10 萬片，但還不能給書面預測，要等他們老闆下個月批准年度計畫；付款條件希望月結 90 天。採購說會導入第二家板廠分散風險。研發經理私下說，老闆最在意我們的交期，上次延遲兩天被記了一筆。我回覆我們可以保證產能，請他們盡快給預測。下週 FAE 會再去確認 EVT 測試報告。</textarea>
+      <textarea id="vTxt">10/16 與 FAE 一起拜訪雲端客戶 A 的硬體研發經理、PM 和採購經理。研發經理說新一代 AI 伺服器主機板 10/2 已經簽回我們的規格書 v1.2，目前在 EVT，PM 說 EVT 應該沒問題，DVT 預計 3 月。我問他們目前散熱方案的進度，PM 說還沒定，如果用液冷，板子的佈局可能要改。採購經理提到明年 Q2 量產，預估每季 10 萬片，但還不能給書面預測，要等他們老闆下個月批准年度計畫；付款條件希望月結 90 天。採購說會導入第二家板廠分散風險。研發經理私下說，老闆最在意我們的交期，上次延遲兩天被記了一筆。我回覆我們可以保證產能，請他們盡快給預測。下週 FAE 會再去確認 EVT 測試報告。</textarea>
       <button class="btn ai" id="vBtn" type="button">交給 AI 填表</button>
       <div id="vOut" aria-live="polite"></div>
     </div>
@@ -202,6 +202,7 @@ td.wrap,th.wrap{white-space:normal}
   <p class="note">本頁客戶、專案、數字與情境皆為虛構示範，僅供教學與研究用途，與作者任職或服務的任何公司無關。</p>
 </div>
 
+<script src="data.js"></script>
 <script>
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
@@ -226,8 +227,8 @@ const GATES=[
  {k:"nre",need:"M2",who:"研發／生產",what:"模具、治具與測試設備（NRE）",amt:600,rec:.1,on:true},
  {k:"lt",need:"M3",who:"採購",what:"DVT／PVT 所需長交期關鍵料",amt:800,rec:.3,on:true},
  {k:"cap",need:"M4",who:"生管",what:"PVT 產能保留與人力訓練",amt:400,rec:0,on:true},
- {k:"first",need:"M5",who:"採購／財務",what:"量產首批料與營運資金額度",amt:4000,rec:.3,on:false},
- {k:"fc",need:"M6",who:"採購",what:"依預測備一季量產料（記憶體、主晶片）",amt:12000,rec:.3,on:true},
+ {k:"first",need:"M5",who:"採購／財務",what:"量產首批料（一個月量產關鍵料）",amt:Math.round(LAB.derived.aMonthKeyMaterial),rec:.3,on:false},
+ {k:"fc",need:"M6",who:"採購",what:"依口述預測備一季量產關鍵料（主晶片、記憶體）",amt:Math.round(LAB.derived.aQuarterKeyMaterial),rec:.3,on:true},
 ];
 
 const MCLS={"書面證據":"m-ok","口頭":"m-warn","未達":"m-bad"};

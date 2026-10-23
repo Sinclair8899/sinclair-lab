@@ -8,7 +8,7 @@
 const DEFAULT_MODEL = "@cf/mistralai/mistral-small-3.1-24b-instruct";
 const FALLBACK_MODEL = "@cf/google/gemma-4-26b-a4b-it";
 const BOT_RE = /bot|crawl|spider|slurp|preview|facebookexternalhit|lighthouse|headless/i;
-const PAGES = new Set(["index", "case-boss", "ap", "mrp", "sourcing", "production", "ar", "sop", "crm", "cockpit", "cash-cycle-lab"]);
+const PAGES = new Set(["index", "case-boss", "ap", "mrp", "sourcing", "production", "ar", "sop", "crm", "vendor", "cockpit", "cash-cycle-lab"]);
 const EVENTS = new Set(["view", "scenario", "lever", "lens", "ai_run", "ai_ok", "ai_fail", "ai_apply", "copy_email", "module_click"]);
 
 let schemaReady = false;
@@ -147,14 +147,35 @@ function cleanBrief(d) {
   };
 }
 
+const PCN_PROMPT = `你是電子製造公司的供應商變更管理 agent。使用者會貼上一份供應商的產品變更通知（PCN）。請只依通知內容判讀，不要捏造；沒寫的就寫「未載明」。一律使用繁體中文（台灣用語），精簡。
+變更類型依 J-STD-046 的概念分類，可複選：外形、配合、功能、品質、可靠度、製程、據點／封裝廠、材料、標示或包裝、停產（EOL）。
+「客戶通知」判斷：據點、製程、材料、可靠度相關的變更，對車用、醫療、伺服器客戶通常需要通知並取得核准，填「需要」；純標示或包裝變更填「可能不需要」。
+只回覆一個 JSON 物件，不要加任何說明或 Markdown 標記，格式如下：
+{"summary":"一句話重點（40 字內）","change_types":["類型"],"affected_parts":["料號"],"affected_products":"推測受影響的我方產品或客戶，不確定就寫「請比對料號清單」","dates":[{"what":"回覆期限|樣品申請期限|最後下單日|最後出貨日|生效日","date":"日期或未載明"}],"silence_is_acceptance":true或false,"customer_notification":"需要|可能不需要","risks":["風險，各 40 字內，最多 4 項"],"actions":[{"dept":"品保|研發|採購|業務|生管|財務","action":"具體行動，30 字內","due":"期限"}]}`;
+function cleanPcn(d) {
+  return {
+    summary: str(d.summary, 120),
+    change_types: arr(d.change_types).slice(0, 6).map(x => str(x, 16)),
+    affected_parts: arr(d.affected_parts).slice(0, 10).map(x => str(x, 40)),
+    affected_products: str(d.affected_products, 80),
+    dates: arr(d.dates).slice(0, 6).map(x => ({ what: str(x.what, 20), date: str(x.date, 30) })),
+    silence_is_acceptance: !!d.silence_is_acceptance,
+    customer_notification: d.customer_notification === "需要" ? "需要" : "可能不需要",
+    risks: arr(d.risks).slice(0, 4).map(x => str(x, 120)),
+    actions: arr(d.actions).slice(0, 8).map(x => ({ dept: str(x.dept, 8), action: str(x.action, 100), due: str(x.due, 30) })),
+  };
+}
+
 const TASKS = {
   "visit-notes": { prompt: VISIT_PROMPT, label: "拜訪紀錄", maxTokens: 1200, clean: cleanResult, ok: d => d && (d.summary || arr(d.signals).length) },
   "crm-note": { prompt: CRM_PROMPT, label: "拜訪紀錄", maxTokens: 1600, clean: cleanCrm, ok: d => d && (d.summary || arr(d.milestones).length) },
+  "pcn-read": { prompt: PCN_PROMPT, label: "變更通知", maxTokens: 1200, clean: cleanPcn, ok: d => d && (d.summary || arr(d.change_types).length) },
   "cockpit-brief": { prompt: BRIEF_PROMPT, label: "駕駛艙結果（JSON）", maxTokens: 900, clean: cleanBrief, ok: d => d && d.headline },
 };
 
 const MOCK = {
   "visit-notes": { summary: "（測試模式）客戶新機種進入 EVT，舊機種 Q4 需求下修兩成", signals: [{ type: "需求變化", content: "舊機種 Q4 出貨可能少兩成", impact: "高" }], actions: [{ dept: "生管", action: "下修 Q4 排程並通知採購", when: "本週" }], risks: ["客戶導入第二家組裝廠"], next_visit: ["新機種 DVT 時程是否確定？"] },
+  "pcn-read": { summary: "（測試模式）主晶片封裝測試移轉馬來西亞廠，導線架換供應商", change_types: ["據點／封裝廠", "材料"], affected_parts: ["SOC-7400A", "SOC-7400B"], affected_products: "客戶 A 新一代主機板", dates: [{ what: "回覆期限", date: "發文後 30 日" }, { what: "最後下單日", date: "2026-12-15" }], silence_is_acceptance: true, customer_notification: "需要", risks: ["30 日未回覆視同接受"], actions: [{ dept: "品保", action: "索取樣品與可靠度報告", due: "11/10 前" }] },
   "cockpit-brief": { headline: "（測試模式）現金與積壓兩盞黃燈，問題在大客戶預測", problems: ["客戶 A 兌現率 80%，依預測備料會積壓"], decisions: [{ decision: "要求客戶 A 書面預測附 NCNR", owner: "業務", tradeoff: "客戶可能要求以票期交換" }], questions: ["問業務：預測有沒有書面？"] },
   "crm-note": { summary: "（測試模式）EVT 樣品通過僅為口頭說法，DVT 時程未確認", milestones: [{ code: "M2", status: "書面證據", evidence: "客戶簽認規格書 v1.2", date: "10/02" }, { code: "M3", status: "口頭", evidence: "PM 口頭表示 EVT 沒問題", date: "" }], forecast: [{ period: "明年 Q2", qty: "10 萬片", basis: "業務口述" }], buying_center: [{ role: "user", person: "硬體研發經理", attitude: "支持" }, { role: "buyer", person: "採購經理", attitude: "中立" }], spin: { S: ["目前用哪家的板子？"], P: [], I: [], N: [] }, needs: { implied: ["散熱方案還沒定"], explicit: [] }, outcome: { type: "延續", reason: "沒有約定下一步行動" }, virtual_commitments: ["「EVT 沒問題」沒有測試報告"], followups: [{ owner: "FAE 工程師", action: "索取 EVT 測試報告", due: "下週" }], next_questions: ["如果散熱方案延後定案，對 DVT 時程影響多大？"] },
 };
