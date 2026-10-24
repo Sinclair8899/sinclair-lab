@@ -193,7 +193,8 @@ details.bg p{margin-top:8px;color:var(--muted);font-size:.9rem}
   </section>
 
   <section class="sec" aria-label="八年推演">
-    <div><span class="label">規則試算・八年推演</span><h2>營運收支、到期資金缺口、抵押覆蓋，三張圖共用年份</h2></div>
+    <div><span class="label">規則試算・八年推演</span><h2>營運收支、到期資金缺口、抵押覆蓋，三張圖共用年份</h2>
+    <p class="note" style="margin-top:4px">顏色規則：藍＝資金流入（長約收入、再融資）、綠＝自有現金、棕＝債務支出、紅＝未解決缺口、紫＝AI；每一段都保留文字標籤。</p></div>
     <div class="charts">
       <div><h3>營運收支（億元）</h3><div class="legend"><span><i style="background:var(--accent)"></i>長約認列營收</span><span><i style="background:var(--line)"></i>現貨營收</span><span><i style="background:var(--inv)"></i>利息</span><span><s style="border-color:var(--ok)"></s>期末現金餘額</span></div><svg class="chart" id="c1" viewBox="0 0 320 220"></svg></div>
       <div><h3>到期資金缺口（第 5 年，億元）</h3><div class="legend"><span><i style="background:var(--inv)"></i>到期本金</span><span><i style="background:var(--ok)"></i>到期前可用現金</span><span><i style="background:var(--accent)"></i>再融資上限</span><span><i style="background:var(--bad)"></i>需增資</span></div><svg class="chart" id="c2" viewBox="0 0 320 220"></svg></div>
@@ -353,13 +354,14 @@ function render(){
   // 首屏大數字與資金橋
   const gapNow=r.equityAtWall;
   $("heroGap").textContent=fmt(gapNow); $("heroTag").textContent=(Object.keys(DEF).every(k=>st[k]===DEF[k])?"預設教學情境・":"你的假設・")+OPTS[st.opt].t;
-  $("heroH1").innerHTML=gapNow>0?`訂單很滿，第五年仍缺 ${fmt(gapNow)} 億。<br>一家投資 ${fmt(r.capex)} 億的算力公司，為什麼需要再次增資？`:(r.wall>0?`訂單很滿，第五年 ${fmt(r.wall)} 億要再融資。<br>一家投資 ${fmt(r.capex)} 億的算力公司，靠什麼借新還舊？`:`這組假設下，第五年本金還得起。<br>試著把利率拉高或把長約縮短，看缺口怎麼出現。`);
+  const full=st.cov>=.6&&st.util>=.4;   // 長約占比或利用率偏低時，不再說「訂單很滿」
+  $("heroH1").innerHTML=gapNow>0?`${full?"訂單很滿，第五年仍缺":"這組假設下，第五年仍缺"} ${fmt(gapNow)} 億。<br>一家投資 ${fmt(r.capex)} 億的算力公司，為什麼需要再次增資？`:(r.wall>0?`${full?"訂單很滿，第五年":"這組假設下，第五年"} ${fmt(r.wall)} 億要再融資。<br>一家投資 ${fmt(r.capex)} 億的算力公司，靠什麼借新還舊？`:`這組假設下，第五年本金還得起。<br>試著把利率拉高或把長約縮短，看缺口怎麼出現。`);
   $("stickyGap").textContent=fmt(gapNow); $("stickyOpt").textContent=OPTS[st.opt].t;
   const cashPart=r.debt0-r.wall, parts=[["s-cash",cashPart,"到期前可用現金"],["s-refi",r.refi,"再融資"],["s-gap",r.equityAtWall,"待補（增資）"]];
   $("bridgeH").textContent=r.debt0>0?`${fmt(r.debt0)} 億本金，怎麼還？`:"沒有借款，沒有到期牆";
   $("bridgeBar").innerHTML=r.debt0>0?parts.map(([c,v,l])=>`<div class="seg ${c}" style="flex:0 0 ${Math.max(0,v/r.debt0*100)}%" title="${l} ${fmt(v)}">${v/r.debt0>.12?fmt(v):""}</div>`).join(""):"";
   $("bridgeCap").innerHTML=parts.map(([c,v,l])=>`<span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px;background:var(--${c==="s-cash"?"ok":c==="s-refi"?"accent":"bad"})"></i>${l} <b>${fmt(v)}</b></span>`).join("");
-  $("bridgeNote").textContent=r.debt0>0?`${fmt(r.debt0)} 億到期本金 → ${fmt(cashPart)} 億現金還本 → ${fmt(r.refi)} 億再融資（上限 ${fmt(r.refiCap)}）→ ${fmt(r.equityAtWall)} 億待補。${r.equityAtWall>0?"紅色那段就是「需要增資」：沒有人補上，公司就走不到第 6 年。":"這組假設下不需要增資。"}`:"";
+  $("bridgeNote").textContent=r.debt0>0?`${fmt(r.debt0)} 億到期本金 → ${fmt(cashPart)} 億現金還本 → ${fmt(r.refi)} 億再融資（上限 ${fmt(r.refiCap)}）→ ${fmt(r.equityAtWall)} 億待補。${r.equityAtWall>0?"紅色那段就是「需要增資」：若缺口未獲補足，模型中的公司將無法如期償還第五年本金。":"這組假設下不需要增資。"}`:"";
   // 操作前後差異
   if(PREV&&prevSt){
     const changed=Object.keys(st).filter(k=>st[k]!==prevSt[k]);
