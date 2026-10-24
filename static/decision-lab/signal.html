@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>前線到研發：市場機會卡</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+TC:wght@700&display=swap">
+<style>
+/* Layout: case story (one 1990s loop, de-identified) → two clocks simulator → opportunity card → five decisions → modern blind spots → live AI card extractor → CRM field spec */
+:root{
+  --bg:#f3f5f7; --panel:#ffffff; --ink:#18222d; --muted:#5b6876; --line:#d9dfe6;
+  --accent:#1f5f8b; --accent-soft:#e3eef6; --inv:#8a4b2a; --inv-soft:#f6e9e1; --ai:#5a4a9e; --ai-soft:#ece9f7;
+  --ok:#2f7d4f; --ok-soft:#e2f2e8; --warn:#a86a0c; --warn-soft:#fbefd9; --bad:#b33a3a; --bad-soft:#f8e1e1;
+  --f-display:"Noto Serif TC","Songti TC",serif; --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11161c; --panel:#18202a; --ink:#e4e9ef; --muted:#93a1b0; --line:#2b3644;
+  --accent:#6fb0dc; --accent-soft:#1c3346; --inv:#e0a07c; --inv-soft:#3a2619; --ai:#b3a5ef; --ai-soft:#2a2545;
+  --ok:#6cc792; --ok-soft:#1a3326; --warn:#e3a94a; --warn-soft:#3a2d16; --bad:#ec7f7f; --bad-soft:#3d1f22; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161c; --panel:#18202a; --ink:#e4e9ef; --muted:#93a1b0; --line:#2b3644;
+  --accent:#6fb0dc; --accent-soft:#1c3346; --inv:#e0a07c; --inv-soft:#3a2619; --ai:#b3a5ef; --ai-soft:#2a2545;
+  --ok:#6cc792; --ok-soft:#1a3326; --warn:#e3a94a; --warn-soft:#3a2d16; --bad:#ec7f7f; --bad-soft:#3d1f22; color-scheme:dark}
+*{box-sizing:border-box}
+html{font-size:106.25%}
+@media (max-width:480px){html{font-size:100%}}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1rem;line-height:1.65}
+.wrap{max-width:1040px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:24px}
+h1{font-family:var(--f-display);font-size:clamp(1.7rem,4.6vw,2.4rem);line-height:1.25;margin:4px 0 0;text-wrap:balance}
+h2{font-family:var(--f-display);font-size:1.25rem;margin:0;text-wrap:balance}
+h3{font-size:1rem;margin:0}
+p{margin:0}
+.lead{color:var(--muted);max-width:66ch;margin-top:10px}
+.eyebrow{font-size:.78rem;letter-spacing:.12em;color:var(--ai);font-weight:500}
+.label{font-size:.72rem;letter-spacing:.08em;color:var(--muted)}
+.mono,.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.note{color:var(--muted);font-size:.84rem}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px}
+a{color:var(--accent)}
+.opener{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.opener div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 14px;display:flex;flex-direction:column;gap:2px}
+.opener b{font-size:1rem}.opener span{color:var(--muted);font-size:.84rem}
+.opener a{text-decoration:none}
+.sec{display:flex;flex-direction:column;gap:10px}
+.tablebox{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap;font-size:.88rem;vertical-align:top}
+th{font-weight:500;color:var(--muted);font-size:.78rem}
+td.num,th.num{text-align:right}
+td.wrap,th.wrap{white-space:normal}
+.pill{font-size:.75rem;padding:1px 8px;border-radius:999px;font-weight:500;white-space:nowrap}
+.p-ok{background:var(--ok-soft);color:var(--ok)}.p-warn{background:var(--warn-soft);color:var(--warn)}.p-bad{background:var(--bad-soft);color:var(--bad)}.p-mute{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.btn{font:inherit;cursor:pointer;border-radius:5px;padding:8px 16px;border:1px solid var(--accent);background:var(--accent);color:var(--panel);font-weight:500;align-self:flex-start}
+.btn.ai{border-color:var(--ai);background:var(--ai)}
+.btn.sm{padding:3px 10px;font-size:.8rem}
+.btn:disabled{opacity:.6;cursor:default}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.callout{padding:14px 16px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 6px 6px 0;font-size:.95rem}
+.callout.inv{border-color:var(--inv);background:var(--inv-soft)}
+.console{padding:18px;background:var(--ai-soft);border-color:var(--ai);display:flex;flex-direction:column;gap:10px}
+.console textarea{font:inherit;width:100%;min-height:150px;padding:8px;border:1px solid var(--line);border-radius:4px;background:var(--panel);color:var(--ink)}
+.console textarea:focus-visible{outline:2px solid var(--ai)}
+.res{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.res>div{border-radius:6px;padding:10px 14px}
+.r-me{background:var(--panel);border:1px solid var(--line)}
+.r-ag{background:var(--ai-soft);border:1px solid var(--ai)}
+.r-ag b{color:var(--ai)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--panel);flex-wrap:wrap}
+.seg button{all:unset;cursor:pointer;padding:3px 11px;font-size:.8rem;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--panel)}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.seg.evi button[aria-pressed="true"]{background:var(--ok)}
+.seg.evi button[data-v="口頭"][aria-pressed="true"]{background:var(--warn)}
+.seg.evi button[data-v="推測"][aria-pressed="true"]{background:var(--bad)}
+/* story */
+.story{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.story div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-size:.86rem;display:flex;flex-direction:column;gap:3px}
+.story b.day{font-family:var(--f-mono);color:var(--inv);font-size:.78rem}
+.story b.t{font-size:.95rem}
+.story span{color:var(--muted)}
+/* levers */
+.levers{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;padding:14px 16px}
+.lv{display:flex;flex-direction:column;gap:4px}
+.lv .label{display:block}
+.lv input[type=range]{width:100%;accent-color:var(--accent)}
+.lv .v{font-family:var(--f-mono);font-size:.9rem}
+/* timeline */
+.tl{padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.bar{position:relative;height:34px;border-radius:6px;overflow:hidden;background:var(--bg);border:1px solid var(--line);display:flex}
+.bar>i{display:block;height:100%;border-right:1px solid var(--panel);font-size:.7rem;line-height:34px;text-align:center;color:#fff;overflow:hidden;white-space:nowrap;font-family:var(--f-mono)}
+.bar .s0{background:#6b7a8a}.bar .s1{background:#1f5f8b}.bar .s2{background:#4a6fa5}.bar .s3{background:#8a4b2a}.bar .s4{background:#b07a4a}.bar .s5{background:#5a4a9e}.bar .s6{background:#2f7d4f}
+.win{position:absolute;top:0;bottom:0;width:0;border-left:2px dashed var(--bad);z-index:2}
+.win::after{content:attr(data-l);position:absolute;top:-1.4rem;left:-1px;font-size:.7rem;color:var(--bad);white-space:nowrap;font-family:var(--f-mono)}
+.barwrap{position:relative;padding-top:1.4rem}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:.78rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.lamp{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.lamp>div{padding:12px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel)}
+.lamp b{display:block;font-family:var(--f-mono);font-size:1.5rem;font-variant-numeric:tabular-nums}
+.lamp .label{display:block}
+.lamp .ok b{color:var(--ok)}.lamp .warn b{color:var(--warn)}.lamp .bad b{color:var(--bad)}
+.lamp small{display:block;color:var(--muted);font-size:.8rem}
+.verdict{padding:12px 16px;border-radius:8px;border:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;gap:6px}
+/* card */
+.card{padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:10px 18px}
+.card .f{display:flex;flex-direction:column;gap:2px;border-bottom:1px dashed var(--line);padding-bottom:6px}
+.card .f .k{font-size:.74rem;color:var(--muted);letter-spacing:.06em}
+.card .f .k code{font-family:var(--f-mono);font-size:.72rem;color:var(--accent)}
+.card .f .v{font-size:.95rem}
+.card .f .v .pill{margin-left:6px;vertical-align:1px}
+.card .wide{grid-column:1/3}
+.ladder{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ladder div{padding:10px 12px;border-radius:6px;border:1px solid var(--line);background:var(--panel);font-size:.86rem}
+.ladder b{display:block}
+.ladder div:nth-child(1){border-left:4px solid var(--ok)}.ladder div:nth-child(2){border-left:4px solid var(--warn)}.ladder div:nth-child(3){border-left:4px solid var(--bad)}
+/* decisions */
+.dec{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.dec button{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:2px;padding:10px 12px;border:1.5px solid var(--line);border-radius:6px;background:var(--panel);font-size:.86rem}
+.dec button b{font-size:.92rem}.dec button span{color:var(--muted);font-size:.8rem}
+.dec button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.dec button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.dept{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.dept div{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:.84rem}
+.dept b{display:block;font-size:.78rem;color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--f-mono);font-size:.76rem;padding:1px 7px;border-radius:3px;background:var(--panel);border:1px solid var(--line)}
+.forms{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.forms div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-size:.86rem}
+.forms b{display:block;margin-bottom:4px}
+.forms ul{margin:0;padding-left:1.1em;color:var(--muted)}
+@media (max-width:820px){.opener,.res,.levers,.card,.ladder,.forms{grid-template-columns:1fr}.card .wide{grid-column:1}.story{grid-template-columns:1fr 1fr}.lamp{grid-template-columns:1fr 1fr}.dec{grid-template-columns:1fr 1fr}.dept{grid-template-columns:1fr 1fr}}
+@media (max-width:480px){.story,.dec{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div style="background:#fbefd9;color:#6b4407;font:14px/1.5 system-ui,sans-serif;padding:8px max(16px,env(safe-area-inset-left,0px));text-align:center">網站版・測試版 2026-10-24：「規則試算」依公式即時計算；「情境示範」為去識別化的重建案例；「前線回報」區塊由開源 AI 模型即時分析。</div>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">AI LAB · 現金循環系列 04C · 前線到研發</span>
+    <h1>前線到研發：市場機會卡</h1>
+    <p class="lead">三十年前，一家台灣品牌電子公司靠一條很短的迴路在海外市場站上貨架：美國前線聽到通路和競品的動靜，當晚回報台灣，研發隔天答覆可不可行，老闆三天內拍板，兩週內樣品空運到客戶面前。這個模組把那條迴路拆成可以量化的「兩個時鐘」——<b>回應速度</b>（一次從訊號到可出貨要幾天）和<b>學習速度</b>（一年能跑幾圈）——再把前線回報變成一張有證據等級的「市場機會卡」，讓研發、採購、生產、財務知道該投入多少。</p>
+    <div class="opener">
+      <div><b>5 分鐘</b><span>拉四個槓桿，看回應天數、呆料與貢獻怎麼變</span></div>
+      <div><b>即時 AI</b><span>貼上前線回報，AI 寫成機會卡並標出哪些只是推測</span></div>
+      <div><a href="index.html"><b>← 現金循環總覽</b></a><span>機會卡決定要不要開一個新機型，也決定後面的存貨天數</span></div>
+    </div>
+    <p class="note" style="margin-top:12px;padding:8px 12px;border:1px dashed var(--line);border-radius:6px">本頁說明（網站版）：<b>情境示範</b>是依公開資料與作者經驗重建的去識別化案例，不指涉任何現存公司或產品；<b>規則試算</b>的天數、金額皆為教學用假設，依公式即時計算；<b>即時 AI</b> 區塊由 Cloudflare 代管的開源模型分析你送出的文字，只用於產生這次結果。方法依據 Kohli &amp; Jaworski 的市場導向（情報產生→擴散→回應）、QFD 品質機能展開、以及《SPIN Selling》對「客戶明說」與「我方推測」的區分；本頁只引用概念。</p>
+  </header>
+
+  <!-- 1. 案例 -->
+  <section class="sec" aria-labelledby="s-case">
+    <h2 id="s-case">一、當年的一條迴路（去識別化重建）</h2>
+    <p class="note">公司背景：台灣端做研發與生產後勤，美國端做行銷與銷售。美國公司原本是獨立創業的品牌銷售公司，後來併入台灣公司，所以一開始就有品牌與通路經驗；台灣端則從一個做電玩的小團隊起家，發展出顯示器的技術。兩端加起來，形成一條「前線聽到砲火、研發隔天答覆」的迴路。以下日程是重建的典型一圈，不是任何一筆實際交易。</p>
+    <div class="story">
+      <div><b class="day">第 0 天 · 美國</b><b class="t">通路買手的一句話</b><span>「競品新機型規格高一級、零售價低一成。促銷檔期前你們沒有對應機型，貨架就換人。」業務當晚傳真回台，附競品規格與目標價。</span></div>
+      <div><b class="day">第 1 天 · 台灣研發</b><b class="t">可行性答覆</b><span>主板不重畫：換相容腳位的主晶片、改幾顆電阻電容、刷新韌體；外殼模具與九成零件不動。估三天出手工樣品。</span></div>
+      <div><b class="day">第 2 天 · 台灣</b><b class="t">老闆拍板</b><span>跨部門十分鐘會：目標價能不能有毛利？首年量多少、誰說的？決定做，限定一個機型、一個通路先試。</span></div>
+      <div><b class="day">第 3–9 天 · 採購與生產</b><b class="t">料早就綁好了</b><span>關鍵晶片平時就維持兩家料源、預留產能；樣品用現有庫存組裝，不等交期。</span></div>
+      <div><b class="day">第 10 天</b><b class="t">樣品空運</b><span>兩台手工樣品空運到美國，業務帶到通路買手面前現場展示，當場比較競品。</span></div>
+      <div><b class="day">第 14 天</b><b class="t">訂單</b><span>買手下首批試銷訂單；台灣依訂單（不是依口頭的「一年六萬台」）排量產與備料。</span></div>
+      <div><b class="day">第 15 天起</b><b class="t">下一圈</b><span>展示時聽到的新抱怨（底座太重、選單難用）變成下一張機會卡。一年跑二十圈，研發對市場的理解和對手拉開距離。</span></div>
+      <div><b class="day">注意</b><b class="t">今天不一定做得到</b><span>當年安規與合規的環境比現在單純、產品以硬體為主、供應鏈都在台灣。拉下方槓桿時，請看「現代盲點」那一節。</span></div>
+    </div>
+    <div class="callout inv">兩個時鐘：<b>回應速度</b>是一次迴路要幾天；<b>學習速度</b>是一年能跑幾圈。回應慢一倍，學習就少一半——同樣一年，對手學到二十件事，你只學到十件。這是當年真正的競爭優勢，不是某一台機器。</div>
+  </section>
+
+  <!-- 2. 模擬 -->
+  <section class="sec" aria-labelledby="s-sim">
+    <h2 id="s-sim">二、兩個時鐘：拉槓桿看天數與金額（規則試算）</h2>
+    <p class="note">情境：前線回報一個競品規格缺口，通路上架死線在 <span id="winTxt" class="mono"></span> 天後。你決定怎麼傳遞、怎麼做、怎麼決、怎麼備料。</p>
+    <div class="panel levers">
+      <div class="lv"><span class="label">前線到研發的傳遞方式</span>
+        <div class="seg" data-k="xfer"><button type="button" data-v="oral" aria-pressed="true">口頭、信件散落</button><button type="button" data-v="card">結構化機會卡</button></div>
+        <span class="note" id="xferN"></span></div>
+      <div class="lv"><span class="label">決策方式</span>
+        <div class="seg" data-k="dec"><button type="button" data-v="normal" aria-pressed="true">常規開案流程</button><button type="button" data-v="fast">72 小時聯席會</button></div>
+        <span class="note" id="decN"></span></div>
+      <div class="lv"><span class="label">研發做法（也可在下方「五個決定」選）</span>
+        <div class="seg" data-k="rd"><button type="button" data-v="redesign" aria-pressed="true">重畫主板</button><button type="button" data-v="platform">平台化：換晶片＋韌體</button><button type="button" data-v="firmware">只改韌體設定</button></div>
+        <span class="note" id="rdN"></span></div>
+      <div class="lv"><span class="label">關鍵料源</span>
+        <div class="seg" data-k="src"><button type="button" data-v="single" aria-pressed="true">單一料源，臨時下單</button><button type="button" data-v="dual">雙料源，預綁產能</button></div>
+        <span class="note" id="srcN"></span></div>
+      <div class="lv"><span class="label">首年承諾量的證據等級</span>
+        <div class="seg evi" data-k="evi"><button type="button" data-v="書面">通路書面意向</button><button type="button" data-v="口頭" aria-pressed="true">買手口頭</button><button type="button" data-v="推測">業務推測</button></div>
+        <span class="note" id="eviN"></span></div>
+      <div class="lv"><span class="label">備料依據</span>
+        <div class="seg" data-k="prep"><button type="button" data-v="full" aria-pressed="true">依承諾量備料</button><button type="button" data-v="disc">依證據折現備料</button></div>
+        <span class="note" id="prepN"></span></div>
+      <div class="lv"><label class="label" for="win">通路上架死線（天）</label><input type="range" id="win" min="15" max="90" step="5" value="45"><span class="v" id="winV"></span></div>
+      <div class="lv"><label class="label" for="vol">首年承諾量（萬台）</label><input type="range" id="vol" min="1" max="12" step="1" value="6"><span class="v" id="volV"></span></div>
+      <div class="lv"><label class="label" for="price">目標零售價（美元／台）</label><input type="range" id="price" min="120" max="300" step="10" value="180"><span class="v" id="priceV"></span></div>
+      <div class="lv"><label class="label" for="gm">我方毛利率（%）</label><input type="range" id="gm" min="6" max="20" step="1" value="12"><span class="v" id="gmV"></span></div>
+    </div>
+
+    <div class="panel tl">
+      <div class="barwrap"><div class="win" id="winLine" data-l="上架死線"></div><div class="bar" id="bar" role="img" aria-label="從訊號到可出貨的各階段天數"></div></div>
+      <div class="legend"><span><i class="s0" style="background:#6b7a8a"></i>傳遞</span><span><i style="background:#1f5f8b"></i>可行性評估</span><span><i style="background:#4a6fa5"></i>決策</span><span><i style="background:#8a4b2a"></i>關鍵料交期</span><span><i style="background:#b07a4a"></i>樣品</span><span><i style="background:#5a4a9e"></i>安規／合規</span><span><i style="background:#2f7d4f"></i>空運與展示</span></div>
+      <p class="note" id="stageTxt"></p>
+    </div>
+
+    <div class="lamp" id="lamps"></div>
+    <div class="verdict" id="verdict"></div>
+    <p class="note">公式（教學用）：到展示＝傳遞＋評估＋決策＋料交期＋樣品＋空運；到可出貨＝到展示＋安規。趕上死線→賣出承諾量的全部；晚 30 天內→一半；更晚→15%（下一檔期才有）。預期銷量＝承諾量 × 證據折現（書面 100%、口頭 70%、推測 40%）× 趕上比例。呆料＝（備料量−預期銷量）× 單位成本 × 專用料比例（重畫 60%、平台化 25%、韌體 5%）。淨貢獻＝毛利−呆料−開發費（重畫 30 萬、平台化 8 萬、韌體 2 萬美元）。</p>
+  </section>
+
+  <!-- 3. 機會卡 -->
+  <section class="sec" aria-labelledby="s-card">
+    <h2 id="s-card">三、市場機會卡：前線回報的標準格式（情境示範）</h2>
+    <p class="note">當年靠一張傳真和一位懂產品的業務；今天要讓 AI 和系統接手，就得把「前線聽到什麼」寫成固定欄位，而且每一格都標證據等級。卡片上的「情報」有三種：客戶<b>明確表示</b>、<b>我方推測</b>、<b>尚待確認</b>。研發和採購只對「明確表示」投入真錢；對「推測」只做不花錢的準備。</p>
+    <div class="ladder">
+      <div><b>明確表示</b>客戶或通路自己說的、最好有文件：競品規格、價格、上架死線、書面意向。研發可以據此開案。</div>
+      <div><b>尚待確認</b>客戶說了但附條件、或還沒給書面：「價格一樣的話一年六萬台」。下次拜訪要問清楚，備料先打折。</div>
+      <div><b>我方推測</b>業務自己的判斷：「這單我們拿得到」「建議直接開新機」。寫下來很好，但不能當成客戶承諾去備料。</div>
+    </div>
+    <div class="panel card" id="card"></div>
+    <p class="note">欄位名稱採一般 CRM 可自訂的英文欄位命名，方便落地到任何系統；AI 區塊會把一段前線回報自動填進這張卡。</p>
+  </section>
+
+  <!-- 4. 五個決定 -->
+  <section class="sec" aria-labelledby="s-dec">
+    <h2 id="s-dec">四、拿到卡之後的五個產品決定（規則試算）</h2>
+    <p class="note">同一張卡，研發可以用五種方式回應。點一個決定，上方時鐘跟著變，下面列出各部門要做的事。</p>
+    <div class="dec" id="decs"></div>
+    <div class="panel" style="padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+      <div id="decTxt"></div>
+      <div class="dept" id="dept"></div>
+    </div>
+    <div class="callout">與現金轉換週期（CCC）的連結：每多開一個機型，就多一套專用料、半成品與成品庫存，<b>存貨天數</b>往上走；平台化讓不同機型共用料，呆料跌價風險才會從六成降到兩三成。晚到的機型賣不掉，就是<a href="cockpit.html">駕駛艙</a>裡的「存貨積壓」那盞燈。承諾量的證據等級，請用 <a href="crm.html">04A CRM</a> 的書面／口頭規則；料源要不要預綁產能，請看 <a href="vendor.html">04B 供應商承諾</a>。</div>
+  </section>
+
+  <!-- 5. 現代盲點 -->
+  <section class="sec" aria-labelledby="s-mod">
+    <h2 id="s-mod">五、當年做得到、今天會卡住的地方</h2>
+    <div class="tablebox panel"><table>
+      <thead><tr><th>比較</th><th class="wrap">1990 年代（案例當時）</th><th class="wrap">今天的品牌或製造公司</th><th class="wrap">模組裡對應的槓桿</th></tr></thead>
+      <tbody>
+        <tr><td>傳遞工具</td><td class="wrap">傳真、電話、主管出差；靠一位懂產品的業務</td><td class="wrap">雲端 CRM、協作平台；資訊更多但更散</td><td class="wrap">結構化機會卡＋AI 填表</td></tr>
+        <tr><td>產品複雜度</td><td class="wrap">以硬體電路與機構為主，架構標準</td><td class="wrap">軟硬整合、韌體、晶片相容性、多國安規</td><td class="wrap">平台化；只改韌體；安規「報備變更」而非重測</td></tr>
+        <tr><td>回饋速度</td><td class="wrap">週級，已經領先對手</td><td class="wrap">天級甚至小時級（電商評價、遙測）</td><td class="wrap">學習速度那盞燈：一年幾圈</td></tr>
+        <tr><td>供應鏈</td><td class="wrap">台灣聚落密集，打樣改模最快</td><td class="wrap">多國組裝、長鏈、物流塞港</td><td class="wrap">雙料源、腳位共用、預綁產能</td></tr>
+        <tr><td>合規</td><td class="wrap">項目少、週期短</td><td class="wrap">改電源或屏蔽就要重送驗，兩個月</td><td class="wrap">凍結高風險電路區；只在低壓訊號區改</td></tr>
+        <tr><td>最常見的失敗</td><td class="wrap">機型太多、庫存混亂</td><td class="wrap">同樣是機型太多，加上軟體維護負擔</td><td class="wrap">「先服務特定客群」與「暫時不做」兩個決定</td></tr>
+      </tbody></table></div>
+  </section>
+
+  <!-- 6. AI -->
+  <section class="sec" aria-labelledby="s-ai">
+    <h2 id="s-ai">六、即時 AI：把前線回報寫成機會卡</h2>
+    <p class="note">貼上一段業務的回報（可改寫下面的示範）。AI 會填出機會卡的各欄位、為每一格標證據等級、把業務自己的推測挑出來，並建議五個決定中的哪一個，以及先去確認什麼。AI 只負責整理，開不開案由主管決定。</p>
+    <div class="panel console">
+      <label for="vTxt" class="label">前線回報（示範：美國業務拜訪通路買手）</label>
+      <textarea id="vTxt">10/20 拜訪西岸一家大型電腦零售通路的顯示器採購買手。買手說上週競品推出 17 吋新機型，更新率比我們高一級，零售價還低 10%，他們的區域經理已經在問為什麼我們沒有對應機型。買手說如果 1 月促銷檔期前我們拿不出來，貨架可能會換成競品。我問如果有對應機型首年大概能走多少量，他說「看價格，如果和競品一樣，一年六萬台應該沒問題」，但現在不能給書面。他也提到有客戶抱怨我們現有機型底座太重。我覺得這一單我們拿得到，建議台灣直接開一個新機型。</textarea>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button class="btn ai" type="button" id="vBtn">AI 寫成機會卡</button><span class="note">約 10–30 秒；由 Cloudflare 代管的開源模型處理，只用於這次結果。</span></div>
+      <div id="vOut"></div>
+    </div>
+  </section>
+
+  <!-- 7. 落地 -->
+  <section class="sec" aria-labelledby="s-form">
+    <h2 id="s-form">七、要落地到系統，需要哪三個東西</h2>
+    <div class="forms">
+      <div><b>CRM 端：機會卡必填欄位</b><ul><li>訊號類型、目標檔期、首年承諾量、規格缺口、目標價</li><li>每格一個證據等級：明確表示／尚待確認／我方推測</li><li>來源人（職稱）、日期、附件（競品規格頁、通路信件）</li></ul></div>
+      <div><b>決策端：72 小時綠色通道</b><ul><li>同一缺口被回報第二次，或承諾量超過門檻，自動開聯席會</li><li>研發在 3–5 個工作天內回：可行／不可行／成本過高／需開案</li><li>老闆只看一頁：天數、量的證據、呆料上限</li></ul></div>
+      <div><b>研發與採購端：平時就做的準備</b><ul><li>一兩款母板平台，兩年凍結佈線與外殼孔位</li><li>關鍵晶片腳位共用設計、雙料源、預綁產能</li><li>高風險電路區凍結，變更只走「報備」</li></ul></div>
+    </div>
+    <p class="note">相關模組：<a href="crm.html">04A CRM 客戶承諾</a>、<a href="vendor.html">04B 供應商承諾</a>、<a href="cockpit.html">00 駕駛艙</a>、<a href="cash-cycle-lab.html">05 綜合診斷</a>。</p>
+  </section>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+const track=(e,d)=>{try{window.labTrack&&window.labTrack(e,d)}catch(_){}};
+const fmtW=x=>(Math.round(x/1000)/10).toLocaleString("zh-Hant-TW",{maximumFractionDigits:1}); // 美元 → 萬美元
+
+/* ---------- 規則試算 ---------- */
+const P={
+  xfer:{oral:{d:5,n:"口頭轉述、信件散落：平均 5 天才有人把規格、價格、死線湊齊。"},card:{d:1,n:"結構化機會卡：當天送達，欄位齊全，研發不用追問。"}},
+  dec:{normal:{d:10,n:"常規開案：排會、簽核，約 10 天。"},fast:{d:3,n:"72 小時聯席會：研發、採購、生產、財務同一桌，3 天內 Go／No-Go。"}},
+  rd:{redesign:{ev:15,smp:12,comp:45,share:.6,dev:300000,n:"重畫主板：評估 15 天、樣品 12 天；電源與屏蔽區改動，安規重送驗約 45 天；專用料比例六成。"},
+      platform:{ev:3,smp:4,comp:5,share:.25,dev:80000,n:"平台化：確認主晶片腳位相容，換晶片、改電阻電容、刷韌體；安規只走報備變更約 5 天；專用料兩成五。"},
+      firmware:{ev:1,smp:1,comp:2,share:.05,dev:20000,n:"只改韌體設定：硬體不動（前提是硬體原本就超規）；幾乎沒有專用料。"}},
+  src:{single:{d:14,n:"單一料源、臨時下單：關鍵晶片交期 14 天。"},dual:{d:3,n:"雙料源、預綁產能：從現有庫存或第二家現貨取料，3 天。"}},
+  evi:{"書面":{h:1,n:"通路書面意向：預期銷量不打折。"},"口頭":{h:.7,n:"買手口頭：預期銷量打七折（參考 04A 的兌現率概念）。"},"推測":{h:.4,n:"業務推測：預期銷量只算四成。"}},
+  prep:{full:{n:"依承諾量備料：業務說六萬就備六萬。"},disc:{n:"依證據折現備料：證據幾分，就備幾分。"}},
+};
+const SHIP=3;
+const st={xfer:"oral",dec:"normal",rd:"redesign",src:"single",evi:"口頭",prep:"full",win:45,vol:6,price:180,gm:12,dec5:"B"};
+
+function model(s){
+  const x=P.xfer[s.xfer].d,r=P.rd[s.rd],d=P.dec[s.dec].d,m=s.rd==="firmware"?0:P.src[s.src].d;
+  const stages=[["傳遞",x],["評估",r.ev],["決策",d],["料交期",m],["樣品",r.smp],["安規",r.comp],["空運展示",SHIP]];
+  const demo=x+r.ev+d+m+r.smp+SHIP, ship=demo+r.comp;
+  const late=ship-s.win;
+  const share=late<=0?1:late<=30?.5:.15;
+  const scope=s.dec5==="D"?.3:s.dec5==="E"?0:1;
+  const units=s.vol*10000*scope;
+  const h=P.evi[s.evi].h;
+  const prep=s.prep==="full"?units:units*h;
+  const sold=Math.min(prep,units*h*share);
+  const unitCost=s.price*(1-s.gm/100);
+  const eo=Math.max(0,prep-sold)*unitCost*r.share;
+  const gp=sold*s.price*s.gm/100;
+  const dev=scope?r.dev:0;
+  const net=gp-eo-dev;
+  const loops=Math.round(3650/demo)/10;
+  return {stages,demo,ship,late,share,units,prep,sold,eo,gp,dev,net,loops,h};
+}
+
+const DEC=[
+ {k:"A",t:"新增功能",s:"換相容晶片＋韌體，外殼不動",rd:"platform",
+  why:"規格缺口在主晶片能力範圍內，母板平台還在凍結期。這是當年最常走的路。",
+  dept:{研發:"確認主晶片腳位相容、改電阻電容、出韌體；高風險電路區不碰",採購:"啟動第二家料源現貨，鎖樣品與首批量的晶片",生產:"共用外殼與九成料；只增一個機型料號",業務:"約好展示日期；把「一年六萬台」換成書面意向或首批試銷訂單",財務:"開發費約 8 萬美元；備料金額依證據等級核定上限"}},
+ {k:"B",t:"修改現有設計",s:"重畫主板，重送安規",rd:"redesign",
+  why:"缺口超出平台能力（例如新介面或新電源）。做得到，但幾乎一定錯過這一檔期；要問值不值得為下一檔期做。",
+  dept:{研發:"重畫佈線、重做電源與屏蔽；安排完整安規測試",採購:"新料號開發、找兩家料源、談最小訂購量",生產:"新治具、新模具；試產一次",業務:"向通路爭取下一檔期的貨架，而不是硬趕這一檔",財務:"開發費約 30 萬美元；專用料比例高，呆料風險最大，需設停損"}},
+ {k:"C",t:"軟體替代",s:"硬體不動，只改韌體設定",rd:"firmware",
+  why:"硬體原本就超規、只是沒開放（硬體超規、軟體鎖頻）。前置時間從數週變數天，但前提要在平台設計時就留好。",
+  dept:{研發:"出一版設定檔；驗證功能與穩定度",採購:"不需新料",生產:"在美國倉或包裝前刷設定檔，不改產線",業務:"當週就能展示；順勢問通路要書面意向",財務:"幾乎沒有新投入；注意不同通路版本的售價差"}},
+ {k:"D",t:"先服務特定客群",s:"限量客製給這一個通路先試",rd:"platform",
+  why:"承諾量只是口頭或附條件。用平台化做一小批（三成量）先賣，用真實銷售取代口頭預測，再決定擴大。",
+  dept:{研發:"同「新增功能」，但限定一個機型",採購:"只備三成量的專用料；其餘用共用料",生產:"小批量，不排滿線",業務:"把這批試銷的實際賣出數字帶回來，當成下一張卡的證據",財務:"呆料上限明確；試銷毛利可能較低，但買到資訊"}},
+ {k:"E",t:"暫時不做",s:"證據不足，先問清楚",rd:"platform",
+  why:"卡上的量和價都還是「我方推測」。不投入，但要把下次拜訪該問的問題寫下來，並設定重新評估的時間點。",
+  dept:{研發:"只做不花錢的準備：確認平台能不能支援",採購:"向料源詢價與交期，不下單",生產:"無",業務:"回去問：書面意向？價格一樣以外的條件？誰決定上架？",財務:"零投入；記錄這張卡，三十天後重看"}},
+];
+
+function renderLevers(){
+  document.querySelectorAll(".seg[data-k]").forEach(sg=>{const k=sg.dataset.k;sg.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===st[k])))});
+  $("xferN").textContent=P.xfer[st.xfer].n;$("decN").textContent=P.dec[st.dec].n;$("rdN").textContent=P.rd[st.rd].n;$("srcN").textContent=st.rd==="firmware"?"只改韌體時不需要新料，料源不影響天數。":P.src[st.src].n;$("eviN").textContent=P.evi[st.evi].n;$("prepN").textContent=P.prep[st.prep].n;
+  $("winV").textContent=st.win+" 天";$("volV").textContent=st.vol+" 萬台";$("priceV").textContent="$"+st.price;$("gmV").textContent=st.gm+"%";$("winTxt").textContent=st.win;
+  document.querySelectorAll("#decs button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.k===st.dec5)));
+}
+
+function render(){
+  renderLevers();
+  const r=model(st);
+  const max=Math.max(r.ship,st.win)*1.08;
+  $("bar").innerHTML=r.stages.map((s,i)=>s[1]?`<i class="s${i}" style="width:${s[1]/max*100}%" title="${s[0]} ${s[1]} 天">${s[1]>=max*.06?s[1]:""}</i>`:"").join("");
+  $("winLine").style.left=(st.win/max*100)+"%";
+  $("stageTxt").innerHTML=r.stages.filter(s=>s[1]).map(s=>`${s[0]} <b class="mono">${s[1]}</b> 天`).join("　·　")+`　→　到展示 <b class="mono">${r.demo}</b> 天，到可出貨 <b class="mono">${r.ship}</b> 天`;
+  const lampShip=r.late<=0?"ok":r.late<=30?"warn":"bad";
+  const lampLoop=r.loops>=12?"ok":r.loops>=6?"warn":"bad";
+  const lampNet=r.net>0?"ok":r.net>-100000?"warn":"bad";
+  const lampEo=r.eo<100000?"ok":r.eo<500000?"warn":"bad";
+  const noGo=st.dec5==="E";
+  $("lamps").innerHTML=`
+   <div class="${lampShip}"><span class="label">回應速度：到可出貨</span><b>${r.ship} 天</b><small>${r.late<=0?`比上架死線早 ${-r.late} 天`:`比上架死線晚 ${r.late} 天`}</small></div>
+   <div class="${lampLoop}"><span class="label">學習速度：一年可跑</span><b>${r.loops} 圈</b><small>到展示 ${r.demo} 天一圈；聽到回饋才算學到</small></div>
+   <div class="${noGo?"":lampNet}"><span class="label">這張卡的淨貢獻</span><b>${noGo?"—":(r.net<0?"−":"")+fmtW(Math.abs(r.net))+" 萬"}</b><small>${noGo?"暫時不做：零投入、零貢獻":`毛利 ${fmtW(r.gp)} − 呆料 ${fmtW(r.eo)} − 開發費 ${fmtW(r.dev)}（萬美元）`}</small></div>
+   <div class="${noGo?"":lampEo}"><span class="label">呆料風險</span><b>${noGo?"—":fmtW(r.eo)+" 萬"}</b><small>${noGo?"沒有備料":`備 ${(r.prep/10000).toFixed(1)} 萬台、預期賣 ${(r.sold/10000).toFixed(1)} 萬台 × 專用料 ${Math.round(P.rd[st.rd].share*100)}%`}</small></div>`;
+  let v="";
+  if(noGo) v=`<b>暫時不做。</b>卡上的量還是「${st.evi}」，先去把證據拿回來；下面列出各部門不花錢的準備。`;
+  else if(r.late>30) v=`<b>這一檔期趕不上（晚 ${r.late} 天）。</b>只能賣到下一檔期的 15%，卻依${st.prep==="full"?"承諾量":"折現後的量"}備了 ${(r.prep/10000).toFixed(1)} 萬台——呆料 ${fmtW(r.eo)} 萬美元是這張卡最大的代價。先改縮短天數的槓桿（平台化、72 小時會、雙料源），或改成「先服務特定客群」。`;
+  else if(r.late>0) v=`<b>晚了 ${r.late} 天，只能搭到半檔。</b>淨貢獻 ${(r.net<0?"−":"")+fmtW(Math.abs(r.net))} 萬美元。再省 ${r.late} 天就能趕上：看哪一段最長。`;
+  else v=`<b>趕上死線，早 ${-r.late} 天。</b>淨貢獻約 ${fmtW(r.net)} 萬美元；${r.eo>0?`但承諾量是「${st.evi}」，備料沒折現，仍有 ${fmtW(r.eo)} 萬美元呆料風險——要嘛拿書面，要嘛依證據備料。`:"量的證據與備料一致，呆料風險最低。"}`;
+  $("verdict").innerHTML=`<p>${v}</p><p class="note">學習速度 ${r.loops} 圈／年：${r.loops>=12?"每個月都在聽回饋，研發對市場的理解會複利成長。":r.loops>=6?"兩個月一圈，勉強跟得上季節檔期。":"一年學不到幾件事，對手會先學會。"}</p>`;
+  const d=DEC.find(x=>x.k===st.dec5);
+  $("decTxt").innerHTML=`<b>${d.k}．${d.t}</b>：${d.why}`;
+  $("dept").innerHTML=Object.entries(d.dept).map(([k,v])=>`<div><b>${k}</b>${esc(v)}</div>`).join("");
+}
+
+document.querySelectorAll(".seg[data-k]").forEach(sg=>sg.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;st[sg.dataset.k]=b.dataset.v;track("lever",sg.dataset.k+":"+b.dataset.v);render()}));
+["win","vol","price","gm"].forEach(k=>$(k).addEventListener("input",e=>{st[k]=Number(e.target.value);render()}));
+$("decs").innerHTML=DEC.map(d=>`<button type="button" data-k="${d.k}"><b>${d.k}．${d.t}</b><span>${d.s}</span></button>`).join("");
+$("decs").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;st.dec5=b.dataset.k;st.rd=DEC.find(x=>x.k===b.dataset.k).rd;track("scenario","dec:"+b.dataset.k);render();});
+
+/* ---------- 機會卡 ---------- */
+const EV={"明確表示":"p-ok","尚待確認":"p-warn","我方推測":"p-bad"};
+let card={
+  trigger:{v:"競品規格＋價格壓力（通路買手）",e:"明確表示"},
+  window:{v:"1 月促銷檔期前上架",e:"明確表示"},
+  volume:{v:"一年 6 萬台（條件：價格與競品相同）",e:"尚待確認"},
+  gap:{cat:"規格",v:"17 吋機型更新率低一級；另有底座太重的抱怨",e:"明確表示"},
+  price:{v:"比我方現有機型低約 10%（約 $180）",e:"明確表示"},
+  spec:["「這一單我們拿得到」","「建議直接開一個新機型」"],
+  source:"西岸大型電腦零售通路・顯示器採購買手・10/20",
+};
+function renderCard(){
+  const f=(k,label,o)=>`<div class="f"><span class="k">${label} <code>${k}</code></span><span class="v">${esc(o.v)}<span class="pill ${EV[o.e]||"p-mute"}">${esc(o.e)}</span></span></div>`;
+  $("card").innerHTML=f("Mkt_Trigger_Type","訊號類型",card.trigger)+f("Target_Market_Window","目標檔期／上架死線",card.window)+f("Committed_Vol_12M","首年承諾量",card.volume)+f("Target_Price_USD","目標零售價",card.price)+
+   `<div class="f wide"><span class="k">規格缺口 <code>Feature_Gap_Category / Detail</code></span><span class="v"><span class="pill p-mute">${esc(card.gap.cat)}</span> ${esc(card.gap.v)}<span class="pill ${EV[card.gap.e]||"p-mute"}">${esc(card.gap.e)}</span></span></div>
+    <div class="f wide"><span class="k">業務自己的推測（記錄，但不據此備料）</span><span class="v">${card.spec.length?card.spec.map(x=>`<span class="pill p-bad" style="margin:0 6px 4px 0">${esc(x)}</span>`).join(""):'<span class="note">沒有</span>'}</span></div>
+    <div class="f wide" style="border-bottom:0"><span class="k">來源 <code>Source_Role / Date</code></span><span class="v note">${esc(card.source)}</span></div>`;
+}
+renderCard();render();
+
+/* ---------- 即時 AI ---------- */
+const L=x=>Array.isArray(x)?x:[];
+const AI_ERR={rate_limited:"你這段時間已經試了好幾次，請 10 分鐘後再試。",daily_cap:"今天的 AI 使用次數已達上限，請明天再來。",too_short:"回報太短，請至少輸入一兩句內容。",ai_unavailable:"AI 服務目前沒有啟用，請稍後再試。",no_result:"這次 AI 沒有產生完整結果，請再按一次。"};
+let lastAI=null;
+$("vBtn").addEventListener("click",async()=>{
+  const btn=$("vBtn"),out=$("vOut"),txt=$("vTxt").value.trim().slice(0,3000);
+  if(!txt)return;
+  if(location.protocol==="file:"){out.innerHTML='<p class="note">即時 AI 只能在網站上使用，本機開啟的檔案無法連線。</p>';return}
+  btn.disabled=true;out.innerHTML='<p class="note">AI 填卡中，通常約 10–30 秒……</p>';track("ai_run","signal-card");
+  try{
+    const r=await fetch("/api/ai/signal-card",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({text:txt})});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok||!j.ok){out.innerHTML=`<p class="note">${AI_ERR[j.error]||"這次沒有取得完整結果，請再按一次。"}</p>`;track("ai_fail",j.error||String(r.status));return}
+    const d=j.result;lastAI=d;
+    const pill=e=>`<span class="pill ${EV[e]||"p-mute"}">${esc(e)}</span>`;
+    const row=(k,o)=>`<tr><td>${k}</td><td class="wrap">${esc(o.text)||"—"}</td><td>${pill(o.evidence)}</td></tr>`;
+    const dec=DEC.find(x=>x.k===d.decision.option);
+    out.innerHTML=`<h3 style="margin-top:4px">${esc(d.summary)}</h3>
+     <div class="tablebox" style="background:var(--panel);border-radius:6px;margin-top:8px"><table style="min-width:480px"><thead><tr><th>欄位</th><th class="wrap">AI 填入</th><th>證據等級</th></tr></thead><tbody>
+       <tr><td>訊號類型</td><td class="wrap">${esc(d.trigger_type)}</td><td>${pill(d.trigger_evidence)}</td></tr>
+       ${row("目標檔期",d.market_window)}${row("首年承諾量",d.committed_volume)}
+       <tr><td>規格缺口</td><td class="wrap"><span class="pill p-mute">${esc(d.feature_gap.category)}</span> ${esc(d.feature_gap.detail)}</td><td>${pill(d.feature_gap.evidence)}</td></tr>
+       ${row("目標價",d.target_price)}
+     </tbody></table></div>
+     <div class="res" style="margin-top:8px">
+       <div class="r-me" style="border-color:var(--bad)"><b style="color:var(--bad)">業務自己的推測（不是客戶說的）</b><ul style="margin:4px 0 0;padding-left:1.1em">${L(d.speculation).map(x=>`<li>${esc(x)}</li>`).join("")||"<li class='note'>沒有發現</li>"}</ul></div>
+       <div class="r-ag"><b>建議的決定：${dec?dec.k+"．"+dec.t:esc(d.decision.option)}</b><p style="margin-top:4px">${esc(d.decision.reason)}</p></div>
+       <div class="r-me"><b>先去確認什麼</b><ul style="margin:4px 0 0;padding-left:1.1em">${L(d.confirm_first).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+       <div class="r-me"><b>各部門的事</b><ul style="margin:4px 0 0;padding-left:1.1em">${L(d.actions).map(a=>`<li><b>${esc(a.dept)}</b>：${esc(a.action)}${a.due?`（${esc(a.due)}）`:""}</li>`).join("")}</ul></div>
+     </div>
+     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px"><button class="btn sm" type="button" id="apply">把 AI 的判讀套用到上方機會卡與時鐘</button><span class="note">套用後請往上看：卡片換成 AI 的內容，承諾量的證據等級與建議的決定也跟著改。</span></div>
+     <p class="note" style="margin-top:8px">由開源模型 ${esc(j.model)} 即時產生；是否採信，由業務主管確認。</p>`;
+    track("ai_ok","signal-card");
+    $("apply").addEventListener("click",()=>{
+      const a=lastAI;
+      card={trigger:{v:a.trigger_type,e:a.trigger_evidence},window:{v:a.market_window.text||"未提到",e:a.market_window.evidence},volume:{v:a.committed_volume.text||"未提到",e:a.committed_volume.evidence},gap:{cat:a.feature_gap.category,v:a.feature_gap.detail,e:a.feature_gap.evidence},price:{v:a.target_price.text||"未提到",e:a.target_price.evidence},spec:L(a.speculation),source:"AI 依前線回報填入"};
+      const m=String(a.committed_volume.text||"").match(/(\d+(?:\.\d+)?)\s*萬/);if(m){st.vol=Math.min(12,Math.max(1,Math.round(Number(m[1]))))}
+      st.evi=a.committed_volume.evidence==="明確表示"?"書面":a.committed_volume.evidence==="尚待確認"?"口頭":"推測";
+      if(DEC.find(x=>x.k===a.decision.option)){st.dec5=a.decision.option;st.rd=DEC.find(x=>x.k===a.decision.option).rd}
+      renderCard();render();track("ai_apply","signal-card");
+      $("s-card").scrollIntoView({behavior:"smooth",block:"start"});
+    });
+  }catch(e){out.innerHTML='<p class="note">連線中斷，請再按一次。</p>';track("ai_fail","network")}
+  finally{btn.disabled=false}
+});
+</script>
+<script src="track.js" defer></script>
+</body>
+</html>

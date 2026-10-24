@@ -8,7 +8,7 @@
 const DEFAULT_MODEL = "@cf/mistralai/mistral-small-3.1-24b-instruct";
 const FALLBACK_MODEL = "@cf/google/gemma-4-26b-a4b-it";
 const BOT_RE = /bot|crawl|spider|slurp|preview|facebookexternalhit|lighthouse|headless/i;
-const PAGES = new Set(["index", "case-boss", "ap", "mrp", "sourcing", "production", "ar", "sop", "crm", "vendor", "cockpit", "neocloud", "cash-cycle-lab"]);
+const PAGES = new Set(["index", "case-boss", "ap", "mrp", "sourcing", "production", "ar", "sop", "crm", "vendor", "cockpit", "neocloud", "signal", "cash-cycle-lab"]);
 const EVENTS = new Set(["view", "scenario", "lever", "lens", "ai_run", "ai_ok", "ai_fail", "ai_apply", "copy_email", "module_click"]);
 
 let schemaReady = false;
@@ -173,15 +173,44 @@ const NEO_PROMPT = `你是一家 AI 算力公司的幕僚，負責把經營駕�
 只回覆一個 JSON 物件，不要加任何說明或 Markdown 標記，格式如下：
 {"headline":"一句話總結（30 字內）","problems":["問題，各 40 字內，最多 3 項"],"decisions":[{"decision":"要做的決定，30 字內","owner":"負責單位","tradeoff":"代價或風險，30 字內"}],"questions":["先去確認什麼，各 40 字內，最多 3 項"]}`;
 
+const SIGNAL_PROMPT = `你是品牌電子公司的「市場機會卡」agent。使用者會貼上一段前線業務的回報（拜訪通路、客戶或看到競品）。你的工作是把回報填進固定欄位，並為每一格標出證據等級，再把業務自己的推測挑出來。判斷規則：
+- 證據等級三種：「明確表示」= 客戶、通路或對方人員自己說的具體事實（競品規格、價格、上架死線、抱怨、書面意向）；「尚待確認」= 對方說了但附條件、含糊、或還沒有書面（例如「價格一樣的話一年六萬台」「應該沒問題」）；「我方推測」= 業務自己的判斷、建議或樂觀預期（例如「這單我們拿得到」「建議開新機」）。欄位沒提到就填空字串並標「尚待確認」。
+- 不要捏造回報中沒有的內容；數量、價格照原文。
+- 建議的決定只能從五個選一個：A 新增功能（換相容晶片＋韌體，外殼不動）、B 修改現有設計（重畫主板、重送安規）、C 軟體替代（硬體不動只改韌體設定）、D 先服務特定客群（限量先試）、E 暫時不做（證據不足先問清楚）。承諾量只是「尚待確認」或「我方推測」時，傾向 D 或 E；缺口只是設定或功能開關時傾向 C；缺口超出平台能力才選 B。
+- 「先去確認什麼」要指向能把證據等級升級的動作（拿書面意向、問條件、問誰決定上架、拿競品規格頁）。
+- 一律使用繁體中文（台灣用語），精簡。不要寫出任何真實公司或品牌名稱；回報中若有，改寫成「競品」「通路」。
+只回覆一個 JSON 物件，不要加任何說明或 Markdown 標記，格式如下：
+{"summary":"一句話重點（40 字內）","trigger_type":"通路拒絕|競品規格|價格壓力|客戶抱怨|法規變更|其他","trigger_evidence":"明確表示|尚待確認|我方推測","market_window":{"text":"目標檔期或上架死線，原文","evidence":"明確表示|尚待確認|我方推測"},"committed_volume":{"text":"首年量，原文含條件","evidence":"明確表示|尚待確認|我方推測"},"feature_gap":{"category":"規格|價格|外觀機構|軟體功能|品質|其他","detail":"缺口描述，40 字內","evidence":"明確表示|尚待確認|我方推測"},"target_price":{"text":"目標價，原文","evidence":"明確表示|尚待確認|我方推測"},"speculation":["業務自己的推測或建議，原文摘錄，最多 4 項"],"decision":{"option":"A|B|C|D|E","reason":"30 字內"},"confirm_first":["先去確認的事，各 40 字內，最多 3 項"],"actions":[{"dept":"研發|採購|生產|業務|財務|主管","action":"具體行動，30 字內","due":"時間點"}]}`;
+const EVI = ["明確表示", "尚待確認", "我方推測"];
+function cleanSignal(d) {
+  const ev = x => (EVI.includes(x) ? x : "尚待確認");
+  const te = o => ({ text: str(o?.text, 80), evidence: ev(o?.evidence) });
+  return {
+    summary: str(d.summary, 120),
+    trigger_type: str(d.trigger_type, 12),
+    trigger_evidence: ev(d.trigger_evidence),
+    market_window: te(d.market_window),
+    committed_volume: te(d.committed_volume),
+    feature_gap: { category: str(d.feature_gap?.category, 8), detail: str(d.feature_gap?.detail, 100), evidence: ev(d.feature_gap?.evidence) },
+    target_price: te(d.target_price),
+    speculation: arr(d.speculation).slice(0, 4).map(x => str(x, 80)),
+    decision: { option: /^[A-E]$/.test(String(d.decision?.option)) ? String(d.decision.option) : "E", reason: str(d.decision?.reason, 80) },
+    confirm_first: arr(d.confirm_first).slice(0, 3).map(x => str(x, 120)),
+    actions: arr(d.actions).slice(0, 6).map(x => ({ dept: str(x.dept, 8), action: str(x.action, 100), due: str(x.due, 30) })),
+  };
+}
+
 const TASKS = {
   "visit-notes": { prompt: VISIT_PROMPT, label: "拜訪紀錄", maxTokens: 1200, clean: cleanResult, ok: d => d && (d.summary || arr(d.signals).length) },
   "crm-note": { prompt: CRM_PROMPT, label: "拜訪紀錄", maxTokens: 1600, clean: cleanCrm, ok: d => d && (d.summary || arr(d.milestones).length) },
   "pcn-read": { prompt: PCN_PROMPT, label: "變更通知", maxTokens: 1200, clean: cleanPcn, ok: d => d && (d.summary || arr(d.change_types).length) },
   "neocloud-brief": { prompt: NEO_PROMPT, label: "駕駛艙結果（JSON）", maxTokens: 900, clean: cleanBrief, ok: d => d && d.headline },
+  "signal-card": { prompt: SIGNAL_PROMPT, label: "前線回報", maxTokens: 1400, clean: cleanSignal, ok: d => d && (d.summary || d.feature_gap) },
   "cockpit-brief": { prompt: BRIEF_PROMPT, label: "駕駛艙結果（JSON）", maxTokens: 900, clean: cleanBrief, ok: d => d && d.headline },
 };
 
 const MOCK = {
+  "signal-card": { summary: "（測試模式）競品 17 吋機型規格高一級、價低一成，通路要求檔期前有對應機型", trigger_type: "競品規格", trigger_evidence: "明確表示", market_window: { text: "1 月促銷檔期前", evidence: "明確表示" }, committed_volume: { text: "一年 6 萬台（價格與競品相同為條件）", evidence: "尚待確認" }, feature_gap: { category: "規格", detail: "17 吋更新率低一級；底座太重", evidence: "明確表示" }, target_price: { text: "比我方現有機型低 10%", evidence: "明確表示" }, speculation: ["這一單我們拿得到", "建議台灣直接開一個新機型"], decision: { option: "D", reason: "量是口頭且附條件，先限量試銷" }, confirm_first: ["向買手索取書面意向或首批試銷訂單", "確認除價格外還有哪些上架條件"], actions: [{ dept: "研發", action: "確認平台主晶片可否支援高一級更新率", due: "3 天內" }, { dept: "採購", action: "查第二家料源現貨與交期", due: "本週" }] },
   "visit-notes": { summary: "（測試模式）客戶新機種進入 EVT，舊機種 Q4 需求下修兩成", signals: [{ type: "需求變化", content: "舊機種 Q4 出貨可能少兩成", impact: "高" }], actions: [{ dept: "生管", action: "下修 Q4 排程並通知採購", when: "本週" }], risks: ["客戶導入第二家組裝廠"], next_visit: ["新機種 DVT 時程是否確定？"] },
   "pcn-read": { summary: "（測試模式）主晶片封裝測試移轉馬來西亞廠，導線架換供應商", change_types: ["據點／封裝廠", "材料"], affected_parts: ["SOC-7400A", "SOC-7400B"], affected_products: "客戶 A 新一代主機板", dates: [{ what: "回覆期限", date: "發文後 30 日" }, { what: "最後下單日", date: "2026-12-15" }], silence_is_acceptance: true, customer_notification: "需要", risks: ["30 日未回覆視同接受"], actions: [{ dept: "品保", action: "索取樣品與可靠度報告", due: "11/10 前" }] },
   "neocloud-brief": { headline: "（測試模式）到期牆與抵押品兩盞紅燈", problems: ["第 5 年到期牆需再融資"], decisions: [{ decision: "要求客戶預付 20% 合約款", owner: "業務與財務", tradeoff: "客戶可能要求降價" }], questions: ["確認 GPU 二手市場報價"] },
