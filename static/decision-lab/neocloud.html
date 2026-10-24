@@ -160,12 +160,12 @@ svg.chart{width:100%;height:auto;display:block}
   <section class="sec" aria-label="八年推演">
     <div><span class="label">規則試算・八年推演</span><h2>營運收支、到期資金缺口、抵押覆蓋，三張圖共用年份</h2></div>
     <div class="charts">
-      <div><h3>營運收支（億元）</h3><div class="legend"><span><i style="background:var(--accent)"></i>長約認列營收</span><span><i style="background:var(--line)"></i>現貨營收</span><span><i style="background:var(--inv)"></i>利息</span><span><s style="border-color:var(--ok)"></s>累計現金</span></div><svg class="chart" id="c1" viewBox="0 0 320 220"></svg></div>
-      <div><h3>到期資金缺口（第 5 年，億元）</h3><div class="legend"><span><i style="background:var(--inv)"></i>到期本金</span><span><i style="background:var(--ok)"></i>累計現金可還</span><span><i style="background:var(--accent)"></i>再融資上限</span><span><i style="background:var(--bad)"></i>需增資</span></div><svg class="chart" id="c2" viewBox="0 0 320 220"></svg></div>
+      <div><h3>營運收支（億元）</h3><div class="legend"><span><i style="background:var(--accent)"></i>長約認列營收</span><span><i style="background:var(--line)"></i>現貨營收</span><span><i style="background:var(--inv)"></i>利息</span><span><s style="border-color:var(--ok)"></s>期末現金餘額</span></div><svg class="chart" id="c1" viewBox="0 0 320 220"></svg></div>
+      <div><h3>到期資金缺口（第 5 年，億元）</h3><div class="legend"><span><i style="background:var(--inv)"></i>到期本金</span><span><i style="background:var(--ok)"></i>期末現金可還</span><span><i style="background:var(--accent)"></i>再融資上限</span><span><i style="background:var(--bad)"></i>需增資</span></div><svg class="chart" id="c2" viewBox="0 0 320 220"></svg></div>
       <div><h3>抵押覆蓋（當年抵押品 ÷ 剩餘債務）</h3><div class="legend"><span><s style="border-color:var(--ai)"></s>覆蓋倍數</span><span><s style="border-color:var(--muted);border-top-style:dashed"></s>1.0×</span></div><svg class="chart" id="c3" viewBox="0 0 320 220"></svg></div>
     </div>
     <div class="panel tablebox"><table id="years"></table></div>
-    <p class="note">簡化模型：不計稅、營運資金與設備更新支出；「息後營運現金流」＝實際收款＋現貨營收−營運費用−利息。認列營收與實際收款分開：預付款在合約年限內逐年抵減收款。</p>
+    <p class="note">簡化模型：不計稅、營運資金與設備更新支出；「息後營運現金流」＝實際收款＋現貨營收−營運費用−利息。認列營收與實際收款分開：預付款在合約年限內逐年抵減收款。<b>後續年度假設所需增資均成功到位；未到位時，公司可能無法持續營運</b>，表中「追加資金」那一列就是這個前提的金額。再融資上限為教學假設：抵押品價值 × 60%（資產擔保貸款的放款成數）＋ EBITDA × 3 倍（無擔保額度的槓桿倍數）；實務上放款機構會同時看兩者，不一定可以直接相加。</p>
   </section>
 
   <section class="sec" aria-label="決策">
@@ -203,6 +203,7 @@ svg.chart{width:100%;height:auto;display:block}
       <div><b>「新興 AI 雲端業者債券殖利率升到百分之十幾」</b><span>2026 年 10 月 14–15 日的債券市場報價，約 14.8%–15%。<a href="https://investinglive.com/stocks/coreweave-bonds-trade-like-distressed-debt-as-ai-spending-outpaces-balance-sheets/" target="_blank" rel="noopener">investingLive，2026-10-15</a></span></div>
       <div><b>模型有算的</b><span>長約與現貨營收、續約降價、營運費用、利息、五年到期一次還本、再融資上限與增資需求、抵押品估值、最大客戶砍半的壓力測試、預付款的收款抵減。</span></div>
       <div><b>模型沒算的</b><span>稅、營運資金、設備更新與汰換支出、電價變動、GPU 壽命對營運產能的影響、供應商回購設備的價格與時點、違約後的清算程序。數字為虛構公司，單位新台幣億元，非投資建議。</span></div>
+      <div><b>重要的教學假設</b><span>再融資上限＝抵押品 × 60% ＋ EBITDA × 3 倍，兩部分分別代表資產擔保貸款的放款成數與無擔保額度的槓桿倍數，實務上不一定可相加。壓力測試中，最大客戶砍約後，已收的預付款假設不退還、抵減額不變；供應商承購保底在壓力測試下假設百分之百履約。追加資金一律假設成功到位。</span></div>
     </div>
   </section>
 
@@ -261,7 +262,7 @@ function model(o={}){
 }
 const OPTS={
  "0":{t:"暫緩擴張（基準）",d:"維持 1,000 億投資，不新增借款",o:{}},
- A:{t:"再投資 1,000 億擴一倍",d:"借款比例不變：新增借款約 800 億、股本約 230 億",o:{scale:2}},
+ A:{t:"再投資 1,000 億擴一倍",d:"借款比例不變，新增借款與股本見比較表",o:{scale:2}},
  B:{t:"只擴已簽長約的量",d:"擴張量＝長約占比 × 1,000 億，新產能全部有約",o:{}},
  C:{t:"擴一倍，要客戶預付 20% 合約款",d:"預付款先抵借款，之後逐年抵減收款",o:{scale:2,prepay:.2}},
  D:{t:"擴一倍，供應商承諾承購未售算力",d:"未售出算力由供應商承購，利用率下限 80%（模擬為利用率保底，不含設備回購）",o:{scale:2,floor:.8}},
@@ -278,7 +279,7 @@ function render(){
   const stCls=(s.outYear!==null||s.equityInj>r.equityInj+1)?"bad":icrCls(s.minIcr)==="ok"?"ok":"warn";
   $("lamps").innerHTML=
     lamp(icrCls(r.minIcr),"EBITDA 利息保障倍數（最低）",r.minIcr===null?"無借款":f1(r.minIcr)+"×",`EBITDA ÷ 利息，八年最低；分子含現貨營收，不代表還本能力`)+
-    lamp(wallCls,"第 5 年到期牆",fmt(r.wall)+" 億",r.wall>0?`再融資上限 ${fmt(r.refiCap)} 億${r.equityAtWall>0?"，不足 "+fmt(r.equityAtWall)+" 億需增資":"，可全數再融資，利率 "+pct(st.rate+st.refi)}`:"累計現金足以還本")+
+    lamp(wallCls,"第 5 年到期牆",fmt(r.wall)+" 億",r.wall>0?`再融資上限 ${fmt(r.refiCap)} 億${r.equityAtWall>0?"，不足 "+fmt(r.equityAtWall)+" 億需增資":"，可全數再融資，利率 "+pct(st.rate+st.refi)}`:"期末現金足以還本")+
     lamp(covCls,"第 5 年抵押品 ÷ 原始借款",r.debt0>0?f1(r.covOrig)+"×":"無借款",`壽命 ${st.life} 年、折價 ${pct(st.haircut)}${r.covNeed!==null&&r.wall>0?"；÷ 再融資需求 "+f1(r.covNeed)+"×":""}`)+
     lamp(stCls,"最大客戶砍一半",s.outYear!==null?"第 "+s.outYear+" 年現金耗盡":(s.minIcr===null?"無借款":f1(s.minIcr)+"×"),`最大客戶占合約 ${pct(st.conc)}；${s.equityInj>0?"八年共需追加資金 "+fmt(s.equityInj)+" 億":"不需追加資金"}`);
   // 診斷：依計算找原因
@@ -292,7 +293,7 @@ function render(){
     if(spotShare>=.3&&st.util<.6) causes.push(`${pct(spotShare)} 的算力沒有長約，現貨利用率只有 ${pct(st.util)}`);
     probs.push(`<b class="h">保障倍數：</b>EBITDA 最低只有利息的 ${f1(r.minIcr)} 倍。${causes.length?"依目前假設，主因是："+causes.join("；")+"。":""}`);
   }
-  if(wallCls!=="ok") probs.push(`<b class="h">到期牆：</b>第 5 年要還 ${fmt(r.debt0)} 億，累計現金只夠還 ${fmt(r.debt0-r.wall)} 億。再融資上限（抵押品六成＋EBITDA 三倍）${fmt(r.refiCap)} 億${r.equityAtWall>0?"，不夠，缺 "+fmt(r.equityAtWall)+" 億要增資或出售資產，否則違約":"，勉強夠，之後利率 "+pct(st.rate+st.refi)}。這是融資期限和資產回收期不匹配，不是營運問題。`);
+  if(wallCls!=="ok") probs.push(`<b class="h">到期牆：</b>第 5 年要還 ${fmt(r.debt0)} 億，期末現金只夠還 ${fmt(r.debt0-r.wall)} 億。再融資上限（抵押品六成＋EBITDA 三倍）${fmt(r.refiCap)} 億${r.equityAtWall>0?"，不夠，缺 "+fmt(r.equityAtWall)+" 億要增資或出售資產，否則違約":"，勉強夠，之後利率 "+pct(st.rate+st.refi)}。缺口同時受營運現金流（續約價格、利用率）與融資期限（五年到期一次還本）影響。`);
   if(covCls!=="ok") probs.push(`<b class="h">抵押品：</b>用 ${st.life} 年壽命加 ${pct(st.haircut)} 折價，第 5 年抵押品只剩原始借款的 ${f1(r.covOrig)} 倍${r.covNeed!==null&&r.wall>0?"、再融資需求的 "+f1(r.covNeed)+" 倍":""}。壽命改成 8 年數字會變好，但那是假設，不是二手市場成交價。`);
   if(stCls!=="ok") probs.push(`<b class="h">集中：</b>最大客戶占合約 ${pct(st.conc)}，第 2 年起砍一半，${s.outYear!==null?"第 "+s.outYear+" 年現金就耗盡，":""}八年共需追加資金 ${fmt(s.equityInj)} 億。客戶的承諾是你的資產，也是最大的單一風險。`);
   if(r.outYear!==null) probs.push(`<b class="h">現金：</b>即使沒有壓力情境，第 ${r.outYear} 年現金也會耗盡，八年需追加 ${fmt(r.equityInj)} 億。`);
@@ -317,7 +318,7 @@ function drawCharts(r){
   { const {mk,txt}=svgOf("c2"); const items=[["到期本金",r.debt0,"var(--inv)"],["現金可還",r.debt0-r.wall,"var(--ok)"],["再融資上限",r.refiCap,"var(--accent)"],["需增資",r.equityAtWall,"var(--bad)"]];
     const max=Math.max(...items.map(i=>i[1]),1)*1.15, bwid=(W-PL-PR)/items.length, y=v=>PT+(1-v/max)*(H-PT-PB);
     items.forEach((it,i)=>{const xx=PL+i*bwid+bwid*.2;mk("rect",{x:xx,y:y(it[1]),width:bwid*.6,height:y(0)-y(it[1]),fill:it[2],rx:3});txt(xx+bwid*.3,y(it[1])-4,fmt(it[1]),{"text-anchor":"middle",fill:"var(--ink)"});txt(xx+bwid*.3,H-8,it[0],{"text-anchor":"middle","font-family":"inherit"});});
-    if(r.wall<=0) txt(W/2,H/2,"累計現金足以還本",{"text-anchor":"middle",fill:"var(--ok)","font-family":"inherit"});
+    if(r.wall<=0) txt(W/2,H/2,"期末現金足以還本",{"text-anchor":"middle",fill:"var(--ok)","font-family":"inherit"});
   }
   { const {mk,txt}=svgOf("c3"); const y=v=>PT+(1-Math.min(2,v)/2)*(H-PT-PB);
     mk("line",{x1:PL,x2:W-PR,y1:y(1),y2:y(1),stroke:"var(--muted)","stroke-dasharray":"5 4"});
@@ -330,7 +331,7 @@ function drawCharts(r){
 }
 function renderYears(r){
   const row=(lab,f)=>`<tr><td>${lab}</td>${r.rows.map(q=>`<td class="num">${f(q)}</td>`).join("")}</tr>`;
-  $("years").innerHTML=`<thead><tr><th>億元</th>${r.rows.map(q=>`<th class="num">第 ${q.t} 年</th>`).join("")}</tr></thead><tbody>${row("長約認列營收",q=>fmt(q.contract))}${row("長約實際收款",q=>fmt(q.collect))}${row("現貨營收",q=>fmt(q.spot))}${row("EBITDA",q=>fmt(q.ebitda))}${row("利息",q=>fmt(q.interest))}${row("到期本金",q=>fmt(q.principal))}${row("簡化息後營運現金流",q=>fmt(q.ocf))}${row("追加資金（增資）",q=>q.inj>0?fmt(q.inj):"—")}${row("累計現金",q=>fmt(q.cash))}${row("剩餘債務",q=>fmt(q.debt))}${row("抵押品價值",q=>fmt(q.collateral))}${row("EBITDA 利息保障",q=>q.icr===null?"無借款":f1(q.icr)+"×")}${row("抵押品 ÷ 剩餘債務",q=>q.cov===null?"無借款":f1(q.cov)+"×")}</tbody>`;
+  $("years").innerHTML=`<thead><tr><th>億元</th>${r.rows.map(q=>`<th class="num">第 ${q.t} 年</th>`).join("")}</tr></thead><tbody>${row("長約認列營收",q=>fmt(q.contract))}${row("長約實際收款",q=>fmt(q.collect))}${row("現貨營收",q=>fmt(q.spot))}${row("EBITDA",q=>fmt(q.ebitda))}${row("利息",q=>fmt(q.interest))}${row("到期本金",q=>fmt(q.principal))}${row("簡化息後營運現金流",q=>fmt(q.ocf))}${row("追加資金（增資）",q=>q.inj>0?fmt(q.inj):"—")}${row("期末現金餘額",q=>fmt(q.cash))}${row("剩餘債務",q=>fmt(q.debt))}${row("抵押品價值",q=>fmt(q.collateral))}${row("EBITDA 利息保障",q=>q.icr===null?"無借款":f1(q.icr)+"×")}${row("抵押品 ÷ 剩餘債務",q=>q.cov===null?"無借款":f1(q.cov)+"×")}</tbody>`;
 }
 function renderCmp(){
   $("opts").innerHTML=Object.entries(OPTS).map(([k,o])=>`<button type="button" data-opt="${k}" class="${st.opt===k?"pick":""}"><b>${k==="0"?"":k+"・"}${o.t}</b><small>${o.d}</small></button>`).join("");
@@ -338,11 +339,14 @@ function renderCmp(){
   const base=model({});
   const P=Object.entries(OPTS).map(([k,o])=>({k,o,r:model(o.o),s:model(Object.assign({stress:true},o.o))}));
   const best=(f,hi)=>{const v=P.map(f);const b=hi?Math.max(...v):Math.min(...v);return v.map(x=>x===b)};
-  const b1=best(p=>p.r.minIcr??99,true),b2=best(p=>p.r.equityAtWall,false),b3=best(p=>p.r.covOrig,true),b4=best(p=>p.s.equityInj,false);
-  $("cmp").innerHTML=`<thead><tr><th>做法</th><th class="num">投資</th><th class="num">新增借款</th><th class="num">新增股本</th><th class="num">最低利息保障</th><th class="num">到期牆</th><th class="num">需增資</th><th class="num">第 5 年抵押／原借款</th><th class="num">客戶砍半：追加資金</th><th class="num">第 8 年剩餘債務</th><th class="num">第 8 年現金</th></tr></thead><tbody>${P.map((p,i)=>`<tr class="${p.k===st.opt?"pick":""}"><td><b>${p.k==="0"?"基準":p.k}</b> ${p.o.t}</td><td class="num">${fmt(p.r.capex)}</td><td class="num">${fmt(p.r.debt0-base.debt0)}</td><td class="num">${fmt(p.r.equity0-base.equity0)}</td><td class="num ${b1[i]?"best":""}">${p.r.minIcr===null?"無借款":f1(p.r.minIcr)+"×"}</td><td class="num">${fmt(p.r.wall)}</td><td class="num ${b2[i]?"best":""}">${fmt(p.r.equityAtWall)}</td><td class="num ${b3[i]?"best":""}">${f1(p.r.covOrig)}×</td><td class="num ${b4[i]?"best":""}">${fmt(p.s.equityInj)}</td><td class="num">${fmt(p.r.debt8)}</td><td class="num">${fmt(p.r.cash8)}</td></tr>`).join("")}</tbody>`;
+  const b1=best(p=>p.r.minIcr??99,true),b2=best(p=>p.r.equityAtWall,false),b3=best(p=>p.r.covOrig,true),b4=best(p=>p.s.equityInj,false),b5=best(p=>p.r.equityInj,false);
+  OPTS.A.d=`借款比例不變：新增借款約 ${fmt(P.find(p=>p.k==="A").r.debt0-base.debt0)} 億、股本約 ${fmt(P.find(p=>p.k==="A").r.equity0-base.equity0)} 億`;
+  $("cmp").innerHTML=`<thead><tr><th>做法</th><th class="num">投資</th><th class="num">新增借款</th><th class="num">新增股本</th><th class="num">最低利息保障</th><th class="num">到期牆</th><th class="num">第 5 年增資缺口</th><th class="num">八年累計追加資金</th><th class="num">第 5 年抵押／原借款</th><th class="num">客戶砍半：八年追加</th><th class="num">第 8 年剩餘債務</th><th class="num">第 8 年現金</th></tr></thead><tbody>${P.map((p,i)=>`<tr class="${p.k===st.opt?"pick":""}"><td><b>${p.k==="0"?"基準":p.k}</b> ${p.o.t}</td><td class="num">${fmt(p.r.capex)}</td><td class="num">${fmt(p.r.debt0-base.debt0)}</td><td class="num">${fmt(p.r.equity0-base.equity0)}</td><td class="num ${b1[i]?"best":""}">${p.r.minIcr===null?"無借款":f1(p.r.minIcr)+"×"}</td><td class="num">${fmt(p.r.wall)}</td><td class="num ${b2[i]?"best":""}">${fmt(p.r.equityAtWall)}</td><td class="num ${b5[i]?"best":""}">${fmt(p.r.equityInj)}</td><td class="num ${b3[i]?"best":""}">${f1(p.r.covOrig)}×</td><td class="num ${b4[i]?"best":""}">${fmt(p.s.equityInj)}</td><td class="num">${fmt(p.r.debt8)}</td><td class="num">${fmt(p.r.cash8)}</td></tr>`).join("")}</tbody>`;
   const a=P.find(p=>p.k==="A").r,c=P.find(p=>p.k==="C").r,d=P.find(p=>p.k==="D").r,z=base;
-  $("cmpNote").textContent=`擴一倍不改變比率，只把到期牆從 ${fmt(z.wall)} 億放大到 ${fmt(a.wall)} 億、需增資從 ${fmt(z.equityAtWall)} 億變 ${fmt(a.equityAtWall)} 億。預付款（C）讓期初借款少 ${fmt(a.debt0-c.debt0)} 億，但合約期內每年少收同樣的錢，需增資 ${fmt(c.equityAtWall)} 億；供應商承購（D）讓現貨端有底，需增資 ${fmt(d.equityAtWall)} 億，代價是供應商、客戶與資金提供者的風險綁在一起。沒有一種做法能靠本身還清第 5 年的本金，差別只在缺口多大、由誰補。`;
+  const selfPay=P.filter(p=>p.r.wall<=0).map(p=>p.o.t);
+  $("cmpNote").textContent=`擴一倍不改變比率，只把到期牆從 ${fmt(z.wall)} 億放大到 ${fmt(a.wall)} 億、第 5 年增資缺口從 ${fmt(z.equityAtWall)} 億變 ${fmt(a.equityAtWall)} 億。預付款（C）讓期初借款比 A 少 ${fmt(a.debt0-c.debt0)} 億，但合約年限 ${st.term} 年內每年少收 ${fmt(c.prepayCash/st.term)} 億，第 5 年增資缺口 ${fmt(c.equityAtWall)} 億；供應商承購（D）讓現貨端有底，缺口 ${fmt(d.equityAtWall)} 億，代價是供應商、客戶與資金提供者的風險綁在一起。${selfPay.length?`在目前假設下，能靠自己還清第 5 年本金的做法：${selfPay.join("、")}。`:"在目前假設下，沒有一種做法能靠本身還清第 5 年本金，差別只在缺口多大、由誰補。"}後續年度假設所需增資均成功到位；未到位時，公司可能無法持續營運。`;
   CMP=P;
+  $("opts").innerHTML=Object.entries(OPTS).map(([k,o])=>`<button type="button" data-opt="${k}" class="${st.opt===k?"pick":""}"><b>${k==="0"?"":k+"・"}${o.t}</b><small>${o.d}</small></button>`).join("");
 }
 function setSt(obj){Object.assign(st,obj);
   const map={cov:[v=>Math.round(v*100),v=>v+"%"],term:[v=>v,v=>v+" 年"],renew:[v=>Math.round(v*100),v=>v+"%"],conc:[v=>Math.round(v*100),v=>v+"%"],util:[v=>Math.round(v*100),v=>v+"%"],lev:[v=>Math.round(v*100),v=>v+"%"],rate:[v=>Math.round(v*100),v=>v+"%"],refi:[v=>Math.round(v*100),v=>"+"+v+" pt"],haircut:[v=>Math.round(v*100),v=>v+"%"]};
@@ -366,26 +370,28 @@ function assumptionText(){return `${OPTS[st.opt].t}；長約覆蓋 ${pct(st.cov)
 $("bBtn").addEventListener("click",async()=>{
   const btn=$("bBtn"),out=$("bOut");
   if(location.protocol==="file:"){out.innerHTML='<p class="note">即時 AI 只能在網站上使用。</p>';return}
-  const {r,s}=LAST, P=CMP;
+  const {r,s}=LAST, P=CMP, snapKey=JSON.stringify(st), snapText=assumptionText();   // 按下當下的假設快照
   const facts={
-    公司:"虛構的 AI 算力公司，單位新台幣億元",假設:assumptionText(),
+    公司:"虛構的 AI 算力公司，單位新台幣億元",假設:snapText,
     燈號:{EBITDA利息保障倍數:icrCls(r.minIcr),到期牆:r.equityAtWall>0?"bad":r.wall>0?"warn":"ok",第5年抵押品除以原始借款:r.covOrig>=1?"ok":r.covOrig>=.7?"warn":"bad",最大客戶砍半:(s.outYear!==null||s.equityInj>r.equityInj+1)?"bad":icrCls(s.minIcr)==="ok"?"ok":"warn"},
     最低EBITDA利息保障倍數:r.minIcr===null?"無借款":f1(r.minIcr)+" 倍",第5年到期牆:fmt(r.wall)+" 億（原始借款 "+fmt(r.debt0)+" 億，再融資上限 "+fmt(r.refiCap)+" 億，需增資 "+fmt(r.equityAtWall)+" 億）",
     第5年抵押品除以原始借款:f1(r.covOrig)+" 倍",最大客戶砍半:(s.outYear!==null?"第 "+s.outYear+" 年現金耗盡，":"")+"八年需追加資金 "+fmt(s.equityInj)+" 億",第8年剩餘債務:fmt(r.debt8)+" 億",
-    五種做法:P.map(p=>`${p.o.t}：新增借款 ${fmt(p.r.debt0-P[0].r.debt0)}、最低利息保障 ${p.r.minIcr===null?"無借款":f1(p.r.minIcr)+" 倍"}、到期牆 ${fmt(p.r.wall)}、需增資 ${fmt(p.r.equityAtWall)}、客戶砍半需追加 ${fmt(p.s.equityInj)}、第 8 年剩餘債務 ${fmt(p.r.debt8)}`),
+    五種做法:P.map(p=>`${p.o.t}：新增借款 ${fmt(p.r.debt0-P[0].r.debt0)}、最低利息保障 ${p.r.minIcr===null?"無借款":f1(p.r.minIcr)+" 倍"}、第 5 年到期牆 ${fmt(p.r.wall)}、第 5 年增資缺口 ${fmt(p.r.equityAtWall)}、八年累計追加資金 ${fmt(p.r.equityInj)}、客戶砍半八年追加 ${fmt(p.s.equityInj)}、第 8 年剩餘債務 ${fmt(p.r.debt8)}`),
+    模型前提:"後續年度假設所需增資均成功到位；第 8 年現金與剩餘債務以此為前提",
   };
   btn.disabled=true;out.innerHTML='<p class="note">AI 撰寫中，通常約 10–30 秒……</p>';track("ai_run","neocloud-brief");
   try{
     const resp=await fetch("/api/ai/neocloud-brief",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({text:JSON.stringify(facts)})});
     const j=await resp.json().catch(()=>({}));
     if(!resp.ok||!j.ok){out.innerHTML=`<p class="note">${AI_ERR[j.error]||"這次沒有取得完整結果，請再按一次。"}</p>`;track("ai_fail",j.error||String(resp.status));return}
-    const d=j.result, L=x=>Array.isArray(x)?x:[]; briefKey=JSON.stringify(st);
+    const d=j.result, L=x=>Array.isArray(x)?x:[]; briefKey=snapKey;
     out.innerHTML=`<div class="stale" id="stale" hidden>假設已更新，這份早報是依先前的假設產生的，請重新產生。</div><div class="brief"><h3>${esc(d.headline)}</h3>
-      <p class="note">產生時的假設：${esc(assumptionText())}</p>
+      <p class="note">產生時的假設：${esc(snapText)}</p>
       <div><b>問題在哪一段</b><ul>${L(d.problems).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
       <div><b>要做的決定</b><ul>${L(d.decisions).map(x=>`<li><b>${esc(x.decision)}</b>（${esc(x.owner)}）：${esc(x.tradeoff)}</li>`).join("")}</ul></div>
       <div><b>先去確認什麼</b><ul>${L(d.questions).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
       <p class="note">由開源模型 ${esc(j.model)} 依頁面算好的數字撰寫；數字若與上方不同，以上方規則試算為準。</p></div>`;
+    if(JSON.stringify(st)!==snapKey) $("stale").hidden=false;   // 等待期間改了假設
     track("ai_ok","neocloud-brief");
   }catch(e){out.innerHTML='<p class="note">連線中斷，請再按一次。</p>';track("ai_fail","network")}
   finally{btn.disabled=false}
