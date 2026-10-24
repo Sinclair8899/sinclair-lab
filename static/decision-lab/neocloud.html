@@ -161,7 +161,7 @@ svg.chart{width:100%;height:auto;display:block}
     <div><span class="label">規則試算・八年推演</span><h2>營運收支、到期資金缺口、抵押覆蓋，三張圖共用年份</h2></div>
     <div class="charts">
       <div><h3>營運收支（億元）</h3><div class="legend"><span><i style="background:var(--accent)"></i>長約認列營收</span><span><i style="background:var(--line)"></i>現貨營收</span><span><i style="background:var(--inv)"></i>利息</span><span><s style="border-color:var(--ok)"></s>期末現金餘額</span></div><svg class="chart" id="c1" viewBox="0 0 320 220"></svg></div>
-      <div><h3>到期資金缺口（第 5 年，億元）</h3><div class="legend"><span><i style="background:var(--inv)"></i>到期本金</span><span><i style="background:var(--ok)"></i>期末現金可還</span><span><i style="background:var(--accent)"></i>再融資上限</span><span><i style="background:var(--bad)"></i>需增資</span></div><svg class="chart" id="c2" viewBox="0 0 320 220"></svg></div>
+      <div><h3>到期資金缺口（第 5 年，億元）</h3><div class="legend"><span><i style="background:var(--inv)"></i>到期本金</span><span><i style="background:var(--ok)"></i>到期前可用現金</span><span><i style="background:var(--accent)"></i>再融資上限</span><span><i style="background:var(--bad)"></i>需增資</span></div><svg class="chart" id="c2" viewBox="0 0 320 220"></svg></div>
       <div><h3>抵押覆蓋（當年抵押品 ÷ 剩餘債務）</h3><div class="legend"><span><s style="border-color:var(--ai)"></s>覆蓋倍數</span><span><s style="border-color:var(--muted);border-top-style:dashed"></s>1.0×</span></div><svg class="chart" id="c3" viewBox="0 0 320 220"></svg></div>
     </div>
     <div class="panel tablebox"><table id="years"></table></div>
@@ -303,7 +303,7 @@ function render(){
     <div><span class="label">資金來源（期初）</span><div class="row"><span>借款（${pct(st.lev)} × 投資額${r.prepayCash?"，扣預付款":""}）</span><b>${fmt(r.debt0)}</b></div>${r.prepayCash?`<div class="row"><span>客戶預付款</span><b>${fmt(r.prepayCash)}</b></div>`:""}<div class="row"><span>股本</span><b>${fmt(r.equity0)}</b></div><div class="row tot"><span>合計</span><b>${fmt(r.debt0+r.prepayCash+r.equity0)}</b></div></div>`;
   drawCharts(r); renderYears(r); renderCmp();
   LAST={r,s};
-  if(briefKey&&briefKey!==JSON.stringify(st)) { const n=$("stale"); if(n) n.hidden=false; }
+  { const n=$("stale"); if(n&&briefKey) n.hidden=(briefKey===JSON.stringify(st)); }
 }
 function svgOf(id){const svg=$(id);svg.innerHTML="";const NS="http://www.w3.org/2000/svg";return {svg,mk:(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);svg.appendChild(e);return e},txt:(x,y,s,a={})=>{const e=document.createElementNS(NS,"text");Object.entries(Object.assign({x,y,"font-size":10,fill:"var(--muted)","font-family":"IBM Plex Mono,monospace"},a)).forEach(([k,v])=>e.setAttribute(k,v));e.textContent=s;svg.appendChild(e);return e}}}
 function drawCharts(r){
@@ -315,7 +315,7 @@ function drawCharts(r){
     mk("path",{d:r.rows.map((q,i)=>(i?"L":"M")+x(i)+" "+y(q.cash)).join(" "),fill:"none",stroke:"var(--ok)","stroke-width":2.5});
     r.rows.forEach((q,i)=>{mk("circle",{cx:x(i),cy:y(q.cash),r:3,fill:q.inj>0?"var(--bad)":"var(--ok)"});});
   }
-  { const {mk,txt}=svgOf("c2"); const items=[["到期本金",r.debt0,"var(--inv)"],["現金可還",r.debt0-r.wall,"var(--ok)"],["再融資上限",r.refiCap,"var(--accent)"],["需增資",r.equityAtWall,"var(--bad)"]];
+  { const {mk,txt}=svgOf("c2"); const items=[["到期本金",r.debt0,"var(--inv)"],["到期前可用現金",r.debt0-r.wall,"var(--ok)"],["再融資上限",r.refiCap,"var(--accent)"],["需增資",r.equityAtWall,"var(--bad)"]];
     const max=Math.max(...items.map(i=>i[1]),1)*1.15, bwid=(W-PL-PR)/items.length, y=v=>PT+(1-v/max)*(H-PT-PB);
     items.forEach((it,i)=>{const xx=PL+i*bwid+bwid*.2;mk("rect",{x:xx,y:y(it[1]),width:bwid*.6,height:y(0)-y(it[1]),fill:it[2],rx:3});txt(xx+bwid*.3,y(it[1])-4,fmt(it[1]),{"text-anchor":"middle",fill:"var(--ink)"});txt(xx+bwid*.3,H-8,it[0],{"text-anchor":"middle","font-family":"inherit"});});
     if(r.wall<=0) txt(W/2,H/2,"期末現金足以還本",{"text-anchor":"middle",fill:"var(--ok)","font-family":"inherit"});
