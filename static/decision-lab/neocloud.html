@@ -142,7 +142,8 @@ details.bg p{margin-top:8px;color:var(--muted);font-size:.9rem}
     <span class="eyebrow">AI LAB · 現金循環系列 06 · AI 時代的資本循環</span>
     <div class="hero">
       <div>
-        <div class="big"><span id="heroGap">212</span><small>億</small></div>
+        <span class="label">第五年增資缺口</span>
+        <div class="big"><span id="heroGap">212</span><small>億</small><small id="heroSub"></small></div>
         <span class="tag" id="heroTag">預設教學情境・暫緩擴張</span>
         <h1 id="heroH1">訂單很滿，第五年仍缺 212 億。<br>一家投資 1,000 億的算力公司，為什麼需要再次增資？</h1>
         <div class="cta"><a class="btn" href="#inputs" style="text-decoration:none">試著縮小這個缺口</a><a href="index.html" class="note">← 現金循環總覽</a></div>
@@ -228,7 +229,8 @@ details.bg p{margin-top:8px;color:var(--muted);font-size:.9rem}
     <p class="note" style="margin-top:4px">上方已選的方案就是你的決定。寫下你認為這個決策最依賴的假設，產生一張可複製的決策摘要；老闆早報可以再幫你整理。</p></div>
     <div class="decide">
       <label for="assume" class="note">這個決策最依賴的假設是……</label>
-      <input type="text" id="assume" maxlength="80" placeholder="例如：最大客戶四年後願意以六折以上續約">
+      <p class="note" id="assumeHint"></p>
+      <input type="text" id="assume" maxlength="80" placeholder="可以直接採用上方建議，或改寫成你自己的判斷">
       <div class="sum" id="decSum"></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="copyDec" type="button">複製決策摘要</button></div>
     </div>
@@ -317,7 +319,8 @@ const OPTS={
 };
 const icrCls=v=>v===null?"ok":v>=1.5?"ok":v>=1.1?"warn":"bad";
 function lamp(cls,label,val,sub){return `<div class="lamp ${cls}"><span class="label">${label}</span><b>${val}</b><span class="s">${sub}</span></div>`}
-let LAST=null, CMP=null, briefKey=null, PREV=null, prevSt=null;
+let LAST=null, CMP=null, briefKey=null, PREV=null, prevSt=null, gest=null, presetLabel=null;
+const PRESET_NAME={stable:"合約穩定",renew:"續約降價",tight:"融資收緊",reset:"重設"};
 const LBL={cov:"長約覆蓋",term:"長約年限",renew:"續約價格",conc:"最大客戶占比",util:"現貨利用率",lev:"借款比例",rate:"借款利率",refi:"再融資加碼",life:"GPU 壽命",haircut:"銀行折價",opt:"方案"};
 const fv=(k,v)=>k==="term"?v+" 年":k==="life"?v+" 年":k==="opt"?OPTS[v].t:k==="refi"?"+"+Math.round(v*100)+" pt":pct(v);
 function cur(){ if(st.opt==="B") OPTS.B.o={scale:1+st.cov,cov:2*st.cov/(1+st.cov)}; return OPTS[st.opt].o; }
@@ -353,7 +356,7 @@ function render(){
     <div><span class="label">資金來源（期初）</span><div class="row"><span>借款（${pct(st.lev)} × 投資額${r.prepayCash?"，扣預付款":""}）</span><b>${fmt(r.debt0)}</b></div>${r.prepayCash?`<div class="row"><span>客戶預付款</span><b>${fmt(r.prepayCash)}</b></div>`:""}<div class="row"><span>股本</span><b>${fmt(r.equity0)}</b></div><div class="row tot"><span>合計</span><b>${fmt(r.debt0+r.prepayCash+r.equity0)}</b></div></div>`;
   // 首屏大數字與資金橋
   const gapNow=r.equityAtWall;
-  $("heroGap").textContent=fmt(gapNow); $("heroTag").textContent=(Object.keys(DEF).every(k=>st[k]===DEF[k])?"預設教學情境・":"你的假設・")+OPTS[st.opt].t;
+  $("heroGap").textContent=fmt(gapNow); $("heroSub").textContent=gapNow>0?"":(r.wall>0?`仍需再融資 ${fmt(r.wall)} 億`:(r.debt0>0?"本金可如期償還":"無借款")); $("heroTag").textContent=(Object.keys(DEF).every(k=>st[k]===DEF[k])?"預設教學情境・":"你的假設・")+OPTS[st.opt].t;
   const full=st.cov>=.6&&st.util>=.4;   // 長約占比或利用率偏低時，不再說「訂單很滿」
   $("heroH1").innerHTML=gapNow>0?`${full?"訂單很滿，第五年仍缺":"這組假設下，第五年仍缺"} ${fmt(gapNow)} 億。<br>一家投資 ${fmt(r.capex)} 億的算力公司，為什麼需要再次增資？`:(r.wall>0?`${full?"訂單很滿，第五年":"這組假設下，第五年"} ${fmt(r.wall)} 億要再融資。<br>一家投資 ${fmt(r.capex)} 億的算力公司，靠什麼借新還舊？`:`這組假設下，第五年本金還得起。<br>試著把利率拉高或把長約縮短，看缺口怎麼出現。`);
   $("stickyGap").textContent=fmt(gapNow); $("stickyOpt").textContent=OPTS[st.opt].t;
@@ -363,20 +366,26 @@ function render(){
   $("bridgeCap").innerHTML=parts.map(([c,v,l])=>`<span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px;background:var(--${c==="s-cash"?"ok":c==="s-refi"?"accent":"bad"})"></i>${l} <b>${fmt(v)}</b></span>`).join("");
   $("bridgeNote").textContent=r.debt0>0?`${fmt(r.debt0)} 億到期本金 → ${fmt(cashPart)} 億現金還本 → ${fmt(r.refi)} 億再融資（上限 ${fmt(r.refiCap)}）→ ${fmt(r.equityAtWall)} 億待補。${r.equityAtWall>0?"紅色那段就是「需要增資」：若缺口未獲補足，模型中的公司將無法如期償還第五年本金。":"這組假設下不需要增資。"}`:"";
   // 操作前後差異
-  if(PREV&&prevSt){
-    const changed=Object.keys(st).filter(k=>st[k]!==prevSt[k]);
-    if(changed.length){const k=changed[0];const d=gapNow-PREV.r.equityAtWall;
+  const baseR=gest?gest.r:PREV&&PREV.r, baseSt=gest?gest.st:prevSt;   // 拖動中以開始拖動時為基準
+  if(baseR&&baseSt){
+    const changed=Object.keys(st).filter(k=>st[k]!==baseSt[k]);
+    if(changed.length){const k=changed[0];const d=gapNow-baseR.equityAtWall;
       $("delta").hidden=false;
-      $("delta").innerHTML=k==="opt"?`你選擇了<b>${OPTS[st.opt].t}</b>：相對基準，期初${r.debt0-CMP[0].r.debt0>=0?"多借":"少借"} <b>${fmt(Math.abs(r.debt0-CMP[0].r.debt0))}</b> 億${r.prepayCash?`，合約年限內每年少收 <b>${fmt(r.prepayCash/st.term)}</b> 億`:""}；第 5 年增資缺口 <b>${fmt(CMP[0].r.equityAtWall)} → ${fmt(gapNow)}</b> 億。`
-        :`${LBL[k]}由 <b>${fv(k,prevSt[k])}</b> 調至 <b>${fv(k,st[k])}</b> → 第 5 年增資缺口 <b>${fmt(PREV.r.equityAtWall)} → ${fmt(gapNow)}</b> 億（${d>=0?"+":"−"}${fmt(Math.abs(d))}），最低利息保障 <b>${PREV.r.minIcr===null?"無借款":f1(PREV.r.minIcr)+"×"} → ${r.minIcr===null?"無借款":f1(r.minIcr)+"×"}</b>。`;
+      $("delta").innerHTML=presetLabel?`已切換「${presetLabel}」情境，${changed.filter(x=>x!=="opt").map(x=>LBL[x]).join("、")}同步更新。第 5 年增資缺口 <b>${fmt(baseR.equityAtWall)} → ${fmt(gapNow)}</b> 億（${d>=0?"+":"−"}${fmt(Math.abs(d))}），最低利息保障 <b>${baseR.minIcr===null?"無借款":f1(baseR.minIcr)+"×"} → ${r.minIcr===null?"無借款":f1(r.minIcr)+"×"}</b>。`
+        :k==="opt"?`你選擇了<b>${OPTS[st.opt].t}</b>：相對基準，期初${r.debt0-CMP[0].r.debt0>=0?"多借":"少借"} <b>${fmt(Math.abs(r.debt0-CMP[0].r.debt0))}</b> 億${r.prepayCash?`，合約年限內每年少收 <b>${fmt(r.prepayCash/st.term)}</b> 億`:""}；第 5 年增資缺口 <b>${fmt(CMP[0].r.equityAtWall)} → ${fmt(gapNow)}</b> 億。`
+        :`${LBL[k]}由 <b>${fv(k,baseSt[k])}</b> 調至 <b>${fv(k,st[k])}</b> → 第 5 年增資缺口 <b>${fmt(baseR.equityAtWall)} → ${fmt(gapNow)}</b> 億（${d>=0?"+":"−"}${fmt(Math.abs(d))}），最低利息保障 <b>${baseR.minIcr===null?"無借款":f1(baseR.minIcr)+"×"} → ${r.minIcr===null?"無借款":f1(r.minIcr)+"×"}</b>。`;
     }
   }
+  presetLabel=null;
   drawCharts(r); renderYears(r); renderCmp();
   LAST={r,s}; PREV={r,s}; prevSt=Object.assign({},st);
   renderDecision(r);
   { const n=$("stale"); if(n&&briefKey) n.hidden=(briefKey===JSON.stringify(st)); }
 }
+const RELY={"0":"長約到期後的續約價格與第 5 年的再融資利率，兩者都不由公司自己決定",A:"新增的 1,000 億產能也能簽到同樣條件的長約，否則缺口只是放大",B:"客戶真的會把長約簽滿新產能，而且不要求更低價格",C:"客戶願意預付，且合約年限內每年少收的錢不會讓現金在到期前先用完",D:"供應商在市場轉弱時仍履行承購承諾；供應商、客戶與資金方的風險已綁在一起"};
 function renderDecision(r){
+  const hint=$("assumeHint"); hint.innerHTML=`依方案的建議：${esc(RELY[st.opt])}　<button type="button" class="btn sm" id="useHint" style="padding:1px 8px">採用</button>`;
+  hint.querySelector("#useHint").onclick=()=>{$("assume").value=RELY[st.opt];renderDecision(LAST.r)};
   const a=($("assume").value||"").trim();
   $("decSum").textContent=`我選擇「${OPTS[st.opt].t}」。\n以目前假設，第 5 年到期本金 ${fmt(r.debt0)} 億，到期前可用現金 ${fmt(r.debt0-r.wall)} 億，可再融資 ${fmt(r.refi)} 億，仍需增資 ${fmt(r.equityAtWall)} 億；八年累計追加資金 ${fmt(r.equityInj)} 億。\n這個決策最依賴的假設是：${a||"（請在上方填寫）"}。\n假設摘要：${assumptionText()}`;
 }
@@ -430,12 +439,13 @@ function setSt(obj){Object.assign(st,obj);
 }
 document.addEventListener("input",e=>{
   const t=e.target, m={cov:v=>v/100,term:v=>+v,renew:v=>v/100,conc:v=>v/100,util:v=>v/100,lev:v=>v/100,rate:v=>v/100,refi:v=>v/100,haircut:v=>v/100};
-  if(m[t.id]){setSt({[t.id]:m[t.id](+t.value)});render();}
+  if(m[t.id]){ if(!gest&&LAST) gest={st:Object.assign({},st),r:LAST.r}; setSt({[t.id]:m[t.id](+t.value)});render();}
 });
+document.addEventListener("change",e=>{ if(e.target.type==="range") gest=null; });   // 放開滑桿（或鍵盤每一步）結束這次比較
 document.addEventListener("click",e=>{
   const l=e.target.closest("#lifeSeg button");if(l){setSt({life:+l.dataset.l});render();track("lever","life="+st.life);return}
   const o=e.target.closest("[data-opt]");if(o){st.opt=o.dataset.opt;render();track("lever","opt="+st.opt);return}
-  const pr=e.target.closest("[data-preset]");if(pr){setSt(Object.assign({},DEF,PRESETS[pr.dataset.preset]));render();track("scenario",pr.dataset.preset);}
+  const pr=e.target.closest("[data-preset]");if(pr){presetLabel=PRESET_NAME[pr.dataset.preset];gest=null;setSt(Object.assign({},DEF,PRESETS[pr.dataset.preset]));render();track("scenario",pr.dataset.preset);}
 });
 setSt({});render();
 $("assume").addEventListener("input",()=>renderDecision(LAST.r));
