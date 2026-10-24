@@ -108,29 +108,64 @@ svg.chart{width:100%;height:auto;display:block}
 .uses .row b{font-family:var(--f-mono);font-weight:500}
 .uses .tot{font-weight:700;border-top:2px solid var(--line)}
 .stale{background:var(--warn-soft);color:var(--warn);border-radius:6px;padding:8px 12px;font-size:.86rem}
-@media (max-width:820px){.opener,.ctl,.opts,.charts,.src,.uses{grid-template-columns:1fr}.lamps,.signals{grid-template-columns:1fr 1fr}}
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:end}
+.hero .big{font-family:var(--f-mono);font-size:clamp(3rem,9vw,5.2rem);line-height:1;font-weight:500;color:var(--bad);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.hero .big small{font-family:var(--f-body);font-size:1rem;color:var(--muted);margin-left:6px;font-weight:400}
+.hero .tag{display:inline-block;font-size:.74rem;padding:2px 9px;border-radius:999px;background:var(--bg);border:1px solid var(--line);color:var(--muted);margin-top:6px}
+.hero h1{margin-top:8px}
+.hero .cta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+details.bg{border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:10px 14px}
+details.bg summary{cursor:pointer;font-weight:700;font-size:.92rem}
+details.bg p{margin-top:8px;color:var(--muted);font-size:.9rem}
+.bridge{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.bridge .bar{display:flex;height:44px;border-radius:6px;overflow:hidden;background:var(--bg)}
+.bridge .seg{display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--f-mono);font-size:.86rem;min-width:0;white-space:nowrap;overflow:hidden;transition:flex-basis .25s ease}
+.bridge .s-cash{background:var(--ok)}.bridge .s-refi{background:var(--accent)}.bridge .s-gap{background:var(--bad)}
+.bridge .cap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 14px;font-size:.84rem;color:var(--muted)}
+.bridge .cap b{font-family:var(--f-mono);font-weight:500;color:var(--ink)}
+.delta{border-left:3px solid var(--inv);background:var(--inv-soft);border-radius:0 6px 6px 0;padding:8px 12px;font-size:.9rem}
+.delta b{font-family:var(--f-mono);font-weight:500}
+.sticky{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--panel);border-top:1px solid var(--line);padding:8px max(16px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:none;justify-content:space-between;align-items:center;gap:10px;font-size:.84rem}
+.sticky b{font-family:var(--f-mono);font-size:1.15rem;color:var(--bad)}
+.decide{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.decide input[type=text]{font:inherit;width:100%;padding:8px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink)}
+.decide .sum{background:var(--bg);border-radius:6px;padding:10px 12px;font-size:.95rem;white-space:pre-line}
+@media (prefers-reduced-motion:reduce){.bridge .seg{transition:none}}
+@media (max-width:820px){.opener,.ctl,.opts,.charts,.src,.uses,.hero{grid-template-columns:1fr}.lamps,.signals{grid-template-columns:1fr 1fr}.sticky{display:flex}.wrap{padding-bottom:90px}}
 </style>
 </head>
 <body>
-<div style="background:#fbefd9;color:#6b4407;font:14px/1.5 system-ui,sans-serif;padding:8px max(16px,env(safe-area-inset-left,0px));text-align:center">網站版・測試版 2026-10-23：本頁所有數字由「規則試算」依公式即時計算；「老闆早報」由開源 AI 模型把算好的結果寫成文字，不做計算。公司為虛構，數量級參考 2026 年 10 月的公開報導。</div>
+<div style="background:#fbefd9;color:#6b4407;font:14px/1.5 system-ui,sans-serif;padding:8px max(16px,env(safe-area-inset-left,0px));text-align:center">網站版・教學版 2026-10-24：數字由規則試算；早報由開源 AI 撰寫，不做計算；公司為虛構。</div>
 
 <div class="wrap">
   <header>
     <span class="eyebrow">AI LAB · 現金循環系列 06 · AI 時代的資本循環</span>
-    <h1>AI 算力公司：訂單越多、借越多，<br>合約能不能還得起債？</h1>
-    <p class="lead">2026 年 10 月，市場開始追問一個問題：新興 AI 雲端業者的算力需求很強，但資本跟不上，債券殖利率升到百分之十幾，而晶片供應商主張 GPU 可以用八年、應該成為銀行願意融資的資產。這是現金循環系列的最後一哩：把客戶長約、GPU 抵押借款、殘值假設、客戶集中與再融資放進同一個八年模型。數字為虛構公司，單位新台幣億元。</p>
-    <div class="opener">
-      <div><b>5 分鐘</b><span>調整合約覆蓋、殘值假設與利率，看四盞燈怎麼變</span></div>
-      <div><b>即時 AI</b><span>把算好的結果寫成老闆早報</span></div>
-      <div><a href="index.html"><b>← 現金循環總覽</b></a><span>和「雲端巨頭」情境、未來 5 年分頁互相對照</span></div>
+    <div class="hero">
+      <div>
+        <div class="big"><span id="heroGap">212</span><small>億</small></div>
+        <span class="tag" id="heroTag">預設教學情境・暫緩擴張</span>
+        <h1 id="heroH1">訂單很滿，第五年仍缺 212 億。<br>一家投資 1,000 億的算力公司，為什麼需要再次增資？</h1>
+        <div class="cta"><a class="btn" href="#inputs" style="text-decoration:none">試著縮小這個缺口</a><a href="index.html" class="note">← 現金循環總覽</a></div>
+      </div>
+      <details class="bg"><summary>情境背景（2026 年 10 月）</summary>
+        <p>市場開始追問：新興 AI 雲端業者的算力需求很強，但資本跟不上，債券殖利率升到百分之十幾；晶片供應商則主張 GPU 可以用八年、應該成為銀行願意融資的資產。這是現金循環系列的最後一哩：把客戶長約、GPU 抵押借款、殘值假設、客戶集中與再融資放進同一個八年模型。數字為虛構公司，單位新台幣億元。</p>
+        <p>所有數字由「規則試算」依公式即時計算；「老闆早報」由開源 AI 模型把算好的結果寫成文字，不做計算。</p>
+      </details>
     </div>
   </header>
 
   <div class="presets" aria-label="情境"><span class="note">試試情境：</span><button type="button" data-preset="stable">合約穩定</button><button type="button" data-preset="renew">續約降價</button><button type="button" data-preset="tight">融資收緊</button><button type="button" data-preset="reset">重設</button><span class="note" id="showing"></span></div>
   <div class="lamps" id="lamps" aria-label="四盞燈"></div>
+  <div class="delta" id="delta" hidden></div>
+  <section class="bridge" aria-label="第五年資金橋">
+    <div><span class="label">規則試算・第 5 年到期牆</span><h2 id="bridgeH">800 億本金，怎麼還？</h2></div>
+    <div class="bar" id="bridgeBar"></div>
+    <div class="cap" id="bridgeCap"></div>
+    <p class="note" id="bridgeNote"></p>
+  </section>
   <section class="diag" id="diag" aria-label="診斷"></section>
 
-  <section class="sec" aria-label="輸入">
+  <section class="sec" aria-label="輸入" id="inputs">
     <div><span class="label">規則試算・你的假設</span><h2>合約、借款、殘值：三組假設決定這家公司能不能活</h2></div>
     <div class="ctl">
       <div><b>合約端</b>
@@ -187,6 +222,17 @@ svg.chart{width:100%;height:auto;display:block}
     </div>
   </section>
 
+  <section class="sec" aria-label="你的決策">
+    <div><span class="label">決策練習</span><h2>以目前假設，你會怎麼做？</h2>
+    <p class="note" style="margin-top:4px">上方已選的方案就是你的決定。寫下你認為這個決策最依賴的假設，產生一張可複製的決策摘要；老闆早報可以再幫你整理。</p></div>
+    <div class="decide">
+      <label for="assume" class="note">這個決策最依賴的假設是……</label>
+      <input type="text" id="assume" maxlength="80" placeholder="例如：最大客戶四年後願意以六折以上續約">
+      <div class="sum" id="decSum"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="copyDec" type="button">複製決策摘要</button></div>
+    </div>
+  </section>
+
   <section class="sec" aria-label="即時 AI">
     <div class="panel console">
       <div><span class="eyebrow">即時 AI · 開源模型 · 老闆早報</span><h3 style="margin-top:2px">把上面的結果，寫成一頁董事會看得懂的早報</h3>
@@ -210,6 +256,7 @@ svg.chart{width:100%;height:auto;display:block}
   <p class="callout">這一頁和系列其他模組講的是同一件事，只是規模不同：客戶的承諾決定你敢對資金提供者承諾多少。一家板卡廠押的是記憶體長約，一家算力公司押的是一千億的 GPU 借款；兩者的問題都是「這筆錢是替誰的樂觀先付的」。AI 時代的競爭有三層：技術、資本、價值實現；前兩層的投資，終究要靠第三層的現金流來還。</p>
   <p class="note">本頁公司、合約與數字皆為虛構示範，數量級參考公開報導，僅供教學與研究用途，與作者任職或服務的任何公司無關，亦非投資建議。</p>
 </div>
+<div class="sticky" id="sticky" aria-live="polite"><span id="stickyOpt">暫緩擴張</span><span>第 5 年增資缺口 <b id="stickyGap">212</b> 億</span><a href="#inputs" style="color:var(--accent);text-decoration:none;font-weight:700">調整 ↑</a></div>
 
 <script>
 const $=id=>document.getElementById(id);
@@ -269,7 +316,9 @@ const OPTS={
 };
 const icrCls=v=>v===null?"ok":v>=1.5?"ok":v>=1.1?"warn":"bad";
 function lamp(cls,label,val,sub){return `<div class="lamp ${cls}"><span class="label">${label}</span><b>${val}</b><span class="s">${sub}</span></div>`}
-let LAST=null, CMP=null, briefKey=null;
+let LAST=null, CMP=null, briefKey=null, PREV=null, prevSt=null;
+const LBL={cov:"長約覆蓋",term:"長約年限",renew:"續約價格",conc:"最大客戶占比",util:"現貨利用率",lev:"借款比例",rate:"借款利率",refi:"再融資加碼",life:"GPU 壽命",haircut:"銀行折價",opt:"方案"};
+const fv=(k,v)=>k==="term"?v+" 年":k==="life"?v+" 年":k==="opt"?OPTS[v].t:k==="refi"?"+"+Math.round(v*100)+" pt":pct(v);
 function cur(){ if(st.opt==="B") OPTS.B.o={scale:1+st.cov,cov:2*st.cov/(1+st.cov)}; return OPTS[st.opt].o; }
 function render(){
   const o=cur(), r=model(o), s=model(Object.assign({stress:true},o));
@@ -301,9 +350,33 @@ function render(){
   // 資金來源與用途
   $("uses").innerHTML=`<div><span class="label">資金用途（期初）</span><div class="row"><span>GPU 與機房投資</span><b>${fmt(r.capex)}</b></div><div class="row"><span>現金準備</span><b>${fmt(r.reserve)}</b></div><div class="row tot"><span>合計</span><b>${fmt(r.uses)}</b></div></div>
     <div><span class="label">資金來源（期初）</span><div class="row"><span>借款（${pct(st.lev)} × 投資額${r.prepayCash?"，扣預付款":""}）</span><b>${fmt(r.debt0)}</b></div>${r.prepayCash?`<div class="row"><span>客戶預付款</span><b>${fmt(r.prepayCash)}</b></div>`:""}<div class="row"><span>股本</span><b>${fmt(r.equity0)}</b></div><div class="row tot"><span>合計</span><b>${fmt(r.debt0+r.prepayCash+r.equity0)}</b></div></div>`;
+  // 首屏大數字與資金橋
+  const gapNow=r.equityAtWall;
+  $("heroGap").textContent=fmt(gapNow); $("heroTag").textContent=(Object.keys(DEF).every(k=>st[k]===DEF[k])?"預設教學情境・":"你的假設・")+OPTS[st.opt].t;
+  $("heroH1").innerHTML=gapNow>0?`訂單很滿，第五年仍缺 ${fmt(gapNow)} 億。<br>一家投資 ${fmt(r.capex)} 億的算力公司，為什麼需要再次增資？`:(r.wall>0?`訂單很滿，第五年 ${fmt(r.wall)} 億要再融資。<br>一家投資 ${fmt(r.capex)} 億的算力公司，靠什麼借新還舊？`:`這組假設下，第五年本金還得起。<br>試著把利率拉高或把長約縮短，看缺口怎麼出現。`);
+  $("stickyGap").textContent=fmt(gapNow); $("stickyOpt").textContent=OPTS[st.opt].t;
+  const cashPart=r.debt0-r.wall, parts=[["s-cash",cashPart,"到期前可用現金"],["s-refi",r.refi,"再融資"],["s-gap",r.equityAtWall,"待補（增資）"]];
+  $("bridgeH").textContent=r.debt0>0?`${fmt(r.debt0)} 億本金，怎麼還？`:"沒有借款，沒有到期牆";
+  $("bridgeBar").innerHTML=r.debt0>0?parts.map(([c,v,l])=>`<div class="seg ${c}" style="flex:0 0 ${Math.max(0,v/r.debt0*100)}%" title="${l} ${fmt(v)}">${v/r.debt0>.12?fmt(v):""}</div>`).join(""):"";
+  $("bridgeCap").innerHTML=parts.map(([c,v,l])=>`<span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px;background:var(--${c==="s-cash"?"ok":c==="s-refi"?"accent":"bad"})"></i>${l} <b>${fmt(v)}</b></span>`).join("");
+  $("bridgeNote").textContent=r.debt0>0?`${fmt(r.debt0)} 億到期本金 → ${fmt(cashPart)} 億現金還本 → ${fmt(r.refi)} 億再融資（上限 ${fmt(r.refiCap)}）→ ${fmt(r.equityAtWall)} 億待補。${r.equityAtWall>0?"紅色那段就是「需要增資」：沒有人補上，公司就走不到第 6 年。":"這組假設下不需要增資。"}`:"";
+  // 操作前後差異
+  if(PREV&&prevSt){
+    const changed=Object.keys(st).filter(k=>st[k]!==prevSt[k]);
+    if(changed.length){const k=changed[0];const d=gapNow-PREV.r.equityAtWall;
+      $("delta").hidden=false;
+      $("delta").innerHTML=k==="opt"?`你選擇了<b>${OPTS[st.opt].t}</b>：相對基準，期初${r.debt0-CMP[0].r.debt0>=0?"多借":"少借"} <b>${fmt(Math.abs(r.debt0-CMP[0].r.debt0))}</b> 億${r.prepayCash?`，合約年限內每年少收 <b>${fmt(r.prepayCash/st.term)}</b> 億`:""}；第 5 年增資缺口 <b>${fmt(CMP[0].r.equityAtWall)} → ${fmt(gapNow)}</b> 億。`
+        :`${LBL[k]}由 <b>${fv(k,prevSt[k])}</b> 調至 <b>${fv(k,st[k])}</b> → 第 5 年增資缺口 <b>${fmt(PREV.r.equityAtWall)} → ${fmt(gapNow)}</b> 億（${d>=0?"+":"−"}${fmt(Math.abs(d))}），最低利息保障 <b>${PREV.r.minIcr===null?"無借款":f1(PREV.r.minIcr)+"×"} → ${r.minIcr===null?"無借款":f1(r.minIcr)+"×"}</b>。`;
+    }
+  }
   drawCharts(r); renderYears(r); renderCmp();
-  LAST={r,s};
+  LAST={r,s}; PREV={r,s}; prevSt=Object.assign({},st);
+  renderDecision(r);
   { const n=$("stale"); if(n&&briefKey) n.hidden=(briefKey===JSON.stringify(st)); }
+}
+function renderDecision(r){
+  const a=($("assume").value||"").trim();
+  $("decSum").textContent=`我選擇「${OPTS[st.opt].t}」。\n以目前假設，第 5 年到期本金 ${fmt(r.debt0)} 億，到期前可用現金 ${fmt(r.debt0-r.wall)} 億，可再融資 ${fmt(r.refi)} 億，仍需增資 ${fmt(r.equityAtWall)} 億；八年累計追加資金 ${fmt(r.equityInj)} 億。\n這個決策最依賴的假設是：${a||"（請在上方填寫）"}。\n假設摘要：${assumptionText()}`;
 }
 function svgOf(id){const svg=$(id);svg.innerHTML="";const NS="http://www.w3.org/2000/svg";return {svg,mk:(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);svg.appendChild(e);return e},txt:(x,y,s,a={})=>{const e=document.createElementNS(NS,"text");Object.entries(Object.assign({x,y,"font-size":10,fill:"var(--muted)","font-family":"IBM Plex Mono,monospace"},a)).forEach(([k,v])=>e.setAttribute(k,v));e.textContent=s;svg.appendChild(e);return e}}}
 function drawCharts(r){
@@ -363,6 +436,10 @@ document.addEventListener("click",e=>{
   const pr=e.target.closest("[data-preset]");if(pr){setSt(Object.assign({},DEF,PRESETS[pr.dataset.preset]));render();track("scenario",pr.dataset.preset);}
 });
 setSt({});render();
+$("assume").addEventListener("input",()=>renderDecision(LAST.r));
+$("copyDec").addEventListener("click",()=>{const t=$("decSum").textContent;const done=()=>{$("copyDec").textContent="已複製";setTimeout(()=>$("copyDec").textContent="複製決策摘要",1800);track("lever","copy_decision")};
+  const sel=()=>{const rg=document.createRange();rg.selectNodeContents($("decSum"));const se=getSelection();se.removeAllRanges();se.addRange(rg);$("copyDec").textContent="已選取，請按複製"};
+  try{navigator.clipboard.writeText(t).then(done,sel)}catch(e){sel()}});
 
 /* 老闆早報 */
 const AI_ERR={rate_limited:"你這段時間已經試了好幾次，請 10 分鐘後再試。",daily_cap:"今天的 AI 使用次數已達上限，請明天再來。",ai_unavailable:"AI 服務目前沒有啟用，請稍後再試。",no_result:"這次 AI 沒有產生完整結果，請再按一次。"};
