@@ -3,13 +3,23 @@ title: "About"
 layout: "single"
 url: "/about/"
 date: 2026-08-06
-lastmod: 2026-08-11
+lastmod: 2026-10-27
 schema_type: "AboutPage"
 summary: about
 ShowToc: false
 ---
 
 Sinclair AI Lab is the personal lab notebook of Sinclair Huang: working hypotheses, documented experiments, and failures worth examining, mostly in applied AI.
+
+## Where the thinking began
+
+The lab is new. The questions behind it are not.
+
+For nearly four decades, my work has involved financial analysis, budgeting, management accounting, business systems, and corporate decision-making. From early spreadsheet models and database applications to ERP systems and enterprise strategy, I have kept returning to the same question: how can fragmented information, business processes, and professional knowledge be connected to support better decisions?
+
+AI did not create that question. It offers new ways to explore it — including possibilities that earlier technologies made difficult or impractical.
+
+**The tools evolve. The fundamental question remains: How can information become better judgment?**
 
 I'm interested in what these systems can actually do — not the demos, but the part where you try to use them for real work and find out where they hold up and where they quietly don't. Retrieval that surfaces noise instead of signal. Models that score well on benchmarks and then fail on the one question you cared about. The gap between what a tool promises and what it delivers is usually more interesting than either.
 
