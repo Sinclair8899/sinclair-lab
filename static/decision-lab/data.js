@@ -1,7 +1,7 @@
 /* 現金循環系列：共用情境資料（虛構示範）
    老闆駕駛艙（cockpit）、CRM 客戶端（crm）、供應商端（vendor）都從這裡取數字，
    任何一頁改了數字，其他頁自動跟著變，避免口徑不一致。單位：新台幣萬元。 */
-window.LAB = {
+(typeof window !== "undefined" ? window : globalThis).LAB = {
   company: {
     name: "某 AI 伺服器板卡製造商（虛構）",
     matShare: 0.85,   // 料成本占營收
@@ -42,4 +42,4 @@ window.LAB = {
     aMonthKeyMaterial: A.program.annualUnits / 12 * A.program.unitPrice * c.keyShare, // 一個月量產關鍵料 18,000
     keyMonthlyAtM4: L.customers.reduce((s, x) => s + x.fc[2], 0) * c.keyShare,       // 第 4 月關鍵料需求 27,225
   };
-})(window.LAB);
+})((typeof window !== "undefined" ? window : globalThis).LAB);

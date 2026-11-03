@@ -6,7 +6,7 @@ compatibility_date = "2026-08-06"
 directory = "./public"
 binding = "ASSETS"
 not_found_handling = "404-page"
-run_worker_first = ["/api/*"]
+run_worker_first = ["/api/*", "/mcp"]
 
 [[routes]]
 pattern = "lab.sinclairhuang.org"
@@ -20,6 +20,8 @@ binding = "AI"
 AI_MODEL = "@cf/mistralai/mistral-small-3.1-24b-instruct"
 AI_DAILY_CAP = "300"
 AI_PER_VISITOR_10MIN = "5"
+MCP_DAILY_CAP = "5000"
+MCP_PER_VISITOR_DAY = "500"
 
 # Usage statistics (D1 database "lab-stats"); tables are created automatically on first use.
 [[d1_databases]]

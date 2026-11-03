@@ -229,6 +229,13 @@ a{color:var(--accent)}
     <p class="principle">管理流程上很多工作可以交給 AI agents，但人的責任、不同部門之間的分權分責，仍然要劃分清楚。不能把所有責任丟給 AI，就什麼都不管了。</p>
   </section>
 
+  <section class="panel about" aria-label="接到你自己的 AI 助理">
+    <span class="label">用你自己的 Claude 或 ChatGPT 跑這套模型（MCP 連線）</span>
+    <p>不用登入、不用安裝。把下面這個網址加進 Claude 的「自訂連接器」（或 ChatGPT 開發者模式的 MCP 伺服器），你的 AI 助理就能直接呼叫這裡的規則：給它客戶的確認訂單、三個月預測和兌現率，它會回四盞燈和三種備料政策的比較；給它應收、存貨、應付天數，它會算現金轉換週期（CCC）與營運資金占用。數字全部由本站的公式計算，AI 只負責問與說。</p>
+    <div class="bar2" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><b class="mono" id="mcpTxt">https://lab.sinclairhuang.org/mcp</b><button class="btn ghost" id="copyMcp" type="button" data-track="module_click:mcp_copy">複製連線網址</button></div>
+    <p class="note">可用工具：lab_guide（導覽）、cockpit_diagnose（駕駛艙）、cash_cycle（現金轉換週期）、opportunity_clock（前線到研發的兩個時鐘）。推理跑在你自己的助理上，本站只記錄匿名呼叫次數；情境皆為虛構示範，用自己公司的數字時請當作教學模型。接自己的 ERP 資料做私有部署，請用下方信箱討論。</p>
+  </section>
+
   <section class="panel about" aria-label="作者">
     <span class="label">關於這個實驗室</span>
     <p>Sinclair Huang 在台灣電子、化工與生技產業累積約 30 年經驗，2008 年起參與大型 EMS 廠應付帳款四單比對系統的建置，歷時約三年完成。這裡的每個情境都來自實務，AI 負責的是把當年要靠人力與時間累積的判斷，變成每家公司都用得起的能力。</p>
@@ -293,6 +300,7 @@ function markStale(){const o=$("aiOut");if(!LASTKEY||!o.firstElementChild)return
 document.addEventListener("input",e=>{if(e.target.matches("input,select"))render()});
 document.addEventListener("click",async e=>{
   const p=e.target.closest("[data-pain]");if(p){PAIN=p.dataset.pain;document.querySelectorAll("[data-pain]").forEach(x=>x.setAttribute("aria-checked",x===p?"true":"false"));markStale();return}
+  if(e.target.id==="copyMcp"){try{await navigator.clipboard.writeText("https://lab.sinclairhuang.org/mcp");e.target.textContent="已複製"}catch(_){const r=document.createRange();r.selectNodeContents($("mcpTxt"));const sel=getSelection();sel.removeAllRanges();sel.addRange(r);e.target.textContent="已選取，請按複製"}}
   if(e.target.id==="copyMail"){try{await navigator.clipboard.writeText("research@sinclairhuang.org");e.target.textContent="已複製"}catch(_){const r=document.createRange();r.selectNodeContents($("mailTxt"));const sel=getSelection();sel.removeAllRanges();sel.addRange(r);e.target.textContent="已選取，請按複製"}}
 });
 render();
