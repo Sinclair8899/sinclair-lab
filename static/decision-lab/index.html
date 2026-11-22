@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>現金循環實驗室</title>
+<title>企業經營決策實驗室</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+TC:wght@700&display=swap">
 <style>
 /* Layout: one-column briefing for executives — question, live cash timeline, calculator, improvement levers, AI diagnosis, public case, module doors, author */
@@ -102,6 +102,12 @@ a.pmod:focus-visible,a.band:focus-visible{outline:2px solid var(--accent);outlin
 @media (max-width:760px){.cols{grid-template-columns:1fr}}
 .cta{display:flex;flex-direction:column;gap:4px;padding:16px 18px;border-radius:8px;border:1px solid var(--ai);background:var(--ai-soft);text-decoration:none;color:inherit}
 .cta b{font-size:1.1rem}
+.entries{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.entries .cta{height:100%}
+.entries .cta .tag{font-size:.82rem;font-weight:700;letter-spacing:.06em;color:var(--ai)}
+.entries .cta .go{margin-top:auto;padding-top:6px;font-weight:500;color:var(--ai)}
+@media (max-width:760px){.entries{grid-template-columns:1fr}}
+@media (max-width:480px){.entries{gap:10px}.entries .cta{padding:12px 16px}.entries .cta .note{display:none}}
 .cta:hover{box-shadow:inset 0 0 0 1px var(--ai)}
 .cta:focus-visible{outline:2px solid var(--ai);outline-offset:2px}
 .pains{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
@@ -120,18 +126,24 @@ a{color:var(--accent)}
 </style>
 </head>
 <body>
-<div style="background:#fbefd9;color:#6b4407;font:14px/1.5 system-ui,sans-serif;padding:8px max(16px,env(safe-area-inset-left,0px));text-align:center">網站版・測試版 2026-10-21：「規則試算」依公式即時計算；「情境示範」為預設結果或重播；標示「本版未提供即時 AI」的區塊需要連接 AI 模型，網站版不開放操作。</div>
+<div style="background:#fbefd9;color:#6b4407;font:14px/1.5 system-ui,sans-serif;padding:8px max(16px,env(safe-area-inset-left,0px));text-align:center">網站版・測試版 2026-11-22：「規則試算」依公式即時計算；「情境示範」為預設結果或重播；「即時 AI」區塊由開源 AI 模型分析你送出的文字。本頁的初步排查為規則試算。</div>
 
 <div class="wrap">
   <header>
-    <span class="eyebrow">AI LAB · 經營決策實驗・訂單、庫存與現金（測試版）</span>
-    <h1>把經營判斷，變成可以持續運作的 AI 工作流程</h1>
-    <p class="lead">從現金循環、採購、生產到應收管理，透過互動案例，探索 AI 如何協助企業查證資訊、協調例外與推進執行，以及哪些決定仍應由人負責。每個案例都以作者約 30 年電子、化工與生技產業的實務經驗為基礎，你可以只玩 3 分鐘，也可以展開看判斷依據、假設與導入條件。</p>
+    <span class="eyebrow">AI LAB · Business Decision Lab（測試版）</span>
+    <h1>企業經營決策實驗室</h1>
+    <p class="lead">從一個你可能正在面對的經營問題開始：做選擇，看它對時間、現金、獲利與上下游關係的影響，以及 AI 能協助查證到哪裡、哪些決定仍應由人負責。不需要先懂 CCC、MRP 或 S&amp;OP，專有名詞會在頁內說明。每個案例都以作者約 30 年電子、化工與生技產業的實務經驗為基礎。</p>
   </header>
 
-  <a class="cta" href="case-boss.html"><span class="eyebrow">開始一個經營情境 · 3 分鐘</span><b>當一次老闆：大客戶突然延後拉貨，還要求延長帳期</b><span class="note">看 AI agents 自己查採購單、應收與合約，提出方案、等你核准、執行後依回饋調整，現金與天數即時變化 →</span></a>
+  <section aria-label="從一個問題開始">
+    <h2>從一個問題開始</h2>
+    <div class="entries" style="margin-top:10px">
+      <a class="cta" href="signal.html"><span class="tag">市場機會</span><b>競品規格更好、價格更低，你要改產品、先試銷，還是暫緩？</b><span class="note">把前線回報寫成機會卡，比較五個產品決定的天數、呆料與貢獻。</span><span class="go">市場機會卡 →</span></a>
+      <a class="cta" href="case-boss.html"><span class="tag">營運危機</span><b>大客戶延後拉貨，又要延長帳期，你怎麼回應？</b><span class="note">在 13 週現金、供應與客戶關係之間取捨，看 AI agents 如何提出方案、等你核准。</span><span class="go">3 分鐘當老闆 →</span></a>
+    </div>
+  </section>
 
-  <section aria-label="試算說明"><h2>先算一算：你的現金，卡在哪裡？</h2><p class="note" style="margin-top:4px;max-width:66ch">從付錢給供應商，到收回客戶的貨款，中間有多少天，公司的錢就被卡住多少天，這就是現金轉換週期（CCC）。輸入貴公司的數字，看出錢卡在存貨、應收還是應付。</p></section>
+  <section aria-label="試算說明"><span class="label">財務模組・現金轉換週期</span><h2 style="margin-top:2px">先算一算：你的現金，卡在哪裡？</h2><p class="note" style="margin-top:4px;max-width:66ch">從付錢給供應商，到收回客戶的貨款，中間有多少天，公司的錢就被卡住多少天，這就是現金轉換週期（CCC）。輸入貴公司的數字，看出錢卡在存貨、應收還是應付。</p></section>
 
   <section class="kpis" aria-label="結論">
     <div class="panel kpi"><span class="label">現金轉換週期</span><span class="v" id="k1"></span><span class="h">現金轉換週期 = 存貨天數 + 應收天數 − 應付天數</span></div>
@@ -200,8 +212,9 @@ a{color:var(--accent)}
   </section>
 
   <section aria-label="系列全景">
-    <h2>系列全景：錢卡在哪一段，就從哪個模組看起</h2>
+    <h2>全部模組：從源頭的供需情報，到存貨、應收與應付</h2>
     <p class="note" style="margin:4px 0 12px">每個模組都可以親手操作：先體驗人工時代的辛苦，再看 AI agents 如何處理同一批工作。最上方的供需兩端情報，是三段能不能順暢運作的源頭。</p>
+    <p class="note" style="margin:0 0 12px">三種內容：數字都由<b>規則試算</b>依公式計算；<b>即時 AI</b> 用在 00、04、04A、04B、04C、06 六個模組，由開源模型分析你送出的文字或把算好的結果寫成文字，不做計算；其他模組裡的 AI 環節是<b>情境示範</b>（預設結果或重播）。</p>
     <div class="pano">
       <a class="band" href="cockpit.html"><span class="k">00 · 老闆駕駛艙</span><b>預測、備料與現金，一張表</b><span class="note">一個月確認訂單加三個月預測、預測準確度、關鍵料備料政策、應收應付天期、存貨積壓與延遲出貨，四盞燈一眼看出問題，再比較三種決策的代價</span></a>
       <a class="band" href="sop.html"><span class="k">04 · 源頭</span><b>供需情報與 S&amp;OP</b><span class="note">客戶端（CRM）與供應商端的情報，在產銷協調會議匯合，決定預測、備料與交易條件</span></a>

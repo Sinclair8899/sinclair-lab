@@ -140,13 +140,13 @@ td.wrap,th.wrap{white-space:normal}
 
 <div class="wrap">
   <header>
-    <span class="eyebrow">AI LAB · 現金循環系列 04C · 前線到研發</span>
+    <span class="eyebrow">AI LAB · 企業經營決策實驗室 04C · 前線到研發</span>
     <h1>前線到研發：市場機會卡</h1>
     <p class="lead">三十年前，一家台灣品牌電子公司靠一條很短的迴路在海外市場站上貨架：美國前線聽到通路和競品的動靜，當晚回報台灣，研發隔天答覆可不可行，老闆三天內拍板，兩週內樣品空運到客戶面前。這個模組把那條迴路拆成可以量化的「兩個時鐘」——<b>回應速度</b>（一次從訊號到可出貨要幾天）和<b>學習速度</b>（一年能跑幾圈）——再把前線回報變成一張有證據等級的「市場機會卡」，讓研發、採購、生產、財務知道該投入多少。</p>
     <div class="opener">
       <div><b>5 分鐘</b><span>拉四個槓桿，看回應天數、呆料與貢獻怎麼變</span></div>
       <div><b>即時 AI</b><span>貼上前線回報，AI 寫成機會卡並標出哪些只是推測</span></div>
-      <div><a href="index.html"><b>← 現金循環總覽</b></a><span>機會卡決定要不要開一個新機型，也決定後面的存貨天數</span></div>
+      <div><a href="index.html"><b>← 企業經營決策實驗室</b></a><span>機會卡決定要不要開一個新機型，也決定後面的存貨天數</span></div>
     </div>
     <p class="note" style="margin-top:12px;padding:8px 12px;border:1px dashed var(--line);border-radius:6px">本頁說明（網站版）：<b>情境示範</b>是依公開資料與作者經驗重建的去識別化案例，不指涉任何現存公司或產品；<b>規則試算</b>的天數、金額皆為教學用假設，依公式即時計算；<b>即時 AI</b> 區塊由 Cloudflare 代管的開源模型分析你送出的文字，只用於產生這次結果。方法依據 Kohli &amp; Jaworski 的市場導向（情報產生→擴散→回應）、QFD 品質機能展開、以及《SPIN Selling》對「客戶明說」與「我方推測」的區分；本頁只引用概念。</p>
   </header>
@@ -362,26 +362,32 @@ function renderLevers(){
 function render(){
   renderLevers();
   const r=model(st);
+  const noGo=st.dec5==="E";
   const max=Math.max(r.ship,st.win)*1.08;
-  $("bar").innerHTML=r.stages.map((s,i)=>s[1]?`<i class="s${i}" style="width:${s[1]/max*100}%" title="${s[0]} ${s[1]} 天">${s[1]>=max*.06?s[1]:""}</i>`:"").join("");
+  /* E．暫時不做：未開案，不把展示日期、可出貨天數、是否趕上檔期、每年學習圈數當成當前結果；模型參數與公式不變，切回開案選項即依原公式重算 */
+  $("bar").innerHTML=noGo?"":r.stages.map((s,i)=>s[1]?`<i class="s${i}" style="width:${s[1]/max*100}%" title="${s[0]} ${s[1]} 天">${s[1]>=max*.06?s[1]:""}</i>`:"").join("");
+  $("bar").setAttribute("aria-label",noGo?"未開案：不預測各階段天數":"從訊號到可出貨的各階段天數");
+  $("winLine").hidden=noGo;
   $("winLine").style.left=(st.win/max*100)+"%";
-  $("stageTxt").innerHTML=r.stages.filter(s=>s[1]).map(s=>`${s[0]} <b class="mono">${s[1]}</b> 天`).join("　·　")+`　→　到展示 <b class="mono">${r.demo}</b> 天，到可出貨 <b class="mono">${r.ship}</b> 天`;
+  $("stageTxt").innerHTML=noGo?`<b>未開案／待驗證</b>：選了「暫時不做」，不排研發、料與安規，所以不預測到展示與可出貨的天數，也不判斷是否趕上 <span class="mono">${st.win}</span> 天的上架死線。改選 A–D 任一開案決定，時鐘會依原公式重算。`
+    :r.stages.filter(s=>s[1]).map(s=>`${s[0]} <b class="mono">${s[1]}</b> 天`).join("　·　")+`　→　到展示 <b class="mono">${r.demo}</b> 天，到可出貨 <b class="mono">${r.ship}</b> 天`;
   const lampShip=r.late<=0?"ok":r.late<=30?"warn":"bad";
   const lampLoop=r.loops>=12?"ok":r.loops>=6?"warn":"bad";
   const lampNet=r.net>0?"ok":r.net>-100000?"warn":"bad";
   const lampEo=r.eo<100000?"ok":r.eo<500000?"warn":"bad";
-  const noGo=st.dec5==="E";
-  $("lamps").innerHTML=`
+  $("lamps").innerHTML=(noGo?`
+   <div><span class="label">回應速度：到可出貨</span><b>未開案</b><small>待驗證：尚未排程，不預測展示與出貨日期，也不判斷能否趕上檔期</small></div>
+   <div><span class="label">學習速度：一年可跑</span><b>待驗證</b><small>還沒跑出一圈；回饋拿回來之前，不計算每年圈數</small></div>`:`
    <div class="${lampShip}"><span class="label">回應速度：到可出貨</span><b>${r.ship} 天</b><small>${r.late<=0?`比上架死線早 ${-r.late} 天`:`比上架死線晚 ${r.late} 天`}</small></div>
-   <div class="${lampLoop}"><span class="label">學習速度：一年可跑</span><b>${r.loops} 圈</b><small>到展示 ${r.demo} 天一圈；聽到回饋才算學到</small></div>
+   <div class="${lampLoop}"><span class="label">學習速度：一年可跑</span><b>${r.loops} 圈</b><small>到展示 ${r.demo} 天一圈；聽到回饋才算學到</small></div>`)+`
    <div class="${noGo?"":lampNet}"><span class="label">這張卡的淨貢獻</span><b>${noGo?"—":(r.net<0?"−":"")+fmtW(Math.abs(r.net))+" 萬"}</b><small>${noGo?"暫時不做：零投入、零貢獻":`毛利 ${fmtW(r.gp)} − 呆料 ${fmtW(r.eo)} − 開發費 ${fmtW(r.dev)}（萬美元）`}</small></div>
    <div class="${noGo?"":lampEo}"><span class="label">呆料風險</span><b>${noGo?"—":fmtW(r.eo)+" 萬"}</b><small>${noGo?"沒有備料":`備 ${(r.prep/10000).toFixed(1)} 萬台、預期賣 ${(r.sold/10000).toFixed(1)} 萬台 × 專用料 ${Math.round(P.rd[st.rd].share*100)}%`}</small></div>`;
   let v="";
-  if(noGo) v=`<b>暫時不做。</b>卡上的量還是「${st.evi}」，先去把證據拿回來；下面列出各部門不花錢的準備。`;
+  if(noGo) v=`<b>未開案／待驗證。</b>選了「暫時不做」：卡上的量還是「${st.evi}」，先去把證據拿回來；下面列出各部門不花錢的準備。`;
   else if(r.late>30) v=`<b>這一檔期趕不上（晚 ${r.late} 天）。</b>只能賣到下一檔期的 15%，卻依${st.prep==="full"?"承諾量":"折現後的量"}備了 ${(r.prep/10000).toFixed(1)} 萬台——呆料 ${fmtW(r.eo)} 萬美元是這張卡最大的代價。先改縮短天數的槓桿（平台化、72 小時會、雙料源），或改成「先服務特定客群」。`;
   else if(r.late>0) v=`<b>晚了 ${r.late} 天，只能搭到半檔。</b>淨貢獻 ${(r.net<0?"−":"")+fmtW(Math.abs(r.net))} 萬美元。再省 ${r.late} 天就能趕上：看哪一段最長。`;
   else v=`<b>趕上死線，早 ${-r.late} 天。</b>淨貢獻約 ${fmtW(r.net)} 萬美元；${r.eo>0?`但承諾量是「${st.evi}」，備料沒折現，仍有 ${fmtW(r.eo)} 萬美元呆料風險——要嘛拿書面，要嘛依證據備料。`:"量的證據與備料一致，呆料風險最低。"}`;
-  $("verdict").innerHTML=`<p>${v}</p><p class="note">學習速度 ${r.loops} 圈／年：${r.loops>=12?"每個月都在聽回饋，研發對市場的理解會複利成長。":r.loops>=6?"兩個月一圈，勉強跟得上季節檔期。":"一年學不到幾件事，對手會先學會。"}</p>`;
+  $("verdict").innerHTML=noGo?`<p>${v}</p><p class="note">學習速度：未開案前不計算；下一次回饋（書面意向、試銷結果）拿回來，才算跑完一圈。</p>`:`<p>${v}</p><p class="note">學習速度 ${r.loops} 圈／年：${r.loops>=12?"每個月都在聽回饋，研發對市場的理解會複利成長。":r.loops>=6?"兩個月一圈，勉強跟得上季節檔期。":"一年學不到幾件事，對手會先學會。"}</p>`;
   const d=DEC.find(x=>x.k===st.dec5);
   $("decTxt").innerHTML=`<b>${d.k}．${d.t}</b>：${d.why}`;
   $("dept").innerHTML=Object.entries(d.dept).map(([k,v])=>`<div><b>${k}</b>${esc(v)}</div>`).join("")+`<div class="chk"><b>專利／合規需確認</b>${esc(d.check)}</div>`;
