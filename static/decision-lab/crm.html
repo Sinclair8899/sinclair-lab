@@ -115,6 +115,11 @@ td.wrap,th.wrap{white-space:normal}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{font-family:var(--f-mono);font-size:.76rem;padding:1px 7px;border-radius:3px;background:var(--panel);border:1px solid var(--line)}
 @media (max-width:820px){.opener,.thesis,.res,.lamp,.forms,.agents{grid-template-columns:1fr}.team{grid-template-columns:1fr 1fr}.gate{grid-template-columns:auto 1fr;grid-auto-rows:auto}.gate .amt{grid-column:2}}
+.ho{padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.ho-qty{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:.9rem}
+.ho-qty .label{flex-basis:100%}
+.ho-qty input{font:inherit;font-family:var(--f-mono);width:7em;padding:4px 6px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink)}
+.ho-qty input:disabled{opacity:.5}
 </style>
 </head>
 <body>
@@ -161,7 +166,24 @@ td.wrap,th.wrap{white-space:normal}
       <div class="bad"><span class="label">沒有任何依據</span><b class="num" id="gBad"></b><span class="note">純粹押注</span></div>
     </div>
     <div class="verdict" id="verdict"></div>
+    <p class="note">取消損失試算未納入下方 MEM-S2 逐月承擔。</p>
     <div class="chips" id="fixes"></div>
+  </section>
+
+  <section class="sec" aria-label="交接給供應商">
+    <div><span class="label">規則試算・交接給供應商端（客戶 A／記憶體 MEM-S2）</span><h2>客戶到底承擔了哪些料、多少、哪段期間？</h2>
+    <p class="note" style="margin-top:4px">書面預測本身不等於客戶承擔專用料。只有 M6 是<b>書面證據</b>，而且書面預測另附<b>專用料承擔條款</b>（上方的 NCNR 勾選）時，條款涵蓋的件數才交給供應商端認列。交接是一次明確的動作：按下按鈕才送出，之後改了條款要重新交接；撤回後，舊連結也不再有效。</p></div>
+    <div class="panel ho">
+      <div id="hoBasis"></div>
+      <p class="note" id="hoDoc"></p>
+      <div class="ho-qty"><span class="label">條款涵蓋件數（MEM-S2，只在該月有效，不累積到下月）</span>
+        <label>第 1 月 <input type="number" id="hoQ1" min="0" step="1" value="400"> 件</label>
+        <label>第 2 月 <input type="number" id="hoQ2" min="0" step="1" value="0"> 件</label>
+        <label>第 3 月 <input type="number" id="hoQ3" min="0" step="1" value="0"> 件</label></div>
+      <p id="hoCalc"></p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="hoGo">交接到供應商頁 →</button><button class="btn ghost" type="button" id="hoWithdraw">撤回條款</button><span class="note">交接僅在本瀏覽器有效。</span></div>
+      <p class="note" id="hoStatus" aria-live="polite"></p>
+    </div>
   </section>
 
   <section class="sec" aria-label="誰去拜訪">
@@ -203,6 +225,7 @@ td.wrap,th.wrap{white-space:normal}
 </div>
 
 <script src="data.js"></script>
+<script src="handoff.js"></script>
 <script>
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
@@ -246,10 +269,12 @@ function calc(){
   GATES.filter(g=>g.on).forEach(g=>{
     const m=MS.find(x=>x.code===g.need);
     let amt=g.amt; if(g.k==="nre"&&nre) amt/=2;
-    let rec=g.rec; if(g.k==="fc"&&ncnr) rec=.85; if((g.k==="cap"||g.k==="first")&&depo) rec=Math.max(rec,.7);
+    let rec=g.rec; if((g.k==="cap"||g.k==="first")&&depo) rec=Math.max(rec,.7);
+    /* 專用料承擔條款：只認列條款實際涵蓋的件數，不再一律套用 85%；M6 不是書面證據時，條款無從主張，涵蓋為 0 */
+    const cov=g.k==="fc"?Math.min(amt,hoCoveredWan()):0;
     if(m.st==="書面證據"){ok+=amt;}
-    else{ if(m.st==="口頭") warn+=amt; else bad+=amt; lossDelay+=amt; lossCancel+=amt*(1-rec); }
-    rows.push({g,m,amt,rec});
+    else{ if(m.st==="口頭") warn+=amt; else bad+=amt; lossDelay+=amt; lossCancel+=(amt-cov)*(1-rec); }
+    rows.push({g,m,amt,rec,cov});
   });
   return {ok,warn,bad,lossDelay,lossCancel,rows};
 }
@@ -273,17 +298,105 @@ function render(){
   const fixes=[];
   MS.forEach((m,i)=>{ if(m.st==="口頭"&&GATES.some(g=>g.on&&g.need===m.code)) fixes.push(`<button class="btn ghost sm" type="button" data-fix="${i}">把 ${m.code} 變成書面：索取${m.doc.split("、")[0]}</button>`); });
   $("fixes").innerHTML=fixes.length?`<span class="note" style="align-self:center">把黃燈變綠燈的動作：</span>`+fixes.join(""):"";
+  renderHo();
 }
+
+/* 交接給供應商端（客戶 A／MEM-S2） */
+const HO=window.LabHandoff;
+const HO_UNIT=Math.round(LAB.customers[0].program.unitPrice*LAB.company.keyShare*LAB.keyMaterial.mix.find(x=>x.k==="mem").share*10000); // 每件記憶體料成本（元）＝1.2 萬 × 45% × 35%
+const HO_DOC="客戶 A 書面預測 v3 第 5 條：記憶體 MEM-S2 專用料不可取消、不可退貨，條款列明的件數由客戶承擔（虛構示範）";
+const hoType=()=>HO.basisType(MS[5].st,$("ncnr").checked);
+const hoCoverage=()=>[1,2,3].map(m=>({month:m,qty:Math.max(0,Math.floor(Number($("hoQ"+m).value)||0))}));
+function hoCoveredWan(){return hoType()==="written_ncnr"?hoCoverage().reduce((a,r)=>a+r.qty,0)*HO_UNIT/10000:0}
+/* 本分頁正在編輯的交接：開頁時還原最新有效交接，避免「只是重新整理」被當成條款變更 */
+let HO_EDITING=null, HO_MSG="";
+function hoApply(s){
+  const e=s.basis.evidence; MS[5].st=e.m6; $("ncnr").checked=!!e.ncnr;
+  [1,2,3].forEach(m=>{const r=s.coverage.find(x=>x.month===m);$("hoQ"+m).value=String(r?r.qty:0)});
+}
+(function hoRestore(){
+  const rec=HO.latest(); if(!rec||rec.status!=="active"||!rec.snapshot)return;
+  const e=rec.snapshot.basis&&rec.snapshot.basis.evidence; if(!e||!ST.includes(e.m6))return;
+  hoApply(rec.snapshot); HO_EDITING=rec.snapshot.id;
+})();
+/* 實際變更事件（M6、NCNR、涵蓋件數）才檢查是否偏離已交接依據；
+   寫入前核對本分頁的交接仍是本機最新一筆，舊分頁不得讓較新的交接失效；寫入失敗則變更不生效 */
+function hoOnChange(){
+  if(!HO_EDITING)return;
+  const id=HO_EDITING, l=HO.readLedger();
+  if(l===undefined){hoRevert(id,"無法讀取本瀏覽器的交接紀錄");return}
+  const rec=l&&l.records[id];
+  if(!l||l.latest!==id){HO_EDITING=null;HO_MSG=`本分頁編輯的交接 ${id} 已不是最新一筆${l&&l.latest?`（最新為 ${l.latest}）`:""}；這個變更只影響本分頁，不會讓最新交接失效。`;return}
+  if(!rec||rec.status!=="active"){HO_EDITING=null;return}
+  const cur={m6Status:MS[5].st,ncnrChecked:$("ncnr").checked,coverage:hoCoverage()};
+  const why=HO.drift(rec,cur); if(!why)return;
+  const r=HO.invalidateIf(id,why);
+  if(r.ok){HO_EDITING=null;HO_MSG="";track("handoff","invalidate");return}
+  if(r.why==="stale"){HO_EDITING=null;HO_MSG=`本分頁編輯的交接 ${id} 已不是最新一筆；這個變更只影響本分頁，不會讓最新交接失效。`;return}
+  if(r.why==="inactive"){HO_EDITING=null;return}
+  hoRevert(id,r.why==="read"?"無法讀取本瀏覽器的交接紀錄":"無法寫入本瀏覽器的交接紀錄");
+}
+function hoRevert(id,cause){
+  const l=HO.readLedger(), rec=l&&l.records&&l.records[id];
+  const back=!!(rec&&rec.snapshot); if(back){hoApply(rec.snapshot);renderMs()}
+  HO_MSG=`<b style="color:var(--bad)">變更未生效：${cause}，交接 ${esc(id)} 沒有被標為失效${back?"；畫面已還原為交接時的條款":"；本頁無法確認交接目前狀態"}。</b>請稍後再試，或確認瀏覽器允許網站資料後重新操作。`;
+  track("handoff","write_fail");
+}
+function renderHo(){
+  const t=hoType(), ncnr=$("ncnr").checked, m6=MS[5].st;
+  const pill={verbal:"p-warn",written_forecast:"p-warn",written_ncnr:"p-ok"}[t];
+  $("hoBasis").innerHTML=`<span class="label">交接依據</span> <span class="pill ${pill}">${HO.TYPES[t]}</span> <span class="note">M6 量產預測：${esc(m6)}${ncnr?"；已勾選 NCNR":""}</span>`+
+    (t==="verbal"&&ncnr?`<p class="note" style="margin-top:4px;color:var(--warn)">已勾選 NCNR，但 M6 仍不是書面證據：條款無從主張，交接時以口頭預測處理，認列 0 件。</p>`:"");
+  $("hoDoc").textContent=t==="written_ncnr"?"條款："+HO_DOC:t==="written_forecast"?"有書面預測，但沒有專用料承擔條款：預測量不等於客戶承擔，認列 0 件。":"沒有可主張的書面條款，認列 0 件。";
+  [1,2,3].forEach(m=>$("hoQ"+m).disabled=t!=="written_ncnr");
+  const cov=hoCoverage(), q=cov.reduce((a,r)=>a+r.qty,0);
+  $("hoCalc").innerHTML=t==="written_ncnr"
+    ?`條款涵蓋 <b class="num">${fmt(q)}</b> 件 × 每件 ${fmt(HO_UNIT)} 元 ≈ <b class="num">${(q*HO_UNIT/10000).toLocaleString("zh-TW",{maximumFractionDigits:1})}</b> 萬元（${cov.map(r=>`第 ${r.month} 月 ${fmt(r.qty)}`).join("、")}）。上方依預測備的一季關鍵料，其餘部分仍由公司承擔；客戶承擔部分風險，也不代表公司已核准下單。`
+    :`目前可交給供應商端認列的客戶承擔：<b class="num">0</b> 件。`;
+  const rec=HO.latest();
+  let s="";
+  if(HO.readLedger()===undefined) s="無法讀取本瀏覽器的交接紀錄（可能是私密瀏覽或停用網站資料），無法交接。";
+  else if(!rec) s="尚未交接。";
+  else {
+    const snap=rec.snapshot;
+    s=`最新交接：${esc(snap.id)}，${HO.fmtTime(snap.issued_at)}，${HO.TYPES[snap.basis.type]}，`+
+      (rec.status==="withdrawn"?`已於 ${HO.fmtTime(rec.withdrawn_at)} 撤回。`
+      :rec.status==="invalidated"?`<b style="color:var(--warn)">已於 ${HO.fmtTime(rec.invalidated_at)} 失效（${esc(rec.invalidated_reason)}）。供應商端客戶承擔以 0 計，請重新交接。</b>`
+      :"有效。")+
+      (rec.status==="active"&&HO_EDITING!==snap.id?` <span style="color:var(--warn)">本分頁沒有在編輯這筆交接，不能撤回或讓它失效。</span>`:"");
+  }
+  $("hoStatus").innerHTML=(HO_MSG?HO_MSG+"<br>":"")+s;
+  $("hoWithdraw").disabled=!(rec&&rec.status==="active"&&HO_EDITING===rec.snapshot.id);
+}
+$("hoGo").addEventListener("click",()=>{
+  const snap=HO.build({m6Status:MS[5].st,ncnrChecked:$("ncnr").checked,coverage:hoCoverage(),document:HO_DOC});
+  if(!HO.issue(snap)){HO_MSG=`<b style="color:var(--bad)">交接未送出：無法寫入本瀏覽器的交接紀錄（可能是私密瀏覽或停用網站資料）。</b>`;render();return}
+  HO_EDITING=snap.id;HO_MSG="";
+  track("handoff","issue:"+snap.basis.type);
+  location.href="vendor.html#"+HO.encode(snap);
+});
+$("hoWithdraw").addEventListener("click",()=>{
+  const id=HO_EDITING;
+  const r=id?HO.withdrawIf(id):{ok:false,why:"stale"};
+  if(r.ok){HO_EDITING=null;HO_MSG="";$("ncnr").checked=false;track("handoff","withdraw")}   // 條款撤回，專案卡上的 NCNR 一併取消
+  else if(r.why==="stale"||r.why==="inactive"){HO_EDITING=null;HO_MSG=`撤回沒有執行：本分頁編輯的交接已不是最新且有效的一筆，不能撤回較新的交接。`}
+  else HO_MSG=`<b style="color:var(--bad)">撤回未生效：${r.why==="read"?"無法讀取":"無法寫入"}本瀏覽器的交接紀錄，交接 ${esc(id)} 仍有效。</b>`;
+  render();
+});
+document.addEventListener("input",e=>{if(/^hoQ[123]$/.test(e.target.id)){hoOnChange();render()}});
+window.addEventListener("pageshow",()=>render());
+window.addEventListener("storage",e=>{if(e.key===HO.KEY)render()});
 document.addEventListener("click",e=>{
   const b=e.target.closest(".seg.evi button");
-  if(b){const i=+b.dataset.i;MS[i].st=b.dataset.v;renderMs();render();track("lever",MS[i].code+"="+b.dataset.v);return}
+  if(b){const i=+b.dataset.i;MS[i].st=b.dataset.v;if(i===5)hoOnChange();renderMs();render();track("lever",MS[i].code+"="+b.dataset.v);return}
   const f=e.target.closest("[data-fix]");
-  if(f){const i=+f.dataset.fix;MS[i].st="書面證據";MS[i].ev="（已索取）"+MS[i].doc.split("、")[0];renderMs();render();track("lever",MS[i].code+"=fix");return}
+  if(f){const i=+f.dataset.fix;MS[i].st="書面證據";MS[i].ev="（已索取）"+MS[i].doc.split("、")[0];if(i===5)hoOnChange();renderMs();render();track("lever",MS[i].code+"=fix");return}
   const t=e.target.closest("#teamSeg button");
   if(t){$("teamSeg").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===t));renderTeam(+t.dataset.t);track("lever","team="+t.dataset.t);}
 });
 document.addEventListener("change",e=>{
   const g=e.target.closest("input[data-k]"); if(g){GATES.find(x=>x.k===g.dataset.k).on=g.checked;render();return}
+  if(e.target.id==="ncnr") hoOnChange();
   if(["nre","ncnr","depo"].includes(e.target.id)) render();
 });
 
@@ -332,7 +445,7 @@ $("vBtn").addEventListener("click",async()=>{
     track("ai_ok","crm-note");
     $("apply").addEventListener("click",()=>{
       L(lastAI.milestones).forEach(m=>{const i=MS.findIndex(x=>x.code===m.code);if(i>=0){MS[i].st=m.status;MS[i].ev=m.evidence+(m.date?"（"+m.date+"）":"")}});
-      renderMs();render();track("ai_apply","crm-note");
+      hoOnChange();renderMs();render();track("ai_apply","crm-note");
       document.querySelector('[aria-label="專案卡"]').scrollIntoView({behavior:"smooth",block:"start"});
     });
   }catch(e){out.innerHTML='<p class="note">連線中斷，請再按一次。</p>';track("ai_fail","network")}

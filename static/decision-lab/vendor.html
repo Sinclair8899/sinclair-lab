@@ -93,6 +93,16 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .res .r-ag{background:var(--ai-soft);border-color:var(--ai)}
 .callout{padding:14px 16px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 6px 6px 0;font-size:.95rem}
 @media (max-width:820px){.opener,.ledger,.opts,.disc,.res{grid-template-columns:1fr}.ledger .mid{min-width:0}}
+.mr{padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.mr-basis{padding:8px 12px;border-radius:6px;border:1px solid var(--line);background:var(--bg);font-size:.9rem}
+.mr-basis.ok{border-color:var(--ok)}.mr-basis.zero{border-color:var(--warn)}
+.mr table{min-width:560px}
+.mr input{font:inherit;font-family:var(--f-mono);width:6.5em;padding:3px 6px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink);text-align:right}
+.mr-sum{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mr-sum>div{padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;gap:2px}
+.mr-sum b{font-family:var(--f-mono);font-size:1.3rem;font-weight:500}
+.mr-sum .bad b{color:var(--bad)}.mr-sum .ok b{color:var(--ok)}
+@media (max-width:820px){.mr-sum{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -121,13 +131,25 @@ input[type=range]{width:100%;accent-color:var(--accent)}
     <div><span class="label">規則試算・兩端承諾對帳表</span><h2>供應端的硬承諾，有多少被客戶端的硬承諾覆蓋？</h2>
     <p class="note" style="margin-top:4px">左邊是客戶已經簽下的東西，右邊是我們對供應商簽下的東西。規則：<b>右邊的硬承諾，不應超過左邊的硬承諾加上老闆願意承擔的風險額度。</b>切換客戶端的承諾形式（和 CRM、駕駛艙相同的開關），再看下面三個供應端決定。</p></div>
     <div class="toggles">
-      <label><input type="checkbox" id="ncnr"> 客戶 A 書面預測附 NCNR（第 2–4 月預測量由客戶背書）</label>
       <label><input type="checkbox" id="depo"> 新創客戶 C 預付 30% 訂金</label>
       <label><input type="checkbox" id="b2b"> 客戶 A 同意背對背：分攤記憶體長約的一半</label>
     </div>
     <div class="slider"><label for="risk"><span>老闆願意承擔的風險額度（12 個月）</span><output id="riskOut" class="num">20,000 萬</output></label><input type="range" id="risk" min="0" max="80000" step="5000" value="20000"></div>
     <div class="ledger" id="ledger"></div>
     <p class="note" id="ledgerNote"></p>
+  </section>
+
+  <section class="sec" aria-label="逐月對帳">
+    <div><span class="label">規則試算・客戶 A 專案逐月對帳（記憶體 MEM-S2，由 CRM 交接）</span><h2>客戶承擔多少、公司自留多少，有沒有超出本案例額度？</h2>
+    <p class="note" style="margin-top:4px">擬承諾量由供應商端決定；客戶承擔只認列 CRM 交接過來、仍然有效的專用料承擔條款。同一料件、同一月份，取「擬承諾量」與「條款涵蓋量」的較小值；沒用完的涵蓋量不帶到下個月。交接資料缺漏、同料同月重複、版本無效、已撤回或沒有收到交接時，客戶承擔一律為 0。客戶 A 的 NCNR 改由這裡認列，上方總帳不另計。</p></div>
+    <div class="panel mr">
+      <div class="mr-basis" id="mrBasis" aria-live="polite"></div>
+      <div class="tablebox"><table id="mrTab"></table></div>
+      <div class="mr-sum" id="mrSum"></div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:.88rem"><label for="mrLimit">本案例公司自留額度（萬元）</label><input type="number" id="mrLimit" min="0" step="0.1" value="300"><span class="note" id="mrUnit"></span></div>
+      <p><span class="pill p-warn">尚未核准下單</span> <span class="note">本區只計算風險歸屬。客戶承擔部分風險，不代表公司已核准向供應商下單；下單仍要採購與財務另行核准。</span></p>
+      <p class="note"><a href="crm.html">← 回 CRM 頁修改或撤回條款</a></p>
+    </div>
   </section>
 
   <section class="sec" aria-label="決定一">
@@ -181,6 +203,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 </div>
 
 <script src="data.js"></script>
+<script src="handoff.js"></script>
 <script>
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
@@ -221,7 +244,7 @@ function custHard(){
   // 客戶端硬承諾，一律換算成關鍵料金額（營收 × 關鍵料占比）；訂金與背對背是現金或直接的記憶體金額，照原值計
   const items=[["第 1 月確認訂單（全部客戶）",D.firmRevenue*CO.keyShare,"書面"]];
   const aFc=A.fc.reduce((x,y)=>x+y,0);
-  if(st.ncnr) items.push(["客戶 A 第 2–4 月預測，附 NCNR",aFc*CO.keyShare,"書面"]); else items.push(["客戶 A 第 2–4 月預測（口頭）",0,"口頭，不計入"]);
+  if(st.ncnr) items.push(["客戶 A 第 2–4 月預測，附 NCNR",aFc*CO.keyShare,"書面"]); else items.push(["客戶 A 第 2–4 月預測（專用料承擔改由下方逐月對帳認列）",0,"本表不計入"]);
   if(st.depo) items.push(["新創客戶 C 訂金（第 2–4 月預測 × 30%）",C.fc.reduce((x,y)=>x+y,0)*.3,"現金"]);
   if(st.b2b&&st.v1==="C") items.push(["客戶 A 背對背：承擔記憶體長約的一半",memM*V1.C.months*.5,"書面"]);
   return items;
@@ -243,10 +266,10 @@ function supHard(v1){
 }
 function renderLedger(){
   const ch=custHard(), sh=supHard(st.v1);
-  const cT=ch.filter(x=>x[2]!=="口頭，不計入").reduce((a,x)=>a+x[1],0);
+  const cT=ch.filter(x=>x[2]!=="本表不計入").reduce((a,x)=>a+x[1],0);
   const sT=sh.reduce((a,x)=>a+x[1],0);
   const gap=sT-cT-st.risk;
-  $("ledger").innerHTML=`<div><span class="label">客戶端硬承諾（換算關鍵料金額）</span>${ch.map(x=>`<div class="row"><span>${x[0]}<span class="note"> ${x[2]}</span></span><b>${x[2]==="口頭，不計入"?"—":fmt(x[1])}</b></div>`).join("")}<div class="row tot"><span>合計</span><b>${fmt(cT)}</b></div><div class="row"><span>＋老闆願意承擔的風險額度</span><b>${fmt(st.risk)}</b></div></div>
+  $("ledger").innerHTML=`<div><span class="label">客戶端硬承諾（換算關鍵料金額）</span>${ch.map(x=>`<div class="row"><span>${x[0]}<span class="note"> ${x[2]}</span></span><b>${x[2]==="本表不計入"?"—":fmt(x[1])}</b></div>`).join("")}<div class="row tot"><span>合計</span><b>${fmt(cT)}</b></div><div class="row"><span>＋老闆願意承擔的風險額度</span><b>${fmt(st.risk)}</b></div></div>
    <div class="mid"><span class="label">未被覆蓋的供應端承諾</span><span class="big" style="color:${gap>0?"var(--bad)":"var(--ok)"}">${gap>0?fmt(gap):"0"}</span><span class="note">${gap>0?"右邊超過左邊＋風險額度":"在額度之內"}</span></div>
    <div><span class="label">供應端硬承諾（12 個月口徑）</span>${sh.map(x=>`<div class="row"><span>${x[0]}</span><b>${fmt(x[1])}</b></div>`).join("")}<div class="row tot"><span>合計</span><b>${fmt(sT)}</b></div></div>`;
   $("ledgerNote").textContent=gap>0?`供應端比客戶端多承諾了 ${fmt(gap)} 萬（已扣風險額度）。這筆錢是在替客戶的樂觀先付。能縮小缺口的動作只有兩種：讓客戶把承諾變成書面（NCNR、訂金、背對背），或把供應端的承諾縮到客戶已經簽的量。`:`供應端承諾在客戶端承諾加風險額度之內。注意：這是承諾金額的對帳，不代表沒有斷料風險；看下面三個決定的代價。`;
@@ -285,9 +308,33 @@ function renderAll(){renderV1();renderV2();renderV3();}
 document.addEventListener("click",e=>{
   for(const k of ["v1","v2","v3"]){const b=e.target.closest(`[data-${k}]`);if(b){st[k]=b.dataset[k];renderAll();track("lever",k+"="+st[k]);return}}
 });
-document.addEventListener("change",e=>{const t=e.target;if(["ncnr","depo","b2b"].includes(t.id)){st[t.id]=t.checked;renderAll();track("lever",t.id+(t.checked?"+":"-"))}});
+document.addEventListener("change",e=>{const t=e.target;if(["depo","b2b"].includes(t.id)){st[t.id]=t.checked;renderAll();track("lever",t.id+(t.checked?"+":"-"))}});
 $("risk").addEventListener("input",e=>{st.risk=+e.target.value;$("riskOut").textContent=fmt(st.risk)+" 萬";renderAll();});
 renderAll();
+
+/* 客戶 A 專案逐月對帳（記憶體 MEM-S2）：每次都從網址交接與本機交接紀錄整份重算，不沿用上一次的結果 */
+const HO=window.LabHandoff;
+const MR_UNIT=Math.round(A.program.unitPrice*CO.keyShare*MEM.share*10000);   // 每件記憶體料成本（元）＝1.2 萬 × 45% × 35%
+const mrPlan={1:1000,2:1000};
+const wan=y=>(y/10000).toLocaleString("zh-TW",{maximumFractionDigits:1});
+function renderMR(){
+  const plan=[1,2].map(m=>({month:m,qty:mrPlan[m]}));
+  const limit=Math.max(0,Number($("mrLimit").value)||0);
+  const r=HO.reconcile({input:HO.decodeHash(location.hash),ledger:HO.readLedger(),plan,unitYuan:MR_UNIT,limitWan:limit,part:HO.PART});
+  const b=r.basis;
+  $("mrBasis").className="mr-basis "+(r.ok?"ok":"zero");
+  $("mrBasis").innerHTML=r.ok
+    ?`<b>採用依據</b>：${esc(b.basis.document)}<br><span class="note">交接 ${esc(b.id)}，${HO.fmtTime(b.issued_at)}；M6 ${esc(b.basis.evidence.m6)}、專用料承擔條款${b.basis.evidence.ncnr?"有":"無"}。${r.notes.length?esc(r.notes.join("；"))+"。":""}</span>`
+    :`<b>採用依據</b>：無有效條款，客戶承擔以 0 計。<br><span class="note">原因：${esc(r.reason)}</span>`;
+  $("mrTab").innerHTML=`<thead><tr><th>月份</th><th class="num">擬承諾量（件）</th><th class="num">有效條款涵蓋</th><th class="num">客戶承擔</th><th class="num">公司自留</th><th class="num">自留金額（萬元）</th></tr></thead><tbody>${r.rows.map(x=>`<tr><td>第 ${x.month} 月</td><td class="num"><input type="number" min="0" step="1" data-mr="${x.month}" value="${x.plan}" aria-label="第 ${x.month} 月擬承諾量"></td><td class="num">${fmt(x.cover)}</td><td class="num">${fmt(x.borne)}</td><td class="num">${fmt(x.retained)}</td><td class="num">${wan(x.retained*MR_UNIT)}</td></tr>`).join("")}<tr><td><b>合計</b></td><td class="num"><b>${fmt(r.totals.plan)}</b></td><td></td><td class="num"><b>${fmt(r.totals.borne)}</b></td><td class="num"><b>${fmt(r.totals.retained)}</b></td><td class="num"><b>${wan(r.totals.retainedYuan)}</b></td></tr></tbody>`;
+  $("mrSum").innerHTML=`<div><span class="label">客戶承擔</span><b>${fmt(r.totals.borne)} 件</b><span class="note">約 ${wan(r.totals.borneYuan)} 萬元</span></div>
+   <div><span class="label">公司自留風險</span><b>${fmt(r.totals.retained)} 件</b><span class="note">約 ${wan(r.totals.retainedYuan)} 萬元</span></div>
+   <div class="${r.over?"bad":"ok"}"><span class="label">是否超出本案例額度（${wan(r.limitYuan)} 萬元）</span><b>${r.over?"超出 "+wan(r.overYuan)+" 萬元":"未超出"}</b><span class="note">${r.over?"自留風險高於額度":"尚餘 "+wan(r.limitYuan-r.totals.retainedYuan)+" 萬元"}</span></div>`;
+  $("mrUnit").textContent=`每件 ${MR_UNIT.toLocaleString("zh-TW")} 元（單價 1.2 萬 × 關鍵料 45% × 記憶體 35%）`;
+}
+document.addEventListener("input",e=>{const m=e.target.dataset&&e.target.dataset.mr;if(m){mrPlan[m]=Math.max(0,Math.floor(Number(e.target.value)||0));renderMR();const el=document.querySelector(`[data-mr="${m}"]`);el&&el.focus()}else if(e.target.id==="mrLimit")renderMR()});
+["hashchange","pageshow","storage","focus"].forEach(ev=>window.addEventListener(ev,renderMR));
+renderMR();
 
 /* 即時 AI：PCN 解讀 */
 const L=x=>Array.isArray(x)?x:[];
