@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="evidence-palette">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EUV 與浸潤式 DUV · 技術更迭觀察站</title>
+<meta name="description" content="EUV 歷史回放：ASML 2017 年廠內設備達標、三星 2018 年開始投片、台積電 2019 年公告客戶產品大量上市，三個里程碑分屬三家公司。附一手來源、二手來源標示與研究限制。">
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://lab.sinclairhuang.org/research/technology-transitions/euv/">
+<link rel="stylesheet" href="../physical-ai/evidence-colors.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+<script>try{var t=localStorage.getItem("pref-theme");if(t==="dark"||t==="light")document.documentElement.dataset.theme=t;}catch(e){}</script>
+<style>
+:root {
+  /* 版面：單欄研究筆記，手機優先；每案固定三格（我目前的判斷／一手來源／下一筆會改判的證據） */
+  --paper: #f4f6f8;
+  --surface: #ffffff;
+  --ink: #17212b;
+  --ink-soft: #51606f;
+  --rule: #d5dce3;
+  --accent: #0b6470;        /* 前瞻觀察：仍在更新 */
+  --accent-tint: #e3f0f2;
+  --past: #5b5f8a;          /* 歷史回放：已有結局 */
+  --past-tint: #ebebf5;
+  --warn: #8a5a00;          /* 只有二手來源 */
+  --warn-tint: #fbf1dc;
+  --font-display: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  --font-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #10161c;
+    --surface: #18212a;
+    --ink: #e6ecf1;
+    --ink-soft: #9fb0bf;
+    --rule: #2c3945;
+    --accent: #5cc0cb;
+    --accent-tint: #15333a;
+    --past: #a9addb;
+    --past-tint: #25273f;
+    --warn: #e2b458;
+    --warn-tint: #382c12;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #10161c;
+  --surface: #18212a;
+  --ink: #e6ecf1;
+  --ink-soft: #9fb0bf;
+  --rule: #2c3945;
+  --accent: #5cc0cb;
+  --accent-tint: #15333a;
+  --past: #a9addb;
+  --past-tint: #25273f;
+  --warn: #e2b458;
+  --warn-tint: #382c12;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.75;
+}
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px 16px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.35; }
+h1 { font-size: 30px; font-weight: 700; }
+h2 { font-size: 22px; font-weight: 700; }
+h3 { font-size: 15px; font-family: var(--font-body); font-weight: 700; letter-spacing: 0.04em; }
+p { margin: 0; }
+ul, ol { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 8px; }
+.mono { font-family: var(--font-mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+
+
+
+.subtitle { font-family: var(--font-display); font-size: 17px; font-weight: 600; color: var(--ink-soft); margin-top: -8px; }
+.back { font-size: 14px; }
+.kicker { font-family: var(--font-mono); font-size: 13px; color: var(--ink-soft); }
+.hero { display: flex; flex-direction: column; gap: 16px; }
+.verdict { font-size: 18px; font-weight: 500; line-height: 1.7; }
+figure { margin: 0; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 14px 12px 10px; display: flex; flex-direction: column; gap: 6px; }
+figcaption { font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
+.fig-title { font-size: 14px; font-weight: 700; }
+.ms-chart { width: 100%; max-width: 520px; height: auto; display: block; font-family: var(--font-body); }
+.ms-grid line, .ms-rows line { stroke: var(--rule); stroke-width: 1; }
+.ms-who text { font-size: 13px; font-weight: 700; fill: var(--ink); }
+.ms-who .ms-sub { font-size: 11px; font-weight: 400; fill: var(--ink-soft); }
+.ms-pt rect, .ms-pt path, .ms-pt circle { fill: var(--event-color, var(--past)); stroke: var(--surface); stroke-width: 2; }
+.ms-lab { font-size: 13px; font-weight: 700; fill: var(--ink); }
+.ms-lab, .ms-val { paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }
+.ms-val { font-size: 11px; fill: var(--ink-soft); font-family: var(--font-mono); }
+.ms-axis text { font-size: 11px; fill: var(--ink-soft); font-family: var(--font-mono); }
+.cta { display: flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 20px; border-radius: 8px; background: var(--past); color: var(--surface); font-weight: 700; text-decoration: none; font-size: 16px; }
+.cta:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+details.gloss { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; }
+details.gloss summary { cursor: pointer; padding: 12px 14px; font-weight: 700; font-size: 15px; min-height: 44px; }
+details.gloss dl { margin: 0; padding: 0 14px 6px; }
+details.gloss .term { padding: 10px 0; border-top: 1px solid var(--rule); }
+details.gloss dt { font-weight: 700; }
+details.gloss dt .en { display: block; font-weight: 400; font-size: 13px; color: var(--ink-soft); font-family: var(--font-mono); }
+details.gloss dd { margin: 2px 0 0; font-size: 15px; line-height: 1.6; }
+.block { scroll-margin-top: 12px; }
+.block { display: flex; flex-direction: column; gap: 10px; }
+.block h2 { font-size: 20px; }
+.sources { list-style: none; padding: 0; gap: 0; }
+.sources li { display: grid; grid-template-columns: 92px 1fr; gap: 10px; padding: 8px 0; border-top: 1px solid var(--rule); font-size: 15px; line-height: 1.6; }
+.sources li:last-child { border-bottom: 1px solid var(--rule); }
+.sources .d { font-family: var(--font-mono); font-size: 13px; color: var(--ink-soft); padding-top: 2px; }
+.second { background: var(--warn-tint); border-left: 3px solid var(--warn); border-radius: 0 6px 6px 0; padding: 10px 14px; font-size: 14.5px; line-height: 1.65; display: flex; flex-direction: column; gap: 6px; }
+.second b { color: var(--warn); }
+.next li::marker { color: var(--accent); }
+.first { font-weight: 700; }
+section.card { background: var(--surface); border: 1px solid var(--rule); border-top: 4px solid var(--past); border-radius: 8px; padding: 20px 16px; display: flex; flex-direction: column; gap: 22px; scroll-margin-top: 12px; }
+.chip { font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 999px; background: var(--past-tint); color: var(--past); }
+footer { font-size: 13px; color: var(--ink-soft); border-top: 1px solid var(--rule); padding-top: 14px; display: flex; flex-direction: column; gap: 4px; }
+@media (max-width: 420px) {
+  h1 { font-size: 24px; }
+  .sources li { grid-template-columns: 1fr; gap: 2px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <a class="back" href="/research/technology-transitions/">← 技術更迭觀察站（四個個案）</a>
+
+  <header class="hero">
+    <div class="kicker">歷史回放 · 2026-11-28 版</div>
+    <h1>EUV 如何走到商用？</h1>
+    <p class="subtitle">EUV 與浸潤式 DUV 多重曝光</p>
+    <p class="verdict">三個里程碑分屬三家公司：ASML 的設備 2017 年在自家廠內達標，三星 2018 年公告開始投片，台積電 2019 年公告客戶產品大量上市。</p>
+    <figure>
+      <div class="fig-title">三個里程碑，三家公司（依公告日期）</div>
+      <svg class="ms-chart" viewBox="0 0 340 200" role="img" aria-labelledby="ms-t ms-d">
+      <title id="ms-t">EUV 三個里程碑的公告日期</title>
+      <desc id="ms-d">ASML 2017 年 7 月公告設備在自家廠內達到每小時 125 片；三星 2018 年 10 月公告 7LPP 開始投片；台積電 2019 年 10 月公告 N7+ 客戶產品大量上市。三點分屬三家公司，不是同一條產線的進度。</desc>
+      <g class="ms-grid">
+        <line x1="72" y1="18" x2="72" y2="172"/><line x1="158" y1="18" x2="158" y2="172"/><line x1="244" y1="18" x2="244" y2="172"/><line x1="330" y1="18" x2="330" y2="172"/>
+      </g>
+      <g class="ms-rows">
+        <line x1="72" y1="44" x2="330" y2="44"/><line x1="72" y1="98" x2="330" y2="98"/><line x1="72" y1="152" x2="330" y2="152"/>
+      </g>
+      <g class="ms-who">
+        <text x="0" y="42">ASML</text><text class="ms-sub" x="0" y="57">設備商</text>
+        <text x="0" y="96">三星</text><text class="ms-sub" x="0" y="111">晶圓廠</text>
+        <text x="0" y="150">台積電</text><text class="ms-sub" x="0" y="165">晶圓廠</text>
+      </g>
+      <g class="ms-pt" data-stage="lab"><title>ASML 新聞稿 2017-07-19：EUV 設備在自家廠內達到每小時 125 片</title>
+        <rect x="113" y="38" width="12" height="12" rx="2"/>
+        <text class="ms-lab" x="132" y="40">設備達標</text><text class="ms-val" x="132" y="56">2017-07 廠內每小時 125 片</text>
+      </g>
+      <g class="ms-pt" data-stage="field"><title>三星新聞稿 2018-10-18：7LPP 完成開發並開始投片</title>
+        <path d="M227 91 L234 98 L227 105 L220 98 Z"/>
+        <text class="ms-lab" x="240" y="94">開始投片</text><text class="ms-val" x="240" y="110">2018-10 7LPP</text>
+      </g>
+      <g class="ms-pt" data-stage="result"><title>台積電新聞稿 2019-10-07：N7+ 客戶產品大量上市</title>
+        <circle cx="310" cy="152" r="6.5"/>
+        <text class="ms-lab" x="300" y="148" text-anchor="end">客戶產品大量上市</text><text class="ms-val" x="300" y="164" text-anchor="end">2019-10 N7+</text>
+      </g>
+      <g class="ms-axis">
+        <text x="72" y="190" text-anchor="middle">2017</text><text x="158" y="190" text-anchor="middle">2018</text><text x="244" y="190" text-anchor="middle">2019</text><text x="330" y="190" text-anchor="end">2020</text>
+      </g>
+    </svg>
+      <figcaption>每一點是公司自己公告的日期，不是同一條產線的進度。回放截點為 2014 年底與 2017 年底，2018、2019 年的公告用來事後對照。</figcaption>
+    </figure>
+    <a class="cta" href="#sources">查看一手公告 ↓</a>
+    <a href="../physical-ai/">用同一組證據看 BMW 人形機器人</a>
+    <details class="gloss">
+      <summary>名詞小抄 · 中英對照</summary>
+      <dl>
+        <div class="term"><dt>設備達標<span class="en">Tool Milestone at the Supplier's Site</span></dt><dd>設備商在自己的廠內量到目標數字。這還不代表客戶的產線已經能用。</dd></div>
+        <div class="term"><dt>開始投片<span class="en">Start of Production (Wafer Start)</span></dt><dd>晶圓廠開始把晶圓放進這個製程生產。這不等於已經大量出貨。</dd></div>
+        <div class="term"><dt>客戶產品大量上市<span class="en">Customer products reach the market in high volume</span></dt><dd>用這個製程做的客戶晶片，已經大量進入市場。</dd></div>
+        <div class="term"><dt>極紫外光微影<span class="en">EUV · Extreme Ultraviolet Lithography</span></dt><dd>用波長很短的極紫外光，把電路圖案印到晶圓上的曝光技術。</dd></div>
+        <div class="term"><dt>浸潤式深紫外光微影<span class="en">DUV Immersion · Deep Ultraviolet Immersion Lithography</span></dt><dd>在鏡頭與晶圓之間加入超純水，讓相同波長的光也能印出更細的圖案。</dd></div>
+        <div class="term"><dt>多重圖形化（副標的「多重曝光」）<span class="en">Multiple Patterning</span></dt><dd>把一層細密圖案拆成多道製程做出來，可能用到多次曝光，也可能搭配沉積與蝕刻。</dd></div>
+        <div class="term"><dt>每小時晶圓片數<span class="en">WPH · Wafers Per Hour</span></dt><dd>一台曝光機一小時能處理幾片晶圓。本頁的「每小時 125 片」是 ASML 在自家廠內的數字。</dd></div>
+        <div class="term"><dt>光源功率<span class="en">EUV Source Power</span></dt><dd>以瓦表示的光源輸出功率。在其他條件相同時，提高功率有助縮短曝光時間。</dd></div>
+        <div class="term"><dt>積壓訂單<span class="en">Backlog</span></dt><dd>已經接單、還沒出貨的機台數。</dd></div>
+        <div class="term"><dt>7LPP<span class="en">Samsung 7nm Low Power Plus</span></dt><dd>三星採用 EUV 的 7 奈米製程名稱。</dd></div>
+        <div class="term"><dt>N7 與 N7+<span class="en">TSMC 7nm / 7nm Plus</span></dt><dd>台積電第一代 7 奈米（N7，2018 年量產）與採用 EUV 的 N7+（2019 年量產）。</dd></div>
+        <div class="term"><dt>Intel 4<span class="en">Intel 4 Process Node</span></dt><dd>Intel 的製程名稱。本頁只用它標記愛爾蘭 Fab 34 的量產公告日。</dd></div>
+        <div class="term"><dt>截點<span class="en">Cutoff Date</span></dt><dd>歷史回放只用這一天以前已公開的文件。</dd></div>
+        <div class="term"><dt>歷史回放<span class="en">Historical Replay</span></dt><dd>結局已知的個案；回頭看當時的公開資料能看出什麼。</dd></div>
+      </dl>
+    </details>
+  </header>
+
+  <section class="card" id="evidence">
+    <div><span class="chip">歷史回放</span></div>
+    <div class="block">
+      <h2>三個里程碑，各記在公告它的公司名下</h2>
+      <p>我把每個里程碑記在公告它的那家公司名下，不合併成同一條產線的進度：</p>
+      <ul>
+        <li><strong>設備達標｜ASML 2017 年在自家廠內達標。</strong>ASML 在 2017 年 7 月公告，EUV 設備在自家廠內達到每小時 125 片；同年 10 月的季報簡報列出積壓訂單 23 台。</li>
+        <li><strong>開始投片｜三星 2018 年開始投片。</strong>三星在 2018 年 10 月公告 7LPP 製程完成開發並開始投片。</li>
+        <li><strong>客戶產品大量上市｜台積電 2019 年公告。</strong>台積電在 2019 年 10 月公告 N7+ 的客戶產品大量上市，並說 EUV 機台日常運轉功率超過 250 瓦。</li>
+      </ul>
+      <p>同一個技術世代有不同的製程路線：台積電第一代 7 奈米 N7 於 2018 年量產；採用 EUV 的 N7+ 於 2019 年量產，同年 10 月公告客戶產品已大量上市。</p>
+      <p><strong>Intel 2023 年宣布愛爾蘭廠量產。</strong>ASML 2012 年 7 月的公告顯示，Intel 承諾取得最多 15% 的股權；8 月的公告顯示三家客戶合計 23%，所以 Intel 是出資最多的一家。Intel 於 2023 年 9 月宣布，愛爾蘭 Fab 34 已進入 Intel 4 大量生產。同一份公告提到俄勒岡的研發廠已有早期量產，沒有寫起始時間，所以這個日期只能用來標記愛爾蘭廠。</p>
+    </div>
+    <div class="block" id="sources">
+      <h2>一手來源</h2>
+      <ul class="sources">
+        <li><span class="d">2012-07-09</span><span><a href="https://www.sec.gov/Archives/edgar/data/0000937966/000119312512298069/d379366dex991.htm">ASML 新聞稿</a>：客戶共同投資計畫，Intel 承諾取得最多 15% 股權</span></li>
+        <li><span class="d">2012-08-27</span><span><a href="https://www.sec.gov/Archives/edgar/data/0000937966/000119312512370598/d402810dex991.htm">ASML 新聞稿</a>：三星加入，計畫額滿；三家客戶合計 23% 股權</span></li>
+        <li><span class="d">2014-07-30</span><span><a href="https://www.sec.gov/Archives/edgar/data/0000937966/000119312514286736/d766550dex991.htm">ASML 新聞稿</a>：客戶端單日曝光 637 片</span></li>
+        <li><span class="d">2017-01-18</span><span><a href="https://www.sec.gov/Archives/edgar/data/0000937966/000093796617000003/asml20170118presentation.htm">ASML 季報簡報</a>：三日平均每日逾 1,500 片；積壓訂單 18 台</span></li>
+        <li><span class="d">2017-07-19</span><span><a href="https://www.sec.gov/Archives/edgar/data/0000937966/000093796617000014/pressreleasequarterlyresul.htm">ASML 新聞稿</a>：廠內達每小時 125 片；積壓訂單 27 台</span></li>
+        <li><span class="d">2017-10-18</span><span><a href="https://www.sec.gov/Archives/edgar/data/0000937966/000093796617000017/asml20171018presentation.htm">ASML 季報簡報</a>：積壓訂單含 23 台 EUV</span></li>
+        <li><span class="d">技術頁</span><span><a href="https://www.tsmc.com/english/dedicatedFoundry/technology/logic/l_7nm">台積電 7 奈米技術頁</a>：N7 於 2018 年量產</span></li>
+        <li><span class="d">2018-10-18</span><span><a href="https://news.samsung.com/global/samsung-electronics-starts-production-of-euv-based-7nm-lpp-process">三星新聞稿</a>：7LPP 開始投片</span></li>
+        <li><span class="d">2019-10-07</span><span><a href="https://pr.tsmc.com/english/news/2010">台積電新聞稿</a>：N7+ 於 2019 年第二季量產，客戶產品大量上市；日常運轉超過 250 瓦</span></li>
+        <li><span class="d">2023-09-29</span><span><a href="https://www.intel.com/content/www/us/en/newsroom/news/new-fab-ireland-high-volume-production-intel-4-technology.html">Intel 新聞稿</a>：愛爾蘭 Fab 34 進入 Intel 4 大量生產；俄勒岡已有早期量產</span></li>
+      </ul>
+      <div class="second"><b>只有二手來源的部分</b><span>晶片廠要 250 瓦才量產、各家對 7 奈米的打算，出自產業媒體 2016 年 3 月的報導。設備這一邊的數字幾乎全是 ASML 自己公布的。</span></div>
+    </div>
+    <div class="block">
+      <h2>會改變這個讀法的資料</h2>
+      <ul class="next">
+        <li class="first">客戶自己發表的產線可用率與產能，用來對照 ASML 的自述。</li>
+        <li>三星 7LPP 何時真正大量出貨。2018 年的公告只是開始投片。</li>
+        <li>Intel 4 在俄勒岡的早期量產始於何時。沒有這個日期，就不能比較 Intel 與三星、台積電的先後；誰先獲利，這一案也沒有檢查。</li>
+      </ul>
+    </div>
+    <div class="block">
+      <h2>研究限制</h2>
+      <ul>
+        <li>日期一律用首次公開日。圖上的點是公告日，不是事件實際發生的日子。</li>
+        <li>本案截點為 2014-12-31 與 2017-12-31。歷史回放只用截點前已公開的文件重建當時的判斷，再對照結果。我寫的時候已經知道結局，所以這不是盲測，也不計命中率。</li>
+        <li>設備這一邊的數字幾乎全是 ASML 自己公布的；這一案沒有成本與出貨量的數據，誰先獲利也沒有檢查。</li>
+        <li>這一頁不評估股價，也不是投資建議。</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <span>技術更迭觀察站 · EUV 歷史回放 · 2026-11-28 版</span>
+    <span><a href="/research/technology-transitions/">回到四個個案總覽</a></span>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,78 @@
+{{- /* Lead with the evidence chart, then retain PaperMod's home_info. */ -}}
+<link rel="stylesheet" href="{{ "research/technology-transitions/physical-ai/evidence-colors.css" | relURL }}">
+<article class="lab-hero evidence-palette" lang="zh-Hant">
+  <style>
+    .lab-hero { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
+    .lab-hero .kicker { font-size: 13px; color: var(--secondary); }
+    .lab-hero .judgment { font-size: 21px; line-height: 1.45; font-weight: 700; color: var(--primary); margin: 0; }
+    .lab-hero .sub { font-size: 16px; line-height: 1.65; color: var(--content); margin: 0; }
+    .lab-hero .en-lead { font-size: 13px; line-height: 1.5; color: var(--secondary); margin: 0; }
+    .lab-hero figure { margin: 0; background: var(--entry); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 12px 10px; display: flex; flex-direction: column; gap: 6px; }
+    .lab-hero .fig-title { font-size: 14px; font-weight: 700; color: var(--primary); }
+    .lab-hero figcaption { font-size: 13px; line-height: 1.55; color: var(--secondary); }
+    .lab-hero .ms-chart { width: 100%; max-width: 520px; height: auto; display: block; }
+    .lab-hero .ms-grid line, .lab-hero .ms-rows line { stroke: var(--tertiary); stroke-width: 1; }
+    .lab-hero .ms-who text, .lab-hero .ms-lab { font-size: 13px; font-weight: 700; fill: var(--primary); }
+    .lab-hero .ms-who .ms-sub { font-size: 11px; font-weight: 400; fill: var(--secondary); }
+    .lab-hero .ms-pt rect, .lab-hero .ms-pt path, .lab-hero .ms-pt circle { fill: var(--event-color, var(--primary)); stroke: var(--entry); stroke-width: 2; }
+    .lab-hero .ms-val, .lab-hero .ms-axis text { font-size: 11px; fill: var(--secondary); font-variant-numeric: tabular-nums; }
+    .lab-hero .ms-lab, .lab-hero .ms-val { paint-order: stroke; stroke: var(--entry); stroke-width: 4px; stroke-linejoin: round; }
+    .lab-hero .cta { display: flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 20px; border-radius: var(--radius); background: var(--primary); color: var(--theme); font-weight: 700; font-size: 16px; text-decoration: none; }
+    .lab-hero .cta:focus-visible { outline: 3px solid var(--secondary); outline-offset: 2px; }
+    .lab-hero .history-link { align-self: start; font-size: .95rem; text-decoration: underline; text-underline-offset: .18em; }
+  </style>
+  <div class="kicker">技術更迭觀察站 · EUV 歷史回放 · 2026-11-28 版</div>
+  <p class="judgment">新技術達標，離商用有多遠？</p>
+  <p class="sub">先看公告證明了哪一步：設備測試達標、晶圓廠開始生產，還是客戶產品已大量進入市場。</p>
+  <p class="en-lead" lang="en">From EUV lithography to BMW humanoid robots. Case studies in Chinese.</p>
+  <figure>
+    <div class="fig-title">三個里程碑，三家公司（依公告日期）</div>
+    <svg class="ms-chart" viewBox="0 0 340 200" role="img" aria-labelledby="ms-t ms-d">
+      <title id="ms-t">EUV 三個里程碑的公告日期</title>
+      <desc id="ms-d">ASML 2017 年 7 月公告設備在自家廠內達到每小時 125 片；三星 2018 年 10 月公告 7LPP 開始投片；台積電 2019 年 10 月公告 N7+ 客戶產品大量上市。三點分屬三家公司，不是同一條產線的進度。</desc>
+      <g class="ms-grid">
+        <line x1="72" y1="18" x2="72" y2="172"/><line x1="158" y1="18" x2="158" y2="172"/><line x1="244" y1="18" x2="244" y2="172"/><line x1="330" y1="18" x2="330" y2="172"/>
+      </g>
+      <g class="ms-rows">
+        <line x1="72" y1="44" x2="330" y2="44"/><line x1="72" y1="98" x2="330" y2="98"/><line x1="72" y1="152" x2="330" y2="152"/>
+      </g>
+      <g class="ms-who">
+        <text x="0" y="42">ASML</text><text class="ms-sub" x="0" y="57">設備商</text>
+        <text x="0" y="96">三星</text><text class="ms-sub" x="0" y="111">晶圓廠</text>
+        <text x="0" y="150">台積電</text><text class="ms-sub" x="0" y="165">晶圓廠</text>
+      </g>
+      <g class="ms-pt" data-stage="lab"><title>ASML 新聞稿 2017-07-19：EUV 設備在自家廠內達到每小時 125 片</title>
+        <rect x="113" y="38" width="12" height="12" rx="2"/>
+        <text class="ms-lab" x="132" y="40">設備達標</text><text class="ms-val" x="132" y="56">2017-07 廠內每小時 125 片</text>
+      </g>
+      <g class="ms-pt" data-stage="field"><title>三星新聞稿 2018-10-18：7LPP 完成開發並開始投片</title>
+        <path d="M227 91 L234 98 L227 105 L220 98 Z"/>
+        <text class="ms-lab" x="240" y="94">開始投片</text><text class="ms-val" x="240" y="110">2018-10 7LPP</text>
+      </g>
+      <g class="ms-pt" data-stage="result"><title>台積電新聞稿 2019-10-07：N7+ 客戶產品大量上市</title>
+        <circle cx="310" cy="152" r="6.5"/>
+        <text class="ms-lab" x="300" y="148" text-anchor="end">客戶產品大量上市</text><text class="ms-val" x="300" y="164" text-anchor="end">2019-10 N7+</text>
+      </g>
+      <g class="ms-axis">
+        <text x="72" y="190" text-anchor="middle">2017</text><text x="158" y="190" text-anchor="middle">2018</text><text x="244" y="190" text-anchor="middle">2019</text><text x="330" y="190" text-anchor="end">2020</text>
+      </g>
+    </svg>
+    <figcaption>三個點各自對應一家公司的公開公告。資料來自 ASML、三星和台積電。</figcaption>
+  </figure>
+  <a class="cta" href="{{ "research/technology-transitions/physical-ai/" | relURL }}">看短片與 BMW 案例</a>
+  <a class="history-link" href="{{ "research/technology-transitions/euv/" | relURL }}">閱讀 EUV 歷史回放</a>
+</article>
+{{- with site.Params.homeInfoParams }}
+<article class="first-entry home-info">
+    <header class="entry-header">
+        <h1>{{ .Title | markdownify }}</h1>
+    </header>
+    <div class="entry-content md-content">
+        {{ $opts := dict "display" "block" }}
+        {{ .Content | $.Page.RenderString $opts }}
+    </div>
+    <footer class="entry-footer">
+        {{ partial "social_icons.html" (dict "align" site.Params.homeInfoParams.AlignSocialIconsTo) }}
+    </footer>
+</article>
+{{- end -}}

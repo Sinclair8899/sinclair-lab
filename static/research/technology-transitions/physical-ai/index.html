@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="zh-Hant" class="evidence-palette">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="從 EUV 到 BMW 人形機器人，用公開證據分辨測試、現場示範與可量測成果。">
+  <link rel="canonical" href="https://lab.sinclairhuang.org/research/technology-transitions/physical-ai/">
+  <title>從 EUV 到人形機器人 · Sinclair AI Lab</title>
+  <script>
+    try {
+      const theme = localStorage.getItem("pref-theme");
+      if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+    } catch {}
+  </script>
+  <link rel="stylesheet" href="evidence-colors.css">
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #f3f6f8;
+      --paper: #ffffff;
+      --ink: #152630;
+      --muted: #4e606a;
+      --line: #d4dee5;
+      --accent: #075861;
+      --dark-page: #101820;
+      --dark-paper: #17242e;
+      --dark-ink: #edf5f8;
+      --dark-muted: #b5c7d2;
+      --dark-line: #344553;
+      --dark-accent: #8bd6de;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        color-scheme: dark;
+        --page: var(--dark-page); --paper: var(--dark-paper); --ink: var(--dark-ink);
+        --muted: var(--dark-muted); --line: var(--dark-line); --accent: var(--dark-accent);
+      }
+    }
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --page: var(--dark-page); --paper: var(--dark-paper); --ink: var(--dark-ink);
+      --muted: var(--dark-muted); --line: var(--dark-line); --accent: var(--dark-accent);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--page); font: 1rem/1.65 "PingFang TC", "Noto Sans CJK TC", "Microsoft JhengHei", system-ui, sans-serif; }
+    a { color: var(--accent); text-underline-offset: .18em; }
+    button, summary { font: inherit; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+    .shell { width: min(100%, 58rem); margin: 0 auto; padding: 0 clamp(1rem, 4vw, 2rem); }
+    .site-header { border-bottom: 1px solid var(--line); }
+    .site-header .shell { min-height: 4rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .5rem 1rem; padding-block: .5rem; }
+    .brand { color: var(--ink); font-weight: 750; text-decoration: none; }
+    .back { font-size: .875rem; }
+    main { padding-block: clamp(1.65rem, 5vw, 3rem) 3rem; }
+    main > section + section { margin-top: 2rem; }
+    section[id] { scroll-margin-top: 1rem; }
+    h1, h2, h3, p, figure, dl, dd { margin: 0; }
+    h1, h2 { font-family: "Songti TC", "Noto Serif CJK TC", "PMingLiU", serif; line-height: 1.24; }
+    h1 { font-size: clamp(2rem, 7vw, 3.55rem); text-wrap: balance; }
+    h2 { font-size: clamp(1.48rem, 4vw, 2rem); }
+    h3 { font-size: 1.15rem; line-height: 1.4; }
+    .lede { max-width: 40rem; margin-top: .7rem; font-size: 1.05rem; }
+    .context, .meta { color: var(--muted); font-size: .875rem; }
+    .context { display: block; margin-bottom: .45rem; }
+    .hero { display: grid; gap: 1.3rem; }
+    .media { min-width: 0; border: 1px solid var(--line); border-radius: .85rem; background: var(--paper); overflow: hidden; }
+    .media summary { display: flex; gap: .9rem; align-items: center; min-height: 44px; cursor: pointer; padding: .75rem; list-style: none; }
+    .media summary::-webkit-details-marker { display: none; }
+    .media summary:focus-visible { outline-offset: -4px; }
+    .media summary img { width: 4rem; height: 5rem; flex: none; border-radius: .4rem; object-fit: cover; object-position: center 45%; background: #102033; }
+    .media-label { display: block; font-size: 1rem; font-weight: 750; }
+    .media-desc { display: block; color: var(--muted); font-size: .875rem; }
+    .close-label, .media[open] .open-label { display: none; }
+    .media[open] .close-label { display: inline; }
+    .player { padding: 0 .75rem .75rem; }
+    video { width: min(100%, 25rem); height: auto; aspect-ratio: 9/16; display: block; margin-inline: auto; border-radius: .45rem; background: #0e1a28; }
+    .player .meta { margin-top: .55rem; }
+    .section-intro { margin-top: .5rem; color: var(--muted); }
+    .timeline { padding: 0; list-style: none; margin: 1rem 0 .7rem; display: grid; gap: .65rem; }
+    .event { border: 1px solid var(--line); border-inline-start: .24rem solid var(--event-color); background: var(--paper); border-radius: .55rem; }
+    .event summary { padding: .65rem .8rem; cursor: pointer; min-height: 44px; }
+    .event summary:focus-visible { outline-offset: -3px; }
+    .event time { color: var(--muted); font-variant-numeric: tabular-nums; font-size: .875rem; }
+    .event .name { display: inline; margin-inline: .3rem; }
+    .event strong { display: block; padding-inline-start: 1rem; }
+    .event .expanded { padding: 0 .85rem .85rem 1.9rem; }
+    .event .expanded p { margin-bottom: .35rem; }
+    .mark { color: var(--event-color); font-size: .85em; }
+    .cases { display: grid; gap: 1rem; margin-top: 1rem; }
+    .case { min-width: 0; border: 1px solid var(--line); border-top: .24rem solid var(--event-color); background: var(--paper); border-radius: .7rem; padding: 1.05rem; }
+    .status { color: var(--event-color); font-size: .875rem; font-weight: 750; margin-bottom: .4rem; }
+    .case > p { margin-top: .5rem; }
+    .case dl { margin-top: .9rem; }
+    .case dt { color: var(--muted); font-size: .875rem; }
+    .case dd { margin-bottom: .7rem; }
+    .case dd:last-child { margin-bottom: 0; }
+    .metrics { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: .8rem; margin-top: .8rem; padding: .65rem 0; border-block: 1px solid var(--line); }
+    .metric strong { display: block; color: var(--event-color); font-size: clamp(1.25rem, 5vw, 1.65rem); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+    .metric span { color: var(--muted); font-size: .875rem; }
+    .sources { margin-top: .8rem; display: flex; flex-wrap: wrap; gap: .25rem 1rem; font-size: .875rem; }
+    .footer { border-top: 1px solid var(--line); margin-top: 2rem; padding-top: .8rem; }
+    @media (min-width: 46rem) {
+      .hero { grid-template-columns: 1fr minmax(15rem, .64fr); align-items: start; }
+      .cases { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+    body[data-preview] .shell { max-width: 24.375rem; padding-inline: 1rem; }
+    body[data-preview] main { padding-top: 1.65rem; }
+    body[data-preview] .hero, body[data-preview] .cases { grid-template-columns: 1fr; }
+    body[data-preview] h1 { font-size: 2rem; }
+    body[data-preview] h2 { font-size: 1.48rem; }
+    body[data-preview] .metric strong { font-size: 1.25rem; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="shell">
+      <a class="brand" href="/">Sinclair AI Lab</a>
+      <a class="back" href="../">技術更迭觀察站</a>
+    </div>
+  </header>
+  <main class="shell">
+    <section class="hero" aria-labelledby="hero-title">
+      <div>
+        <span class="context">從 EUV 微影到 BMW 人形機器人</span>
+        <h1 id="hero-title">新技術達標，離商用有多遠？</h1>
+        <p class="lede">先看公告證明了哪一步。設備測試、現場作業和可量測成果，各自回答不同問題。</p>
+      </div>
+      <details class="media" id="short">
+        <summary>
+          <img src="poster.webp" width="64" height="80" alt="">
+          <span>
+            <span class="media-label"><span class="open-label">播放 67 秒短片</span><span class="close-label">收合播放器</span></span>
+            <span class="media-desc">繁中字幕</span>
+          </span>
+        </summary>
+        <div class="player">
+          <video controls playsinline preload="none" poster="poster.webp" aria-label="新技術達標，離商用有多遠？67 秒短片">
+            <source src="short.mp4" type="video/mp4">
+          </video>
+          <p class="meta">影片中的定位動作為任務示意。<a href="short.mp4">直接開啟 MP4</a></p>
+        </div>
+      </details>
+    </section>
+
+    <section id="euv" aria-labelledby="euv-title">
+      <h2 id="euv-title">EUV 的三種證據</h2>
+      <p class="section-intro">點開各筆公告，看看它能回答什麼。</p>
+      <ol class="timeline">
+        <li><details class="event" data-stage="lab">
+          <summary><time datetime="2017-07-19">2017.07</time><span class="name">ASML</span><strong><span class="mark" aria-hidden="true">■</span> 設備廠內達標</strong></summary>
+          <div class="expanded"><p>ASML 在自家廠內的一台設備測得每小時曝光 125 片晶圓。客戶產線的持續運轉能力需要另查。</p><a href="https://www.sec.gov/Archives/edgar/data/937966/000093796617000014/pressreleasequarterlyresul.htm">ASML 原始公告</a></div>
+        </details></li>
+        <li><details class="event" data-stage="field">
+          <summary><time datetime="2018-10-18">2018.10</time><span class="name">三星</span><strong><span class="mark" aria-hidden="true">◆</span> 晶圓廠開始投片</strong></summary>
+          <div class="expanded"><p>三星公告 7LPP 開始生產晶圓。客戶產品是否已大量上市，需要市場端的證據。</p><a href="https://news.samsung.com/global/samsung-electronics-starts-production-of-euv-based-7nm-lpp-process">三星原始公告</a></div>
+        </details></li>
+        <li><details class="event" data-stage="result">
+          <summary><time datetime="2019-10-07">2019.10</time><span class="name">台積電</span><strong><span class="mark" aria-hidden="true">●</span> 客戶產品大量上市</strong></summary>
+          <div class="expanded"><p>台積電公告採用 N7+ 製程的客戶產品已大量進入市場。</p><a href="https://pr.tsmc.com/chinese/news/2010">台積電原始公告</a></div>
+        </details></li>
+      </ol>
+      <p class="meta">日期是各公司的公開公告日，三筆證據各自對應不同公司。</p>
+      <p class="sources"><a href="../euv/">閱讀 EUV 歷史回放</a></p>
+    </section>
+
+    <section id="bmw" aria-labelledby="bmw-title">
+      <h2 id="bmw-title">BMW 人形機器人走到哪一步？</h2>
+      <p class="section-intro">Physical AI 把感知、判斷與動作帶進現場。BMW 在 Spartanburg 廠試做了兩種工作，各有不同的公開證據。</p>
+      <div class="cases">
+        <article class="case" data-stage="result" aria-labelledby="figure-02">
+          <p class="status"><span aria-hidden="true">●</span> 已完成試點 · 有作業數據</p>
+          <h3 id="figure-02">Figure 02｜焊接前的鈑金定位</h3>
+          <p>2025 年在車身工場搬運與定位鈑金件。BMW 於 <time datetime="2026-02-27">2026 年 2 月 27 日</time>公布試點實績。</p>
+          <div class="metrics">
+            <div class="metric"><strong>逾 90,000 件</strong><span>累計搬運零件</span></div>
+            <div class="metric"><strong>約 1,250 小時</strong><span>累計運作時間</span></div>
+          </div>
+          <dl><dt>接下來要查</dt><dd>合格率、人工介入頻率，以及每件合格品的成本。</dd></dl>
+          <div class="sources"><a href="https://newsroom.bmwgroup.com/global/bmw-group-to-deploy-humanoid-robots-in-production-in-germany-for-the-first-time">BMW 試點報告</a></div>
+        </article>
+        <article class="case" data-stage="field" aria-labelledby="figure-03">
+          <p class="status"><span aria-hidden="true">◆</span> 現場示範 · 追蹤運作數據</p>
+          <h3 id="figure-03">Figure 03｜物流零件依序分揀</h3>
+          <p>在 Hall 52 從料箱取出零件，按裝配順序放到推車。BMW 於 <time datetime="2026-06-25">6 月 25 日</time>說明新任務，Figure 於 <time datetime="2026-06-30">6 月 30 日</time>公布現場示範。</p>
+          <dl><dt>接下來要查</dt><dd>公開現場示範後，追班次產出、累計運轉時數、人工介入與每件合格品成本。</dd></dl>
+          <div class="sources">
+            <a href="https://newsroom.bmwgroup.com/global/bmw-group-advances-the-use-of-physical-ai-in-production-with-figure-03-project-in-spartanburg">BMW 任務說明</a>
+            <a href="https://www.figure.ai/news/f-03-at-bmw">Figure 現場示範</a>
+            <a href="https://www.bmwgroup.com/en/news/general/2026/humanoid-robot-in-leipzig.html">BMW 後續回顧</a>
+          </div>
+        </article>
+      </div>
+    </section>
+    <footer class="footer meta">公開證據核對至 <time datetime="2026-11-28">2026 年 11 月 28 日</time>。</footer>
+  </main>
+  <script>
+    const media = document.querySelector(".media");
+    const player = media.querySelector("video");
+    media.querySelector("summary").addEventListener("click", (event) => {
+      if (!media.open) {
+        event.preventDefault();
+        media.open = true;
+        player.play().catch(() => {});
+      }
+    });
+    media.addEventListener("toggle", () => {
+      if (!media.open) player.pause();
+    });
+  </script>
+</body>
+</html>
