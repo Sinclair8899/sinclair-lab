@@ -18,7 +18,7 @@ buildDrafts = false
 
 [params.homeInfoParams]
   Title = "Sinclair AI Lab — by Sinclair Huang"
-  Content = "A working lab for small, inspectable AI systems and research tools: working hypotheses, documented experiments, and failures worth examining. Mostly about the gap between what these systems promise and what they deliver."
+  Content = "A working lab for small, inspectable AI systems and research tools: working hypotheses, documented experiments, and failures worth examining. Mostly about the gap between what these systems promise and what they deliver.\n\n**[技術更迭觀察站（Technology Transitions）](/research/technology-transitions/)**"
 
 [[menu.main]]
   identifier = "about"
