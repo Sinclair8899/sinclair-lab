@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>技術更迭觀察站</title>
+<meta name="description" content="一代 AI 產品碰到工程限制時，哪些公開線索能提早看出技術路線可能改變：兩個歷史回放（EUV、HBM）與兩張前瞻觀察卡（CoWoS、CPO），每案列出我目前的判斷、一手來源與下一筆會改判的證據。">
+<link rel="canonical" href="https://lab.sinclairhuang.org/research/technology-transitions/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* 版面：單欄研究筆記，手機優先；每案固定三格（我目前的判斷／一手來源／下一筆會改判的證據） */
+  --paper: #f4f6f8;
+  --surface: #ffffff;
+  --ink: #17212b;
+  --ink-soft: #51606f;
+  --rule: #d5dce3;
+  --accent: #0b6470;        /* 前瞻觀察：仍在更新 */
+  --accent-tint: #e3f0f2;
+  --past: #5b5f8a;          /* 歷史回放：已有結局 */
+  --past-tint: #ebebf5;
+  --warn: #8a5a00;          /* 只有二手來源 */
+  --warn-tint: #fbf1dc;
+  --font-display: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  --font-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #10161c;
+    --surface: #18212a;
+    --ink: #e6ecf1;
+    --ink-soft: #9fb0bf;
+    --rule: #2c3945;
+    --accent: #5cc0cb;
+    --accent-tint: #15333a;
+    --past: #a9addb;
+    --past-tint: #25273f;
+    --warn: #e2b458;
+    --warn-tint: #382c12;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #10161c;
+  --surface: #18212a;
+  --ink: #e6ecf1;
+  --ink-soft: #9fb0bf;
+  --rule: #2c3945;
+  --accent: #5cc0cb;
+  --accent-tint: #15333a;
+  --past: #a9addb;
+  --past-tint: #25273f;
+  --warn: #e2b458;
+  --warn-tint: #382c12;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.75;
+}
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px 16px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.35; }
+h1 { font-size: 30px; font-weight: 700; }
+h2 { font-size: 22px; font-weight: 700; }
+h3 { font-size: 15px; font-family: var(--font-body); font-weight: 700; letter-spacing: 0.04em; }
+p { margin: 0; }
+ul, ol { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 8px; }
+.mono { font-family: var(--font-mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+
+
+header.masthead { display: flex; flex-direction: column; gap: 12px; }
+.kicker { font-family: var(--font-mono); font-size: 13px; color: var(--ink-soft); }
+.lede { font-size: 17px; }
+.four { counter-reset: q; list-style: none; padding: 0; display: grid; gap: 8px; }
+.four li { counter-increment: q; display: grid; grid-template-columns: 28px 1fr; gap: 8px; align-items: baseline; }
+.four li::before { content: counter(q); font-family: var(--font-mono); font-size: 13px; color: var(--ink-soft); border: 1px solid var(--rule); border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; }
+
+.chain { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.chain a {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 12px 14px; border-radius: 8px; text-decoration: none; color: var(--ink);
+  background: var(--surface); border: 1px solid var(--rule); border-left: 4px solid var(--past);
+}
+.chain a.live { border-left-color: var(--accent); }
+.chain .seg { font-family: var(--font-mono); font-size: 12px; color: var(--ink-soft); }
+.chain .name { font-weight: 700; line-height: 1.4; }
+.chain .one { font-size: 14px; color: var(--ink-soft); line-height: 1.55; }
+.legend { font-size: 13px; color: var(--ink-soft); display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; background: var(--past); }
+.legend span.live::before { background: var(--accent); }
+
+section.case {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-top: 4px solid var(--past);
+  border-radius: 8px;
+  padding: 20px 16px;
+  display: flex; flex-direction: column; gap: 18px;
+  scroll-margin-top: 12px;
+}
+section.case.live { border-top-color: var(--accent); }
+.case-head { display: flex; flex-direction: column; gap: 8px; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+.chip { font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 999px; background: var(--past-tint); color: var(--past); }
+.live .chip { background: var(--accent-tint); color: var(--accent); }
+.block { display: flex; flex-direction: column; gap: 10px; }
+.block h3 { color: var(--ink-soft); }
+.verdict { font-size: 17px; font-weight: 500; }
+.sources { list-style: none; padding: 0; gap: 0; }
+.sources li { display: grid; grid-template-columns: 92px 1fr; gap: 10px; padding: 8px 0; border-top: 1px solid var(--rule); font-size: 15px; line-height: 1.6; }
+.sources li:last-child { border-bottom: 1px solid var(--rule); }
+.sources .d { font-family: var(--font-mono); font-size: 13px; color: var(--ink-soft); padding-top: 2px; }
+.second {
+  background: var(--warn-tint); border-left: 3px solid var(--warn); border-radius: 0 6px 6px 0;
+  padding: 10px 14px; font-size: 14.5px; line-height: 1.65; display: flex; flex-direction: column; gap: 6px;
+}
+.second b { color: var(--warn); }
+.next li::marker { color: var(--accent); }
+.first { font-weight: 700; }
+.more { font-size: 14px; color: var(--ink-soft); }
+.judge { display: flex; flex-direction: column; gap: 10px; }
+
+.tablewrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 6px; }
+table { border-collapse: collapse; width: 100%; min-width: 320px; font-size: 14px; }
+th, td { text-align: left; padding: 8px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+th { font-size: 13px; color: var(--ink-soft); font-weight: 700; background: var(--paper); }
+td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+section.plain { display: flex; flex-direction: column; gap: 12px; }
+footer { font-size: 13px; color: var(--ink-soft); border-top: 1px solid var(--rule); padding-top: 14px; display: flex; flex-direction: column; gap: 4px; }
+
+@media (max-width: 600px) {
+  .chain { grid-template-columns: 1fr; }
+}
+@media (max-width: 420px) {
+  h1 { font-size: 26px; }
+  .sources li { grid-template-columns: 1fr; gap: 2px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="masthead">
+    <div class="kicker">Sinclair AI Lab · 研究筆記 · 2026-11-28 版</div>
+    <h1>技術更迭觀察站</h1>
+    <p class="lede">我想知道，一代 AI 產品碰到工程限制時，哪些公開線索能讓我們提早看出技術路線可能改變。</p>
+    <p>我會把發表、送樣、客戶測試、出貨和持續運轉分開看，再追問：瓶頸移到哪裡？誰能把技術優勢變成營收？證據還不夠時，我會寫清楚哪一筆資料會讓我改判。</p>
+    <p>每個個案回答同樣四件事：</p>
+    <ol class="four">
+      <li>舊技術卡在哪裡。</li>
+      <li>哪條新路跨過門檻。上面五種證據不能互相代替。</li>
+      <li>瓶頸移到誰手上。只列候選，要看到供應不足、交期拉長或替代品未過認證才算成立。</li>
+      <li>財務資料能證明多少。沒有產品或分部揭露的地方，留白。</li>
+    </ol>
+    <p>下面每一案固定放三格：<strong>我目前的判斷</strong>、<strong>一手來源</strong>、<strong>下一筆會改判的證據</strong>。判斷是我的看法；證據我會寫明出自哪家公司、哪篇論文或哪份公告。只靠二手來源的部分，另外標出。</p>
+  </header>
+
+  <nav aria-label="四個個案">
+    <div class="chain">
+      <a href="#euv"><span class="seg">微影 · 歷史回放</span><span class="name">EUV 與浸潤式 DUV</span><span class="one">ASML 2017 達標、三星 2018 投片、台積電 2019 大量出貨</span></a>
+      <a href="#hbm"><span class="seg">記憶體 · 歷史回放</span><span class="name">HBM 與 HMC</span><span class="one">看得見瓶頸與架構，選不出贏家</span></a>
+      <a href="#cowos" class="live"><span class="seg">封裝 · 前瞻觀察</span><span class="name">CoWoS 類先進封裝</span><span class="one">公開證據不足以判定哪一項已限制合格產出</span></a>
+      <a href="#cpo" class="live"><span class="seg">互連 · 前瞻觀察</span><span class="name">CPO 與銅互連</span><span class="one">CPO、可插拔與銅並存；大規模部署只找到 Lambda 一家</span></a>
+    </div>
+  </nav>
+  <div class="legend"><span>歷史回放：已有結局，用來看當時看得到什麼</span><span class="live">前瞻觀察：結果未定，會持續更新</span></div>
+
+  <!-- ===== EUV ===== -->
+  <section class="case" id="euv">
+    <div class="case-head">
+      <div class="meta"><span class="chip">歷史回放</span><span class="mono">截點 2014-12-31、2017-12-31</span></div>
+      <h2>EUV 與浸潤式 DUV 多重曝光</h2>
+    </div>
+    <div class="block">
+      <h3>我目前的判斷</h3>
+      <p class="verdict">三個里程碑分屬三家公司：ASML 的設備 2017 年在自家廠內達標，三星 2018 年公告開始投片，台積電 2019 年公告客戶產品大量出貨。</p>
+      <p>我把每個里程碑記在公告它的那家公司名下，不合併成同一條產線的進度：</p>
+      <ul>
+        <li><strong>ASML 2017 年在自家廠內達標。</strong>ASML 在 2017 年 7 月公告，EUV 設備在自家廠內達到每小時 125 片；同年 10 月的季報簡報列出積壓訂單 23 台。</li>
+        <li><strong>三星 2018 年開始投片。</strong>三星在 2018 年 10 月公告 7LPP 製程完成開發並開始投片。</li>
+        <li><strong>台積電 2019 年公告客戶產品大量出貨。</strong>台積電在 2019 年 10 月公告 N7+ 的客戶產品大量上市，並說 EUV 機台日常運轉功率超過 250 瓦。</li>
+      </ul>
+      <p>同一個技術世代有不同的製程路線：台積電第一代 7 奈米 N7 於 2018 年量產；採用 EUV 的 N7+ 於 2019 年量產，同年 10 月公告客戶產品已大量上市。</p>
+      <p><strong>Intel 2023 年宣布愛爾蘭廠量產。</strong>ASML 2012 年 7 月的公告顯示，Intel 承諾取得最多 15% 的股權；8 月的公告顯示三家客戶合計 23%，所以 Intel 是出資最多的一家。Intel 於 2023 年 9 月宣布，愛爾蘭 Fab 34 已進入 Intel 4 大量生產。同一份公告提到俄勒岡的研發廠已有早期量產，沒有寫起始時間，所以這個日期只能用來標記愛爾蘭廠。</p>
+    </div>
+    <div class="block">
+      <h3>一手來源</h3>
+      <ul class="sources">
+        <li><span class="d">2012-07-09</span><span><a href="https://www.sec.gov/Archives/edgar/data/0000937966/000119312512298069/d379366dex991.htm">ASML 新聞稿</a>：客戶共同投資計畫，Intel 承諾取得最多 15% 股權</span></li>
+        <li><span class="d">2012-08-27</span><span><a href="https://www.sec.gov/Archives/edgar/data/0000937966/000119312512370598/d402810dex991.htm">ASML 新聞稿</a>：三星加入，計畫額滿；三家客戶合計 23% 股權</span></li>
+        <li><span class="d">2014-07-30</span><span><a href="https://www.sec.gov/Archives/edgar/data/0000937966/000119312514286736/d766550dex991.htm">ASML 新聞稿</a>：客戶端單日曝光 637 片</span></li>
+        <li><span class="d">2017-01-18</span><span><a href="https://www.sec.gov/Archives/edgar/data/0000937966/000093796617000003/asml20170118presentation.htm">ASML 季報簡報</a>：三日平均每日逾 1,500 片；積壓訂單 18 台</span></li>
+        <li><span class="d">2017-07-19</span><span><a href="https://www.sec.gov/Archives/edgar/data/0000937966/000093796617000014/pressreleasequarterlyresul.htm">ASML 新聞稿</a>：廠內達每小時 125 片；積壓訂單 27 台</span></li>
+        <li><span class="d">2017-10-18</span><span><a href="https://www.sec.gov/Archives/edgar/data/0000937966/000093796617000017/asml20171018presentation.htm">ASML 季報簡報</a>：積壓訂單含 23 台 EUV</span></li>
+        <li><span class="d">技術頁</span><span><a href="https://www.tsmc.com/english/dedicatedFoundry/technology/logic/l_7nm">台積電 7 奈米技術頁</a>：N7 於 2018 年量產</span></li>
+        <li><span class="d">2018-10-18</span><span><a href="https://news.samsung.com/global/samsung-electronics-starts-production-of-euv-based-7nm-lpp-process">三星新聞稿</a>：7LPP 開始投片</span></li>
+        <li><span class="d">2019-10-07</span><span><a href="https://pr.tsmc.com/english/news/2010">台積電新聞稿</a>：N7+ 於 2019 年第二季量產，客戶產品大量上市；日常運轉超過 250 瓦</span></li>
+        <li><span class="d">2023-09-29</span><span><a href="https://www.intel.com/content/www/us/en/newsroom/news/new-fab-ireland-high-volume-production-intel-4-technology.html">Intel 新聞稿</a>：愛爾蘭 Fab 34 進入 Intel 4 大量生產；俄勒岡已有早期量產</span></li>
+      </ul>
+      <div class="second"><b>只有二手來源的部分</b><span>晶片廠要 250 瓦才量產、各家對 7 奈米的打算，出自產業媒體 2016 年 3 月的報導。設備這一邊的數字幾乎全是 ASML 自己公布的。</span></div>
+    </div>
+    <div class="block">
+      <h3>會改變這個讀法的資料</h3>
+      <ul class="next">
+        <li class="first">客戶自己發表的產線可用率與產能，用來對照 ASML 的自述。</li>
+        <li>三星 7LPP 何時真正大量出貨。2018 年的公告只是開始投片。</li>
+        <li>Intel 4 在俄勒岡的早期量產始於何時。沒有這個日期，就不能比較 Intel 與三星、台積電的先後；誰先獲利，這一案也沒有檢查。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===== HBM ===== -->
+  <section class="case" id="hbm">
+    <div class="case-head">
+      <div class="meta"><span class="chip">歷史回放</span><span class="mono">截點 2013-12-31、2016-06-30</span></div>
+      <h2>HBM 與 HMC</h2>
+    </div>
+    <div class="block">
+      <h3>我目前的判斷</h3>
+      <p class="verdict">2013 年底已經看得出記憶體頻寬是瓶頸，也看得到兩種堆疊記憶體架構；但到 2016 年中，公開資料仍不足以選出贏家。</p>
+      <p>Micron 在 2013 年 9 月公告 HMC 工程樣品出貨；JEDEC 在同年 10 月發布 HBM 標準。SK hynix 在 2015 年 6 月公告 HBM1 量產，三星在 2016 年 1 月公告 HBM2 量產。</p>
+      <p>堆疊記憶體沒有全面取代傳統介面。NVIDIA 2016 年 4 月的新聞稿說，資料中心產品 Tesla P100 採用 CoWoS 與 HBM2，並預告 6 月隨 DGX-1 供貨、2017 年初由伺服器廠供貨；同一家公司 5 月公告的遊戲顯示卡 GTX 1080，用的則是傳統介面的 GDDR5X。我的讀法是：只有當頻寬、功耗與空間的限制值得付出額外的整合成本時，堆疊記憶體才更有吸引力。Micron 在 2018 年 8 月發文宣布調整路線、轉向 HBM，文中沒有給明確理由。</p>
+    </div>
+    <div class="block">
+      <h3>一手來源</h3>
+      <ul class="sources">
+        <li><span class="d">2013-09-25</span><span><a href="https://www.globenewswire.com/news-release/2013/09/25/575731/12205/en/micron-technology-ships-first-samples-of-hybrid-memory-cube.html">Micron 新聞稿（經 GlobeNewswire 發布）</a>：HMC 工程樣品出貨</span></li>
+        <li><span class="d">2013-10</span><span><a href="https://secondrise.jedec.org/node/93">JEDEC</a>：JESD235 HBM 標準</span></li>
+        <li><span class="d">2015-06-16</span><span><a href="https://sst.semiconductor-digest.com/2015/06/sk-hynix-ramps-production-of-high-bandwidth-memory/">SK hynix 新聞稿（Semiconductor Digest 轉載）</a>：HBM1 量產，AMD Fury X 採用</span></li>
+        <li><span class="d">2016-01</span><span><a href="https://news.samsung.com/global/samsung-begins-mass-producing-worlds-fastest-dram-based-on-newest-high-bandwidth-memory-hbm-interface">三星新聞稿</a>：4GB HBM2 量產</span></li>
+        <li><span class="d">2016-04-05</span><span><a href="https://nvidianews.nvidia.com/news/nvidia-delivers-massive-performance-leap-for-deep-learning-hpc-applications-with-nvidia-tesla-p100-accelerators">NVIDIA 新聞稿</a>：Tesla P100 採用 CoWoS 與 HBM2；預告 6 月隨 DGX-1 供貨</span></li>
+        <li><span class="d">2016-05</span><span><a href="https://nvidianews.nvidia.com/news/a-quantum-leap-in-gaming:-nvidia-introduces-geforce-gtx-1080">NVIDIA 新聞稿</a>：GTX 1080 採用 GDDR5X</span></li>
+        <li><span class="d">2018-08-01</span><span><a href="https://www.micron.com/about/blog/2018/august/micron-announces-shift-in-high-performance-memory-roadmap-strategy">Micron 部落格</a>：高效能記憶體路線調整</span></li>
+      </ul>
+      <div class="second"><b>只有二手來源的部分</b><span>SK hynix 2013 年的送樣只有產業媒體轉述，所以不能寫成哪一邊領先。P100 在 2016 年 6 月底是否已實際出貨，NVIDIA 的新聞稿只有預告的供貨時程；第一筆具名交付在 8 月，來自媒體報導。HMC 第三版規格沒有發布、各版規格的日期取自維基百科，未對照原始規格文件。</span></div>
+    </div>
+    <div class="block">
+      <h3>會改變這個讀法的資料</h3>
+      <ul class="next">
+        <li class="first">整合成本怎麼在記憶體廠、封裝廠與系統廠之間分攤。目前完全沒有數據。</li>
+        <li>兩種架構各自的出貨量。</li>
+        <li>P100 的 HBM2 由誰供應，用來確認是否已有第二個合格來源。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===== CoWoS ===== -->
+  <section class="case live" id="cowos">
+    <div class="case-head">
+      <div class="meta"><span class="chip">前瞻觀察</span><span class="mono">2026-11-28 版</span></div>
+      <h2>CoWoS 類先進封裝</h2>
+    </div>
+    <div class="block">
+      <h3>我目前的判斷</h3>
+      <p class="verdict">公開證據不足以判定哪一項已限制合格產出。</p>
+      <p>台積電 2026 年 4 月的技術論壇新聞稿寫明：5.5 倍光罩尺寸的 CoWoS 已在生產；14 倍光罩尺寸、可整合約 10 個大型運算晶粒與 20 個 HBM 堆疊的版本，預計 2028 年生產。2025 年 4 月的新聞稿寫的是計畫在 2027 年量產 9.5 倍、整合 12 個以上 HBM 堆疊；那是當時公布的計畫，不是實績。</p>
+      <p>這些公告講的是尺寸與時程，沒有講各尺寸的合格產出。我在看的兩項是載板用的低熱膨脹玻纖布和大尺寸封裝的翹曲；兩項都沒有供應不足、交期拉長或替代品未過認證的一手證據，所以我不能說哪一項已經限制合格產出。</p>
+    </div>
+    <div class="block">
+      <h3>一手來源</h3>
+      <ul class="sources">
+        <li><span class="d">技術頁</span><span><a href="https://3dfabric.tsmc.com/english/dedicatedFoundry/technology/cowos.htm">台積電 3DFabric</a>：CoWoS 技術說明</span></li>
+        <li><span class="d">2023</span><span><a href="https://conferences.computer.org/ectc/pdfs/ECTC2023-1NkkviSxgDnmPjptC1ysqm/349800b022/349800b022.pdf">台積電 ECTC 論文</a>：以局部矽橋加重分佈層取代整片矽中介層</span></li>
+        <li><span class="d">2025-04-24</span><span><a href="https://pr.tsmc.com/chinese/news/3228">台積電新聞稿</a>：計畫 2027 年量產 9.5 倍光罩尺寸的 CoWoS（當時公布的計畫）</span></li>
+        <li><span class="d">2025-05-27</span><span><a href="https://ieeexplore.ieee.org/document/11038354/">台積電 ECTC 論文</a>：大尺寸 CoWoS-R 的翹曲控制。我只核對到摘要</span></li>
+        <li><span class="d">2025-06-05</span><span><a href="https://patents.google.com/patent/US20250178952A1/en">日東紡專利申請 US20250178952A1</a>：一組玻纖配方連續拉絲六小時無斷絲。我只核對到這一組實驗；文件裡沒有織布、載板或客戶認證的資料</span></li>
+        <li><span class="d">2026-04-23</span><span><a href="https://pr.tsmc.com/chinese/news/3302">台積電新聞稿</a>：5.5 倍已在生產；14 倍預計 2028 年生產</span></li>
+      </ul>
+      <div class="second"><b>只有二手來源的部分</b><span>「良率超過 98%」是媒體報導台積電主管 2026 年 5 月在技術論壇台灣場的說法；它指的是 5.5 倍尺寸還是整體 CoWoS，各家媒體寫法不同，所以我沒有放進判斷。16 層記憶體仍在客戶認證，是 SK hynix 在研討會的說法，經媒體報導。</span></div>
+    </div>
+    <div class="block">
+      <h3>下一筆會改判的證據</h3>
+      <ul class="next">
+        <li class="first">台積電或客戶公布特定大尺寸（5.5 倍以上）的合格產出或良率。</li>
+        <li>低熱膨脹玻纖布出現合格供應不足、交期拉長，或替代品未過認證，任何一項。</li>
+        <li>9.5 倍尺寸是否如 2025 年公布的計畫在 2027 年量產。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===== CPO ===== -->
+  <section class="case live" id="cpo">
+    <div class="case-head">
+      <div class="meta"><span class="chip">前瞻觀察</span><span class="mono">2026-11-28 版</span></div>
+      <h2>CPO 與銅互連</h2>
+    </div>
+    <div class="block">
+      <h3>我目前的判斷</h3>
+      <p class="verdict">具名的案例顯示，共同封裝光學（CPO）、可插拔模組與銅同時存在。CPO 的大規模部署我只找到 Lambda 一家，所以我目前把它當成選項之一，不是必要條件。</p>
+      <p><strong>部署｜Lambda（Lambda 公告，2026 年 11 月）。</strong>Lambda 說，魁北克園區用 NVIDIA 的 CPO 交換器連接超過一萬顆 GPU，交換器有 144 個 800G 埠。公告裡有 Lambda 自己做的可插拔對照：吞吐量相同；延遲較低，差距從機櫃規模的 3.8% 擴大到 pod 規模的 10.1%；光學元件的中位溫度是 36°C，可插拔是 51°C。公告沒有提供長期故障率或維修數據，也沒有每埠成本；「可靠度最高 15 倍」在公告裡沒有附數據。</p>
+      <p><strong>測試｜Meta（ECOC 2025 論文）。</strong>這是另一個平台（Broadcom 的 51.2T CPO 交換器）。在 40°C 環境、所有埠接光纖自迴路的條件下，累計約 105 萬個 400G 埠小時，沒有出現不可更正碼字。論文說的「低 65%」，指的是光學部分的功耗，比較對象是含重定時器的可插拔模組，不是整機功耗。論文自己點名，可維修性與單一故障波及的範圍，是大量部署要先解決的問題。</p>
+      <p><strong>產品｜NVIDIA、Arista。</strong>NVIDIA 在 2025 年 3 月的新聞稿發表 CPO 交換器。Arista 在 2026 年 6 月的新聞稿發表 1.6T 交換器系列，支援線性可插拔光模組（LPO），沒有提到 CPO。NVIDIA 的 DGX Grace Blackwell 機櫃使用手冊寫明，機櫃內的 GPU 經由被動銅纜背板連接。</p>
+      <p><strong>產業文件｜OIF（2025 年 11 月）。</strong>OIF 的框架文件說，機櫃內的連結最講究成本、功耗與可靠度，業界慣例是能用銅就用銅，常見做法是機櫃內的被動銅纜背板；相鄰機櫃之間可用主動電纜。</p>
+      <p>Lambda 與 Meta 的證據來自不同平台，一個是部署公告，一個是實驗室條件的測試，我不把它們接成同一條時間線。</p>
+    </div>
+    <div class="block">
+      <h3>一手來源</h3>
+      <ul class="sources">
+        <li><span class="d">使用手冊</span><span><a href="https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html">NVIDIA DGX Grace Blackwell 機櫃使用手冊</a>：機櫃內的 GPU 經由被動銅纜背板連接</span></li>
+        <li><span class="d">2025-03</span><span><a href="https://nvidianews.nvidia.com/news/nvidia-spectrum-x-co-packaged-optics-networking-switches-ai-factories">NVIDIA 新聞稿</a>：發表 CPO 交換器。效率與可靠度的倍數是 NVIDIA 的一般宣稱</span></li>
+        <li><span class="d">2025（ECOC）</span><span><a href="https://ocp-all.groups.io/g/OCP-SROI/attachment/371/0/ECOC_2025_CPO_Final.pdf">Meta 論文全文</a>：51.2T CPO 交換器在 40°C、光纖自迴路下的測試</span></li>
+        <li><span class="d">2025-11-04</span><span><a href="https://www.oiforum.com/wp-content/uploads/OIF-FD-CEI-448G-01.0.pdf">OIF 框架文件</a>：每線道 448G 的電介面；機櫃內慣用被動銅纜背板</span></li>
+        <li><span class="d">2025-11-20</span><span><a href="https://www.businesswire.com/news/home/20251120689633/en">Lambda 新聞稿</a>：開始導入 NVIDIA 的矽光子網路</span></li>
+        <li><span class="d">2026-06-09</span><span><a href="https://www.arista.com/en/company/news/press-release/24102-pr-20260609">Arista 新聞稿</a>：1.6T 的 7060XE7 系列，支援線性可插拔光模組</span></li>
+        <li><span class="d">2026-11-16</span><span><a href="https://lambda.com/blog/worlds-first-large-scale-deployment-of-nvidia-photonics-switches-with-cpo">Lambda 部署公告</a>：魁北克園區、逾一萬顆 GPU、144 個 800G 埠，以及 Lambda 自己的可插拔對照</span></li>
+      </ul>
+      <div class="second"><b>只有二手來源的部分</b><span>機櫃內下一代銅方案延後，是一家研究機構的說法；NVIDIA 只回應「路線圖不變」。大型雲端業者都在內部試驗 CPO，是媒體轉述。Lambda 的部署運轉了多久、承載哪些工作負載，公告沒有寫，我也沒有找到其他一手來源。</span></div>
+    </div>
+    <div class="block">
+      <h3>下一筆會改判的證據</h3>
+      <ul class="next">
+        <li class="first">同一客戶公布 CPO 與可插拔在實際運轉中的故障率、維修時間與每埠總成本。</li>
+        <li>大型雲端業者公告把 CPO 從測試轉為大量部署。Meta 的論文是測試，不是部署。</li>
+        <li>機櫃內下一代銅方案延後的說法，出現公司公告或第二個獨立來源。</li>
+      </ul>
+    </div>
+    <div class="block">
+      <h3>財務定點驗證：Credo</h3>
+      <p>我問的問題：主動電纜（AEC，內含訊號晶片的短距離銅纜）的需求，有沒有變成營收？</p>
+      <p class="verdict">主動電纜是 Credo 2026 財年的營收增長主因。</p>
+      <p>Credo 的 2026 財年年報寫明：營收比前一年增加 8.983 億美元，主因是主動電纜出貨量大增；大型資料中心客戶擴大採用主動電纜，貢獻了超過 99% 的營收增量。</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>期間</th><th>營收（百萬美元）</th><th>公司整體毛利率</th></tr></thead>
+          <tbody>
+            <tr><td>2025 財年（至 2025-05-03）</td><td class="num">436.8</td><td class="num">64.8%</td></tr>
+            <tr><td>2026 財年（至 2026-05-02）</td><td class="num">1,335.1</td><td class="num">68.0%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="more">兩年的數字都出自 <a href="https://www.sec.gov/Archives/edgar/data/1807794/000162828026043303/crdo-20260502.htm">Credo 2026 財年年報</a>。毛利率是公司整體的數字；年報沒有揭露各產品線的毛利率，所以不能把它當成主動電纜的毛利率。年報的終端客戶表顯示，三家客戶合計占 2026 財年營收的 84%。這張卡只回答 2026 財年這一年，不能拿來推論銅的未來；其餘個案的獲利歸屬我都沒有檢查，不判定。</p>
+    </div>
+  </section>
+
+  <section class="plain">
+    <h2>個案觀察</h2>
+    <p>下面幾點只是從這四個個案看到的現象，不是規則；個案數太少，不能推廣。</p>
+    <ul>
+      <li><strong>舊技術在同一代產品上都還做得出來。</strong>GDDR5X 之於 HBM，先量產的 N7 之於採用 EUV 的 N7+，銅與可插拔模組之於 CPO。新技術先進入划算的少數位置，不是一次全換。</li>
+      <li><strong>供應商廠內的成績、晶圓廠開始投片、客戶產品大量出貨，是不同的里程碑。</strong>EUV 這一案，三者分屬三家公司：ASML（2017）、三星（2018）、台積電（2019）。CPO 這一案，Meta 的測試與 Lambda 的部署是不同平台，不能相加；兩邊都還沒有長期運轉的數據。</li>
+      <li><strong>客戶用的指標比供應商自己的目標有鑑別力。</strong>台積電 2019 年公告用的指標是日常運轉超過 250 瓦，不是 ASML 早先公布的每日片數。CPO 這一案，我還沒有找到客戶公開訂的數字門檻。</li>
+      <li><strong>公司的營收與毛利率，不等於某一項產品的。</strong>Credo 的年報把營收增量歸因於主動電纜，但毛利率只有公司整體的數字。</li>
+    </ul>
+  </section>
+
+  <section class="plain">
+    <h2>方法與限制</h2>
+    <ul>
+      <li>日期一律用首次公開日；專利用公開日，不用優先權日。</li>
+      <li>歷史回放只用截點前已公開的文件重建當時的判斷，再對照結果。我寫的時候已經知道結局，所以這不是盲測，也不計命中率。</li>
+      <li>前瞻觀察沒有結局，只寫到某日為止證據與假說相不相符。新個案在查證前，我會先寫下什麼發現會推翻假說。</li>
+      <li>目前的弱點：CPO 一案只有 Lambda 公告與 Meta 論文讀了全文，其餘來源只核對了與判斷有關的段落。CoWoS 的翹曲論文只讀到摘要，專利只核對到一組實驗。兩個歷史回放都沒有成本與出貨量的數據。</li>
+      <li>這一頁不評估股價，也不是投資建議。</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>技術更迭觀察站 · /research/technology-transitions/ · 2026-11-28 版</span>
+    <span>兩個歷史回放、兩張前瞻觀察卡、一張財務卡。任何一案出現「下一筆會改判的證據」時更新。</span>
+  </footer>
+</div>
+</body>
+</html>
